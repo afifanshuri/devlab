@@ -1,4 +1,4 @@
-import { allLessons } from "../../curriculum.js?v=mission-copy-1";
+import { allLessons } from "../../curriculum.js?v=roadmap-expansion-1";
 import * as store from "../../database.js";
 import { state } from "../state.js";
 import { $, esc, toast, shell, download } from "../ui.js";
@@ -57,9 +57,12 @@ function settings() {
         <p class="muted">
           The SQL playground still runs SQLite in the browser. Terminal commands
           are noninteractive: use the editor or shell redirection instead of
-          vim, nano or interactive psql. Containers persist until a passing
-          answer or one hour of inactivity; saved editor drafts and progress
-          remain in this browser.
+          vim, nano or interactive psql. Java shares one runtime; PostgreSQL
+          shares one runtime with a database and login per exercise. Passing
+          removes that exercise's files/database. Shared runtimes expire after
+          one hour without activity in any of their exercises. Linux, Oracle and
+          cluster-role labs use dedicated containers deleted on pass or after
+          one idle hour. Saved drafts and progress remain in this browser.
         </p>
         <p class="muted">
           Built with

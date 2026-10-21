@@ -1,7 +1,11 @@
-import { courses, allLessons } from "../../curriculum.js?v=mission-copy-1";
+import { courses, allLessons } from "../../curriculum.js?v=roadmap-expansion-1";
 import { state } from "../state.js";
 import { esc, shell } from "../ui.js";
-import { completed, count, route } from "../catalog-data.js?v=mission-copy-1";
+import {
+  completed,
+  count,
+  route,
+} from "../catalog-data.js?v=roadmap-expansion-1";
 function progressPage() {
   const done = completed();
   shell(
@@ -57,17 +61,17 @@ function paths() {
     [
       "java",
       "Build reliable backend services",
-      "OOP basics → deeper OOP → collections → algorithms → SOLID → reliability → secure workflows → design patterns. Earlier helper signatures are included in later starters, and cumulative regression tests protect what you already built.",
+      "OOP → collections → algorithms → SOLID → reliability → design patterns → Spring dependencies and configuration → Spring Boot APIs, persistence and security. Cumulative service exercises rerun earlier contracts as your implementation grows.",
     ],
     [
       "linux",
       "Investigate incidents systematically",
-      "Files and permissions → service-level evidence → correlation IDs → repeatable reports → verified support bundles.",
+      "Files and permissions → shell streams and automation → processes and evidence → incident reports → administrative configuration and diagnosis. Privileged topics use clearly labelled configuration files and incident snapshots.",
     ],
     [
       "sql",
       "Protect data and diagnose queries",
-      "Queries → procedural functions → atomic transfers → idempotent requests → reconciliation and index investigation. Oracle remains an optional separate environment.",
+      "Joins and subqueries → analytical windows and CTEs → safe database programming → atomic transfers → reconciliation and query investigation. Tables are supplied; basic syntax and standalone DDL drills are skipped. Oracle remains optional.",
     ],
   ];
   shell(`<div class="eyebrow">LEARN IT. REUSE IT. BUILD ON IT.</div>

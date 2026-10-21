@@ -81,7 +81,7 @@ export function runnerApi(sessions) {
             throw Error("Invalid filename");
           const r = await sessions.command(
             s,
-            "cat /workspace/" + data.filename,
+            "cat " + (s.workspace || "/workspace") + "/" + data.filename,
           );
           if (r.code) throw Error(r.output);
           return r;

@@ -7,17 +7,20 @@ import {
 } from "./exercise-factories.js?v=roadmap-1";
 import { advancedCourses } from "./progression.js";
 import { patternCourses } from "./patterns.js";
-import { roadmapCourses } from "./roadmap.js?v=mission-copy-1";
-import { applyMissions } from "./missions.js?v=mission-copy-1";
+import { sqlRoadmapCourses } from "./sql-roadmap.js?v=roadmap-expansion-1";
+import { linuxRoadmapCourses } from "./linux-roadmap.js?v=roadmap-expansion-1";
+import { springCourses } from "./spring-practice.js?v=roadmap-expansion-1";
+import { roadmapCourses } from "./roadmap.js?v=roadmap-expansion-1";
+import { applyMissions } from "./missions.js?v=roadmap-expansion-1";
 import {
   solidPractice,
   advancedPatterns,
-} from "./design-practice.js?v=mission-copy-1";
+} from "./design-practice.js?v=roadmap-expansion-1";
 import {
   linuxBasicsPractice,
   linuxAdminPractice,
   sqlAdminPractice,
-} from "./ops-practice.js?v=mission-copy-1";
+} from "./ops-practice.js?v=roadmap-expansion-1";
 export const courses = [
   make(
     "java-dsa",
@@ -234,6 +237,19 @@ courses.splice(
   solidPractice,
 );
 courses.push(advancedPatterns, sqlAdminPractice);
+courses.push(...springCourses);
+// Put the query progression before procedural/admin application of SQL.
+courses.splice(
+  courses.findIndex((c) => c.track === "sql"),
+  0,
+  ...sqlRoadmapCourses,
+);
+courses.splice(
+  courses.findIndex((c) => c.id === "hands-linux-admin"),
+  0,
+  linuxRoadmapCourses[0],
+);
+courses.push(linuxRoadmapCourses[1]);
 courses.splice(
   courses.findIndex((c) => c.id === "hands-linux-basics") + 1,
   0,
@@ -244,11 +260,12 @@ courses.splice(
   0,
   linuxAdminPractice,
 );
-courses
-  .filter((c) => c.track === "java")
-  .forEach((c, i) => {
-    c.stage = i + 1;
-  });
+for (const track of ["java", "linux", "sql"])
+  courses
+    .filter((c) => c.track === track && c.lessons[0].engine !== "oracle")
+    .forEach((c, i) => {
+      c.stage = i + 1;
+    });
 applyMissions(courses);
 
 // Prerequisites guide the learning order without locking users out of practice.

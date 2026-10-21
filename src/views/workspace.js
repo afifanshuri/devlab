@@ -1,8 +1,9 @@
-import { courses, allLessons } from "../../curriculum.js?v=mission-copy-1";
+import { courses, allLessons } from "../../curriculum.js?v=roadmap-expansion-1";
 import * as store from "../../database.js";
 import { state } from "../state.js";
 import { $, esc, shell, toast } from "../ui.js";
 import { callRunner, localRunner } from "../services/runner.js";
+import { editKey } from "../editor-input.js";
 import {
   starterFiles,
   readDraft,
@@ -114,7 +115,7 @@ export function lesson(courseId, idx) {
           </div>
           <div class="hint">
             ${available
-              ? "Real disposable container · no host folders mounted · network disabled · commands have a 10-second limit."
+              ? "Local exercise runtime · no host folders mounted · network disabled · commands have a 10-second limit (Spring checks: 45 seconds)."
               : "To execute this lab: start Docker Desktop, run npm run setup:labs and npm start in the project folder, then open http://127.0.0.1:5173. GitHub Pages hosts the catalog; it cannot execute processes."}
           </div>
         </section>
@@ -174,7 +175,8 @@ ${esc(context.files[context.filename])}</textarea
             </div>
             <form id="terminal-form" class="terminal-form">
               <label for="command">$</label
-              ><input
+              ><textarea
+                rows="1"
                 id="command"
                 autocomplete="off"
                 spellcheck="false"
@@ -182,10 +184,14 @@ ${esc(context.files[context.filename])}</textarea
                 placeholder="${task.engine === "java"
                   ? "javac *.java"
                   : task.engine === "postgres"
-                    ? "psql -U postgres -d lab -c &quot;SELECT * FROM employees;&quot;"
+                    ? "psql -c &quot;SELECT * FROM employees;&quot;"
                     : "ls -la"}"
-              /><button class="secondary" type="submit">Run ↵</button>
+              ></textarea
+              ><button class="secondary" type="submit">Run ↵</button>
             </form>
+            <p class="muted terminal-help">
+              Enter runs · Shift+Enter adds an indented line · Tab indents
+            </p>
           </section>
         </section>
       </div>
@@ -357,7 +363,16 @@ ${esc(context.files[context.filename])}</textarea
       }
     }, 350);
   };
-  $("#command").oninput = noteActivity;
+  const resizeCommand = () => {
+    const command = $("#command");
+    command.style.height = "auto";
+    command.style.height =
+      Math.min(180, Math.max(32, command.scrollHeight || 32)) + "px";
+  };
+  $("#command").oninput = () => {
+    noteActivity();
+    resizeCommand();
+  };
   const run = async (command) => {
     await ensure();
     log("$ " + command + "\n");
@@ -372,30 +387,30 @@ ${esc(context.files[context.filename])}</textarea
     history.push(command);
     cursor = history.length;
     $("#command").value = "";
+    resizeCommand();
     await run(command);
   });
   $("#command").onkeydown = (e) => {
-    if (["ArrowUp", "ArrowDown"].includes(e.key)) {
+    if (e.key === "Enter" && !e.shiftKey && !e.isComposing) {
+      e.preventDefault();
+      $("#terminal-form").requestSubmit();
+      return;
+    }
+    editKey(e, () => $("#command").oninput());
+    if (
+      ["ArrowUp", "ArrowDown"].includes(e.key) &&
+      !e.target.value.includes("\n")
+    ) {
       e.preventDefault();
       cursor = Math.max(
         0,
         Math.min(history.length, cursor + (e.key === "ArrowUp" ? -1 : 1)),
       );
       e.target.value = history[cursor] || "";
+      resizeCommand();
     }
   };
-  $("#code").onkeydown = (e) => {
-    if (e.key === "Tab") {
-      e.preventDefault();
-      e.target.setRangeText(
-        "  ",
-        e.target.selectionStart,
-        e.target.selectionEnd,
-        "end",
-      );
-      $("#code").oninput();
-    }
-  };
+  $("#code").onkeydown = (e) => editKey(e, () => $("#code").oninput());
   $("#check").onclick = action(async () => {
     if (!hasAnswer()) return;
     await save();
@@ -409,7 +424,9 @@ ${esc(context.files[context.filename])}</textarea
     if (r.passed) {
       context.session = null;
       context.lastSaved = {};
-      $("#runner-state").textContent = "PASSED · CONTAINER DELETED";
+      $("#runner-state").textContent = r.runtimeRetained
+        ? "PASSED · RUNTIME READY"
+        : "PASSED · CONTAINER DELETED";
       await store.saveLesson(key, draft(), true);
       state.records = store.progress();
       $("#completion").innerHTML =

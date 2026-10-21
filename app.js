@@ -1,11 +1,17 @@
 import * as store from "./database.js";
 import { state } from "./src/state.js";
 import { $, esc } from "./src/ui.js";
-import { catalog } from "./src/views/catalog.js?v=mission-copy-1";
-import { lesson, flushDraft } from "./src/views/workspace.js?v=mission-copy-1";
-import { progressPage, paths } from "./src/views/progress.js?v=mission-copy-1";
-import { settings } from "./src/views/settings.js?v=mission-copy-1";
-import { playground } from "./src/views/playground.js?v=mission-copy-1";
+import { catalog } from "./src/views/catalog.js?v=roadmap-expansion-1";
+import {
+  lesson,
+  flushDraft,
+} from "./src/views/workspace.js?v=roadmap-expansion-1";
+import {
+  progressPage,
+  paths,
+} from "./src/views/progress.js?v=roadmap-expansion-1";
+import { settings } from "./src/views/settings.js?v=roadmap-expansion-1";
+import { playground } from "./src/views/playground.js?v=roadmap-expansion-1";
 async function render() {
   await flushDraft();
   const [page, id, index] = location.hash.slice(1).split("/");

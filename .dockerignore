@@ -1,2 +1,3 @@
 **
 !runner/Dockerfile
+!runner/spring-pom.xml

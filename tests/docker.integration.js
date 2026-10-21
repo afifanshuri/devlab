@@ -1,17 +1,21 @@
-import test from "node:test";
+import test, { after } from "node:test";
 import assert from "node:assert/strict";
 import { allLessons } from "../content.js";
 import { LabSessions } from "../runner/sessions.js";
 import { must } from "../runner/docker.js";
+const sharedLabs = new LabSessions();
+after(() => sharedLabs.clear());
 for (const lesson of allLessons.filter((l) => l.engine !== "oracle")) {
   test(
     "real container rejects starter and accepts reference: " + lesson.id,
     { timeout: 60000 },
     async () => {
-      const labs = new LabSessions();
+      const labs = sharedLabs;
+      let session;
       try {
         const info = await labs.create(lesson.id);
         const s = labs.get(info.id);
+        session = s;
         const before = await labs.check(s);
         assert.equal(before.passed, false, before.output);
         await labs.write(s, lesson.filename, lesson.solution);
@@ -45,7 +49,7 @@ for (const lesson of allLessons.filter((l) => l.engine !== "oracle")) {
           assert.ok(!config.Mounts.some((m) => m.Type === "bind"));
           const denied = await labs.command(
             s,
-            "echo altered > /checks/Verify.java",
+            `echo altered > ${s.checks || "/checks"}/Verify.java`,
           );
           assert.notEqual(denied.code, 0);
           await assert.rejects(
@@ -54,7 +58,8 @@ for (const lesson of allLessons.filter((l) => l.engine !== "oracle")) {
           );
         }
       } finally {
-        await labs.clear();
+        if (session && labs.sessions.has(session.id))
+          await labs.remove(session.id);
       }
     },
   );
@@ -68,15 +73,14 @@ test(
     try {
       const lesson = allLessons.find((l) => l.id === "hands-java-dsa:0");
       const first = await labs.create(lesson.id);
-      await labs.command(labs.get(first.id), "touch /workspace/keep");
+      await labs.command(labs.get(first.id), "touch keep");
       labs.sessions.get(first.id).lastUsed = Date.now() - 59 * 60 * 1000;
       const second = await labs.create(lesson.id);
       assert.equal(second.id, first.id);
       await labs.write(labs.get(first.id), lesson.filename, lesson.solution);
       await labs.resetAnswer(lesson.id);
       assert.equal(
-        (await labs.command(labs.get(first.id), "test -f /workspace/keep"))
-          .code,
+        (await labs.command(labs.get(first.id), "test -f keep")).code,
         0,
       );
       assert.equal((await labs.checkAnswer(first.id)).passed, false);
@@ -120,7 +124,7 @@ test(
       for (const [name, body] of Object.entries(sources))
         await labs.write(session, name, body);
       assert.equal((await labs.check(session)).passed, true);
-      await labs.command(session, "echo keep > /workspace/personal-notes.txt");
+      await labs.command(session, "echo keep > personal-notes.txt");
       assert.equal((await labs.create(lesson.id)).id, first.id);
       await labs.resetAnswer(lesson.id);
       for (const [name, body] of Object.entries({
@@ -128,13 +132,16 @@ test(
         ...lesson.editableFiles,
       }))
         assert.equal(
-          (await labs.command(session, "cat /workspace/" + name)).output,
+          (
+            await labs.command(
+              session,
+              "cat " + (session.workspace || "/workspace") + "/" + name,
+            )
+          ).output,
           body,
         );
       assert.equal(
-        (
-          await labs.command(session, "cat /workspace/personal-notes.txt")
-        ).output.trim(),
+        (await labs.command(session, "cat personal-notes.txt")).output.trim(),
         "keep",
       );
       assert.equal(
@@ -166,7 +173,7 @@ test(
       await labs.write(s, lesson.filename, lesson.solution);
       const applied = await labs.command(
         s,
-        "psql -X -v ON_ERROR_STOP=1 -U postgres -d lab -f /workspace/solution.sql",
+        "psql -X -v ON_ERROR_STOP=1 -f /workspace/solution.sql",
       );
       assert.equal(applied.code, 0, applied.output);
       await labs.resetAnswer(lesson.id);
@@ -177,7 +184,7 @@ test(
       );
       const preserved = await labs.command(
         s,
-        "psql -X -At -U postgres -d lab -c \"SELECT count(*) FROM pg_roles WHERE rolname='report_reader'\"",
+        "psql -X -At -c \"SELECT count(*) FROM pg_roles WHERE rolname='report_reader'\"",
       );
       assert.equal(
         preserved.output.trim(),
@@ -203,7 +210,7 @@ test(
       const info = await labs.create(lesson.id);
       const session = labs.get(info.id);
       await labs.write(session, lesson.filename, lesson.solution);
-      await labs.command(session, "psql -U postgres -d lab -f solution.sql");
+      await labs.command(session, "psql -f solution.sql");
       await labs.resetAnswer(lesson.id);
       assert.equal((await labs.checkAnswer(info.id)).passed, false);
       assert.ok(labs.sessions.has(info.id));

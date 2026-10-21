@@ -727,7 +727,8 @@ h1 span {
   align-items: center;
   gap: 10px;
 }
-.terminal-form input {
+.terminal-form input,
+.terminal-form textarea {
   background: transparent;
   border: 0;
   color: #d5e7cb;
@@ -735,8 +736,21 @@ h1 span {
   flex: 1;
   font: 12px monospace;
 }
-.terminal-form input:focus {
+.terminal-form input:focus,
+.terminal-form textarea:focus {
   outline: 0;
+}
+.terminal-form textarea {
+  resize: vertical;
+  min-height: 32px;
+  max-height: 180px;
+  line-height: 1.6;
+  tab-size: 2;
+}
+.terminal-help {
+  font-size: 11px;
+  padding: 0 20px 10px;
+  margin: 0;
 }
 .task-nav {
   display: flex;
@@ -1104,7 +1118,8 @@ dialog h2 {
   color: #c5f578;
   font-weight: 700;
 }
-.terminal-pane .terminal-form input {
+.terminal-pane .terminal-form input,
+.terminal-pane .terminal-form textarea {
   color: #d1e5c7;
 }
 @media (max-width: 760px) {

@@ -10,9 +10,9 @@ globalThis.indexedDB = indexedDB;
 globalThis.window = { initSqlJs: () => Promise.resolve(SQL) };
 await store.initialize();
 test("every exercise is a coding task, with unique versioned IDs", () => {
-  assert.equal(courses.length, 23);
-  assert.equal(allLessons.length, 99);
-  assert.equal(new Set(allLessons.map((l) => l.id)).size, 99);
+  assert.equal(courses.length, 30);
+  assert.equal(allLessons.length, 142);
+  assert.equal(new Set(allLessons.map((l) => l.id)).size, 142);
   for (const l of allLessons) {
     assert.equal(l.type, "workspace");
     assert.ok(l.task && l.starter && l.solution && l.hint);
@@ -77,10 +77,10 @@ test("all screens and practical tasks render without missing references", async 
   try {
     const { catalog } = await import("../src/views/catalog.js");
     catalog();
-    assert.match(nodes.get("#app").innerHTML, /99 exercises/);
+    assert.match(nodes.get("#app").innerHTML, /142 exercises/);
     assert.equal(
       (nodes.get("#cards").innerHTML.match(/<article/g) || []).length,
-      23,
+      30,
     );
     for (const [file, names] of [
       ["progress", ["progressPage", "paths"]],
@@ -202,7 +202,11 @@ test("runner registry restores containers and idle timestamps after restart", as
     assert.equal(b.sessions.get(id).lastUsed, 12345);
     b.sessions.clear();
     b.persist();
-    assert.deepEqual(JSON.parse(await readFile(file, "utf8")), []);
+    assert.deepEqual(JSON.parse(await readFile(file, "utf8")), {
+      version: 2,
+      pools: [],
+      sessions: [],
+    });
   } finally {
     await rm(file, { force: true });
     await (await import("node:fs/promises")).rmdir(folder);
@@ -525,4 +529,29 @@ test("Linux and PostgreSQL practice cover the requested operating skills", () =>
     assert.ok(
       l.resetSql || /CREATE OR REPLACE (FUNCTION|VIEW)/i.test(l.solution),
     );
+});
+
+test("roadmap additions skip SQL syntax drills and use real Spring with bounded tests", () => {
+  const sql = allLessons.filter(
+    (l) =>
+      l.course.startsWith("hands-sql-") &&
+      /relational|analytics|programming-roadmap/.test(l.course),
+  );
+  assert.equal(sql.length, 16);
+  assert.equal(sql.filter((l) => l.queryResult).length, 14);
+  for (const l of sql.filter((l) => l.queryResult)) {
+    assert.match(l.solution, /^(SELECT|WITH)/);
+    assert.doesNotMatch(l.starter, /CREATE TABLE|ALTER TABLE|DROP TABLE/);
+    assert.ok(
+      l.seed.includes("CREATE TABLE"),
+      "Schema is supplied, not an assignment",
+    );
+  }
+  const spring = allLessons.filter((l) => l.framework === "spring");
+  assert.equal(spring.length, 9);
+  for (const l of spring) {
+    assert.equal(l.engine, "java");
+    assert.match(l.verify, /org\.springframework\./);
+    assert.ok(l.goal && l.example && l.mission);
+  }
 });

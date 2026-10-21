@@ -11,10 +11,28 @@ const types = {
   ".css": "text/css; charset=utf-8",
   ".wasm": "application/wasm",
 };
-export function createApp(sessions = new LabSessions()) {
+export function createApp(
+  sessions = new LabSessions(),
+  ready = Promise.resolve(),
+) {
   const api = runnerApi(sessions);
   return http.createServer(async (req, res) => {
-    if (req.url.startsWith("/api/")) return api(req, res);
+    if (req.url.startsWith("/api/")) {
+      try {
+        await ready;
+      } catch {
+        res
+          .writeHead(503, { "Content-Type": "application/json" })
+          .end(
+            JSON.stringify({
+              error:
+                "Docker recovery failed. Check Docker Desktop and restart the runner.",
+            }),
+          );
+        return;
+      }
+      return api(req, res);
+    }
     try {
       const requested = decodeURIComponent(
         new URL(req.url, "http://localhost").pathname,
@@ -51,13 +69,11 @@ export function createApp(sessions = new LabSessions()) {
 }
 export function start() {
   const sessions = new LabSessions(path.join(root, ".devlab-sessions.json")),
-    app = createApp(sessions);
-  sessions
-    .adoptUntracked()
-    .then(() => sessions.expire())
-    .catch(console.error);
+    ready = sessions.adoptUntracked().then(() => sessions.expire()),
+    app = createApp(sessions, ready);
+  ready.catch(console.error);
   const cleanup = setInterval(
-    () => sessions.expire().catch(console.error),
+    () => ready.then(() => sessions.expire()).catch(console.error),
     60000,
   );
   cleanup.unref();
