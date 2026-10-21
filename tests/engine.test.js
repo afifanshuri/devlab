@@ -10,9 +10,9 @@ globalThis.indexedDB = indexedDB;
 globalThis.window = { initSqlJs: () => Promise.resolve(SQL) };
 await store.initialize();
 test("every exercise is a coding task, with unique versioned IDs", () => {
-  assert.equal(courses.length, 8);
-  assert.equal(allLessons.length, 16);
-  assert.equal(new Set(allLessons.map((l) => l.id)).size, 16);
+  assert.equal(courses.length, 14);
+  assert.equal(allLessons.length, 40);
+  assert.equal(new Set(allLessons.map((l) => l.id)).size, 40);
   for (const l of allLessons) {
     assert.equal(l.type, "workspace");
     assert.ok(l.task && l.starter && l.solution && l.hint);
@@ -77,10 +77,10 @@ test("all screens and practical tasks render without missing references", async 
   try {
     const { catalog } = await import("../src/views/catalog.js");
     catalog();
-    assert.match(nodes.get("#app").innerHTML, /16 exercises/);
+    assert.match(nodes.get("#app").innerHTML, /40 exercises/);
     assert.equal(
       (nodes.get("#cards").innerHTML.match(/<article/g) || []).length,
-      8,
+      14,
     );
     for (const [file, names] of [
       ["progress", ["progressPage", "paths"]],
@@ -283,4 +283,30 @@ test("opening an exercise auto-connects and Check answer saves and validates", a
     delete globalThis.document;
     delete globalThis.location;
   }
+});
+
+test("progression prerequisites are valid and acyclic; Java stages retain previous helpers", () => {
+  const byId = new Map(allLessons.map((l) => [l.id, l]));
+  const visit = (id, path = new Set()) => {
+    assert.ok(!path.has(id), "Prerequisite cycle: " + id);
+    const next = new Set(path).add(id);
+    for (const p of byId.get(id).prerequisites || []) {
+      assert.ok(byId.has(p), "Unknown prerequisite: " + p);
+      visit(p, next);
+    }
+  };
+  for (const l of allLessons) visit(l.id);
+  const pipeline = allLessons.filter(
+    (l) => l.track === "java" && l.reuseNote?.includes("Earlier working"),
+  );
+  assert.equal(pipeline.length, 15);
+  for (const l of pipeline) {
+    assert.ok(l.starter.includes("normalize(String value)"));
+    assert.ok(l.verify.includes("Main.normalize("));
+    assert.ok(l.prerequisites.length);
+  }
+  const capstone = byId.get("hands-java-capstone:3");
+  assert.ok(capstone.starter.includes("executeOnce("));
+  assert.ok(capstone.starter.includes("summary("));
+  assert.ok(capstone.verify.includes("SecurityException"));
 });

@@ -1200,3 +1200,98 @@ dialog h2 {
     flex-wrap: wrap;
   }
 }
+
+.learning-scaffold {
+  border-left: 2px solid #536f7d;
+  padding: 1px 0 1px 14px;
+  margin: 22px 0;
+}
+.learning-scaffold h3 {
+  font-size: 11px;
+  color: #c4d6e0;
+  font-weight: 600;
+  margin: 12px 0 8px;
+}
+.learning-scaffold ul {
+  padding-left: 17px;
+  margin: 0 0 15px;
+}
+.learning-scaffold li,
+.learning-scaffold p {
+  font-size: 11px;
+}
+.learning-plan-intro {
+  border-color: #43533c;
+}
+.path-continue {
+  margin: 8px 0 22px;
+}
+.path-stages {
+  display: grid;
+  gap: 12px;
+}
+.path-stage {
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  padding: 0 17px;
+}
+.path-stage summary {
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+  padding: 16px 0;
+  font-size: 13px;
+}
+.path-stage summary small {
+  display: block;
+  font-size: 9px;
+  color: #9eb68f;
+  margin-bottom: 5px;
+  letter-spacing: 1px;
+}
+.path-exercises {
+  padding-bottom: 10px;
+}
+.path-exercise {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding: 14px 10px;
+  border-top: 1px solid var(--line);
+  font-size: 12px;
+}
+.path-exercise small {
+  display: block;
+  color: var(--muted);
+  font-size: 10px;
+  margin-top: 5px;
+}
+.path-number {
+  color: #94ab83;
+  font-family: monospace;
+}
+.path-status {
+  margin-left: auto;
+  color: #9baa91;
+  white-space: nowrap;
+  font-size: 10px;
+}
+.path-exercise.is-next {
+  background: #263025;
+  border-radius: 5px;
+}
+@media (max-width: 760px) {
+  .path-status {
+    font-size: 9px;
+  }
+  .path-exercise {
+    gap: 8px;
+    padding-left: 2px;
+    padding-right: 2px;
+  }
+  .path-stage {
+    padding: 0 12px;
+  }
+}

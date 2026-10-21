@@ -1,8 +1,8 @@
-import { courses, allLessons } from "../../curriculum.js";
+import { courses, allLessons } from "../../curriculum.js?v=progression-1";
 import * as store from "../../database.js";
 import { state } from "../state.js";
 import { $, esc, icon, shell } from "../ui.js";
-import { completed, count, route } from "../catalog-data.js?v=docker-1";
+import { completed, count, route } from "../catalog-data.js?v=progression-1";
 let filter = "all",
   query = "";
 function catalog() {
@@ -77,7 +77,9 @@ function catalog() {
       <div class="section-title">
         <h2>Explore the lab library</h2>
         <span
-          >${courses.length} labs. Three tracks. Endless possibilities.</span
+          ><a class="text-link" href="#paths"
+            >Follow a progressive path →</a
+          ></span
         >
       </div>
       <div class="filters">

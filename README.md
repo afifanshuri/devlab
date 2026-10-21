@@ -27,7 +27,7 @@ Open **http://127.0.0.1:5173**. Open an exercise; its container starts or reconn
 
 The terminal runs noninteractive commands one at a time, with a ten-second limit. It is not a full PTY: vim/nano, interactive prompts and interactive psql are not supported. Use the file editor, heredocs, or command flags. `cd` persists between commands within a session.
 
-The initial curriculum contains 16 coding tasks across eight labs: Java DSA, SOLID, strategy/observer patterns; Linux navigation, text filtering, permissions and backups; PostgreSQL views, windows, PL/pgSQL branches and cursors; and two optional Oracle PL/SQL tasks.
+The curriculum contains 40 coding tasks across fourteen labs: Java DSA, SOLID, strategy/observer patterns; Linux navigation, text filtering, permissions and backups; PostgreSQL views, windows, PL/pgSQL branches and cursors; and two optional Oracle PL/SQL tasks.
 
 ## Where it runs
 
@@ -75,3 +75,13 @@ The unit suite checks task data, storage/backup behavior, rendered screen paths 
 - `database.js`: browser SQLite persistence and validated backup import.
 
 There are no added runtime npm dependencies for Docker execution. sql.js is vendored from its upstream package; Prettier and fake-indexeddb are development-only tools. No API keys or cloud service accounts are needed.
+
+## Progressive paths
+
+The Learning paths screen recommends the next unfinished exercise without locking other exercises. Each exercise shows prerequisites and the skills it introduces. Existing exercise IDs and progress remain valid.
+
+New Java stages develop one incident-processing service: validated inputs → parsing → overflow-safe aggregation → immutable snapshots → deterministic algorithms → bounded retries → idempotency → concurrency → authorization → workflow rules → redaction → service capstone. Later starters include reference implementations of previous helpers, and internal verifiers rerun earlier requirements. Learners reuse those helpers and extend their code; this is scaffold reuse rather than automatic copying of previous personal submissions.
+
+Linux advances from basic files and permissions to service error aggregation, trace correlation, idempotent report scripts and verified incident bundles. Intermediate fixture files contain reference outputs from earlier tasks. PostgreSQL advances from functions to row-locked transfers, idempotent request records, atomic failure behavior, reconciliation and index inspection. Earlier reference functions are preinstalled in the next fixture.
+
+The curriculum emphasizes production-oriented backend and support skills. No CV, personal information or source career documents are stored in the repository.

@@ -1,4 +1,4 @@
-import { courses } from "../../curriculum.js";
+import { courses, allLessons } from "../../curriculum.js?v=progression-1";
 import * as store from "../../database.js";
 import { state } from "../state.js";
 import { $, esc, shell, toast } from "../ui.js";
@@ -28,6 +28,15 @@ export function lesson(courseId, idx) {
   state.current = { id: key };
   store.setting("lastLab", course.id).catch(() => {});
   const available = localRunner();
+  const prerequisites = (task.prerequisites || [])
+    .map((id) => allLessons.find((l) => l.id === id))
+    .filter(Boolean);
+  const nextStep = allLessons.find(
+    (l) =>
+      l.prerequisites?.includes(key) &&
+      l.track === course.track &&
+      l.engine !== "oracle",
+  );
   shell(
     /* HTML */ `<div class="lab-heading">
         <div>
@@ -46,6 +55,18 @@ export function lesson(courseId, idx) {
           <p>${esc(task.task)}</p>
           <h2>How it works</h2>
           <p>${esc(task.concept)}</p>
+          <div class="learning-scaffold">
+            <h3>What you’ll practise</h3>
+            <ul>
+              ${(task.learn || [])
+                .map((item) => `<li>${esc(item)}</li>`)
+                .join("")}
+            </ul>
+            ${prerequisites.length
+              ? `<h3>Builds on</h3>${prerequisites.map((l) => `<a class="text-link" href="#lab/${l.course}/${l.index}">${state.records[l.id]?.completed ? "✓ " : ""}${esc(l.title)}</a>`).join("<br>")}`
+              : "<p>Your starting point in this track.</p>"}
+            ${task.reuseNote ? `<p>${esc(task.reuseNote)}</p>` : ""}
+          </div>
           <p>
             The lab connects automatically. Write your answer, then select
             “Check answer” to compile, run, and validate it against internal
@@ -137,10 +158,14 @@ ${esc(state.records[key]?.draft ?? task.starter)}</textarea
           class="secondary"
           href="${index + 1 < course.lessons.length
             ? `#lab/${course.id}/${index + 1}`
-            : "#progress"}"
+            : nextStep
+              ? `#lab/${nextStep.course}/${nextStep.index}`
+              : "#progress"}"
           >${index + 1 < course.lessons.length
             ? "Next exercise →"
-            : "View progress →"}</a
+            : nextStep
+              ? "Next stage →"
+              : "View progress →"}</a
         >
       </div>`,
   );

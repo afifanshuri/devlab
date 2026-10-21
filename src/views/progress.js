@@ -1,7 +1,7 @@
-import { courses, allLessons } from "../../curriculum.js";
+import { courses, allLessons } from "../../curriculum.js?v=progression-1";
 import { state } from "../state.js";
 import { esc, shell } from "../ui.js";
-import { completed, count, route } from "../catalog-data.js?v=docker-1";
+import { completed, count, route } from "../catalog-data.js?v=progression-1";
 function progressPage() {
   const done = completed();
   shell(
@@ -51,69 +51,65 @@ function progressPage() {
       </div>`,
   );
 }
-function paths() {
-  shell(
-    /* HTML */ `<div class="eyebrow">A LITTLE STRUCTURE GOES A LONG WAY</div>
-      <h1>Choose your learning path<span>.</span></h1>
-      <p class="sub">
-        Follow a track in order or jump into the topic you need today.
-      </p>
-      ${[
-        [
-          "java",
-          "Java engineer",
-          "Master collections, complexity, clean architecture and reusable design.",
-        ],
-        [
-          "linux",
-          "Linux operator",
-          "Start with navigation, then build confidence in system administration.",
-        ],
-        [
-          "sql",
-          "Database developer",
-          "Run real queries, then explore PostgreSQL and Oracle procedural concepts.",
-        ],
-      ]
-        .map(
-          ([track, title, desc]) =>
-            /* HTML */ `<section class="panel">
-              <div class="row">
-                <div>
-                  <div class="eyebrow">${track}</div>
-                  <h2>${title}</h2>
-                  <p class="muted">${desc}</p>
-                </div>
-                <span class="muted"
-                  >${courses
-                    .filter((c) => c.track === track)
-                    .reduce((s, c) => s + c.minutes, 0)}
-                  min estimated</span
-                >
-              </div>
-              <div class="practice-list">
-                ${courses
-                  .filter((c) => c.track === track)
-                  .map(
-                    (c, i) =>
-                      /* HTML */ `<a href="${route(c)}"
-                        ><span
-                          ><span style="color:#8ba574;margin-right:15px"
-                            >0${i + 1}</span
-                          >${c.title}</span
-                        ><span style="color:#9ba892"
-                          >${count(c) === c.lessons.length
-                            ? "✓ Complete"
-                            : "Explore →"}</span
-                        ></a
-                      >`,
-                  )
-                  .join("")}
-              </div>
-            </section>`,
-        )
-        .join("")}`,
-  );
-}
 
+function paths() {
+  const tracks = [
+    [
+      "java",
+      "Build reliable backend services",
+      "Contracts → algorithms → reliability → secure workflows. Earlier helper methods are included in later starters, and cumulative regression tests protect what you already built.",
+    ],
+    [
+      "linux",
+      "Investigate incidents systematically",
+      "Files and permissions → service-level evidence → correlation IDs → repeatable reports → verified support bundles.",
+    ],
+    [
+      "sql",
+      "Protect data and diagnose queries",
+      "Queries → procedural functions → atomic transfers → idempotent requests → reconciliation and index investigation. Oracle remains an optional separate environment.",
+    ],
+  ];
+  shell(`<div class="eyebrow">LEARN IT. REUSE IT. BUILD ON IT.</div>
+    <h1>Your progressive learning paths<span>.</span></h1>
+    <p class="sub">Follow the recommended order. Each step introduces a focused idea, then later tasks reuse it in a larger problem. You can revisit or skip ahead at any time.</p>
+    <div class="panel learning-plan-intro"><h2>From implementing a feature to owning its behavior</h2><p class="muted">Practise defensive contracts, failure-path testing, concurrency, idempotency, database integrity, and repeatable operational diagnosis. Passing requires actual runtime checks. The Java service sequence also reruns earlier tests as the code grows.</p></div>
+    ${tracks
+      .map(([track, title, description]) => {
+        const stages = courses
+          .filter((c) => c.track === track)
+          .sort(
+            (a, b) =>
+              Number(a.lessons[0].engine === "oracle") -
+              Number(b.lessons[0].engine === "oracle"),
+          );
+        const ordered = stages.flatMap((c) =>
+          c.lessons.map((l, index) => ({
+            ...l,
+            index,
+            course: c.id,
+            id: c.id + ":" + index,
+          })),
+        );
+        const next = ordered.find(
+          (l) => l.engine !== "oracle" && !state.records[l.id]?.completed,
+        );
+        let number = 0;
+        return `<section class="panel"><div class="row"><div><div class="eyebrow">${track}</div><h2>${title}</h2></div><span class="muted">${ordered.filter((l) => state.records[l.id]?.completed).length} / ${ordered.length} complete</span></div><p class="muted">${description}</p>
+        ${next ? `<a class="primary path-continue" href="#lab/${next.course}/${next.index}">Recommended next: ${esc(next.title)} →</a>` : '<div class="complete-banner">Core path complete. Revisit a challenge to reinforce your skills.</div>'}
+        <div class="path-stages">${stages
+          .map(
+            (c) =>
+              `<details class="path-stage" ${c.lessons.some((_, i) => next?.id === c.id + ":" + i) ? "open" : ""}><summary><span><small>${c.lessons[0].engine === "oracle" ? "OPTIONAL" : c.stage ? "STAGE " + c.stage : "FOUNDATIONS"}</small>${esc(c.title)}</span><span class="muted">${count(c)} / ${c.lessons.length}</span></summary><p class="muted">${esc(c.description)}</p><div class="path-exercises">${c.lessons
+                .map((l, i) => {
+                  const id = c.id + ":" + i;
+                  number++;
+                  return `<a href="#lab/${c.id}/${i}" class="path-exercise ${next?.id === id ? "is-next" : ""}"><span class="path-number">${String(number).padStart(2, "0")}</span><span>${esc(l.title)}<small>${l.reuseNote ? "Reuses earlier building blocks" : l.prerequisites?.length ? "Builds on the previous exercise" : "Start here"}</small></span><span class="path-status">${state.records[id]?.completed ? "✓ Complete" : next?.id === id ? "Up next →" : "Practise →"}</span></a>`;
+                })
+                .join("")}</div></details>`,
+          )
+          .join("")}</div></section>`;
+      })
+      .join("")}`);
+}
 export { progressPage, paths };
