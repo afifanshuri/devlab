@@ -191,12 +191,15 @@ export class LabSessions {
     try {
       await must(args, { timeout: 20000 });
       if (postgres) {
+        // The initialization server accepts sockets only; TCP signals the final server.
         let ready = false;
         for (let i = 0; i < 40; i++) {
           const r = await docker([
             "exec",
             name,
             "pg_isready",
+            "-h",
+            "127.0.0.1",
             "-U",
             "postgres",
             "-d",
