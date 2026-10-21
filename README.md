@@ -27,7 +27,7 @@ Open **http://127.0.0.1:5173**. Open an exercise; its container starts or reconn
 
 The terminal runs noninteractive commands one at a time, with a ten-second limit. It is not a full PTY: vim/nano, interactive prompts and interactive psql are not supported. Use the file editor, heredocs, or command flags. `cd` persists between commands within a session.
 
-The curriculum contains 69 coding tasks across eighteen labs: Java DSA, SOLID, strategy/observer patterns; Linux navigation, text filtering, permissions and backups; PostgreSQL views, windows, PL/pgSQL branches and cursors; and two optional Oracle PL/SQL tasks.
+The curriculum contains 99 coding tasks across twenty-three labs: Java DSA, SOLID, strategy/observer patterns; Linux navigation, text filtering, permissions and backups; PostgreSQL views, windows, PL/pgSQL branches and cursors; and two optional Oracle PL/SQL tasks.
 
 ## Where it runs
 
@@ -103,3 +103,11 @@ The Java path now begins with 20 exercises covering the Basics of OOP, More abou
 | Run the busy counter | 7 | Array vs ArrayList, Set, Map, Queue, Deque/Stack, Iterator, generic collections |
 
 All new tasks use minimal signatures/TODOs and real JDK verification. Runtime checks verify observable behavior and selected reflection-visible structure. Instructions also request implementation techniques such as Iterator.remove; behavioral tests alone do not prove every internal technique. The package exercise uses flat source files with package declarations; javac -d creates the package directories in the disposable compilation output.
+
+### More SOLID, design patterns and operations practice
+
+Five SOLID labs cover SRP, OCP, LSP, ISP and DIP through multi-file contracts, injected test doubles, rejection paths and observable side effects. Seven further pattern labs cover Template Method, Chain of Responsibility, Composite, protection/caching Proxy, State, Memento and Abstract Factory.
+
+Twelve Linux labs add paths with spaces, hard/symbolic links, CSV pipelines, environment defaults, shell conditions, find, umask, setgid, process signals, log rotation, archive restore and disk reports. Six PostgreSQL labs add metadata inspection, data constraints, limited reporting roles, atomic stock reservations, composite indexes and bounded retention. The PostgreSQL labs use real PostgreSQL-specific commands; the optional Oracle exercises remain a separate environment.
+
+Each exercise includes a concrete example result as well as its scenario, goal and exact acceptance criteria. Fresh Linux fixtures are prepared once per new container; reconnecting does not rerun preparation. Privileges remain limited to the disposable container. SQL DDL checks use per-task answer cleanup inside a transaction that rolls back, including failed validation; Reset lab still resets only the answer.

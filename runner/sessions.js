@@ -249,6 +249,11 @@ export class LabSessions {
         await this.write(session, file, body);
       for (const [file, body] of Object.entries(lesson.files || {}))
         await this.write(session, file, body);
+      if (lesson.setup) {
+        const result = await this.command(session, lesson.setup);
+        if (result.code !== 0)
+          throw Error("Lab fixture setup failed: " + result.output);
+      }
       if (lesson.verify)
         await must(
           [
@@ -368,7 +373,12 @@ export class LabSessions {
       const object = s.lesson.solution.match(
         /CREATE OR REPLACE (VIEW|FUNCTION) (\w+)(\([^)]*\))?/i,
       );
-      const drop = `DROP ${object[1]} IF EXISTS ${object[2]}${object[1].toUpperCase() === "FUNCTION" ? object[3] : ""};`;
+      const drop =
+        s.lesson.resetSql ??
+        (object &&
+          `DROP ${object[1]} IF EXISTS ${object[2]}${object[1].toUpperCase() === "FUNCTION" ? object[3] : ""};`);
+      if (typeof drop !== "string")
+        throw Error("SQL exercise has no answer isolation rule.");
       // Validate the submitted SQL against fresh answer objects, without
       // clearing unrelated database work or retaining old passing definitions.
       command = `psql -X -v ON_ERROR_STOP=1 -U postgres -d lab <<'DEVLAB_CHECK'\nBEGIN;\n${drop}\n\\i /workspace/solution.sql\n${s.lesson.check}\nROLLBACK;\nDEVLAB_CHECK`;

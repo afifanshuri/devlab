@@ -10,9 +10,9 @@ globalThis.indexedDB = indexedDB;
 globalThis.window = { initSqlJs: () => Promise.resolve(SQL) };
 await store.initialize();
 test("every exercise is a coding task, with unique versioned IDs", () => {
-  assert.equal(courses.length, 18);
-  assert.equal(allLessons.length, 69);
-  assert.equal(new Set(allLessons.map((l) => l.id)).size, 69);
+  assert.equal(courses.length, 23);
+  assert.equal(allLessons.length, 99);
+  assert.equal(new Set(allLessons.map((l) => l.id)).size, 99);
   for (const l of allLessons) {
     assert.equal(l.type, "workspace");
     assert.ok(l.task && l.starter && l.solution && l.hint);
@@ -77,10 +77,10 @@ test("all screens and practical tasks render without missing references", async 
   try {
     const { catalog } = await import("../src/views/catalog.js");
     catalog();
-    assert.match(nodes.get("#app").innerHTML, /69 exercises/);
+    assert.match(nodes.get("#app").innerHTML, /99 exercises/);
     assert.equal(
       (nodes.get("#cards").innerHTML.match(/<article/g) || []).length,
-      18,
+      23,
     );
     for (const [file, names] of [
       ["progress", ["progressPage", "paths"]],
@@ -460,6 +460,7 @@ test("roadmap sections are covered and missions keep story separate from require
   for (const l of allLessons) {
     assert.ok(l.mission?.length > 50, "Missing meaningful mission: " + l.id);
     assert.ok(l.goal?.length > 35, "Missing actionable goal: " + l.id);
+    assert.ok(l.example?.length > 15, "Missing concrete example: " + l.id);
     assert.ok(l.requirements.length > 0);
     assert.equal(l.requirements.join(" "), l.task);
     assert.ok(
@@ -467,4 +468,61 @@ test("roadmap sections are covered and missions keep story separate from require
       "Starter should contain contracts, not solutions",
     );
   }
+});
+
+test("SOLID and advanced pattern tasks have distinct contracts and minimal starters", () => {
+  const solid = courses.find((c) => c.id === "hands-java-solid-workshop");
+  assert.deepEqual(
+    solid.lessons.map((l) => l.designTopic),
+    [
+      "Single responsibility",
+      "Open/closed",
+      "Liskov substitution",
+      "Interface segregation",
+      "Dependency inversion",
+    ],
+  );
+  const patterns = courses.find((c) => c.id === "hands-java-patterns-advanced");
+  assert.deepEqual(
+    patterns.lessons.map((l) => l.designTopic),
+    [
+      "Template Method",
+      "Chain of Responsibility",
+      "Composite",
+      "Protection and caching proxy",
+      "State",
+      "Memento",
+      "Abstract Factory",
+    ],
+  );
+  for (const task of [...solid.lessons, ...patterns.lessons]) {
+    for (const source of Object.values({
+      [task.filename]: task.starter,
+      ...task.editableFiles,
+    })) {
+      assert.ok(
+        source.includes("interface ") ||
+          source.includes("throw new UnsupportedOperationException"),
+      );
+    }
+    assert.ok(task.interview.length > 30);
+  }
+});
+
+test("Linux and PostgreSQL practice cover the requested operating skills", () => {
+  for (const id of [
+    "hands-linux-foundations",
+    "hands-linux-admin-workshop",
+    "hands-sql-admin-workshop",
+  ]) {
+    const course = courses.find((c) => c.id === id);
+    assert.equal(course.lessons.length, 6);
+    assert.equal(new Set(course.lessons.map((l) => l.opsTopic)).size, 6);
+    for (const l of course.lessons) assert.ok(l.goal && l.example && l.mission);
+  }
+  const sql = courses.find((c) => c.id === "hands-sql-admin-workshop");
+  for (const l of sql.lessons)
+    assert.ok(
+      l.resetSql || /CREATE OR REPLACE (FUNCTION|VIEW)/i.test(l.solution),
+    );
 });

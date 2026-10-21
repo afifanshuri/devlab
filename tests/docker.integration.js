@@ -19,6 +19,16 @@ for (const lesson of allLessons.filter((l) => l.engine !== "oracle")) {
           await labs.write(s, name, body);
         const after = await labs.check(s);
         assert.equal(after.passed, true, after.output);
+        if (lesson.id === "hands-linux-admin-workshop:2") {
+          const pid = (await labs.command(s, "cat /workspace/service.pid"))
+            .output;
+          assert.equal((await labs.create(lesson.id)).id, info.id);
+          assert.equal(
+            (await labs.command(s, "cat /workspace/service.pid")).output,
+            pid,
+            "Reopening must not restart the prepared service process",
+          );
+        }
         if (lesson.id === "hands-java-oop-basics:4") {
           await labs.write(s, lesson.filename, "");
           assert.equal(
@@ -136,6 +146,47 @@ test(
         await labs.write(session, name, body);
       assert.equal((await labs.checkAnswer(first.id)).passed, true);
       assert.equal(labs.sessions.has(first.id), false);
+    } finally {
+      await labs.clear();
+    }
+  },
+);
+
+test(
+  "SQL role checks isolate an empty answer and roll back their cleanup",
+  { timeout: 30000 },
+  async () => {
+    const labs = new LabSessions();
+    try {
+      const lesson = allLessons.find(
+        (l) => l.id === "hands-sql-admin-workshop:2",
+      );
+      const info = await labs.create(lesson.id),
+        s = labs.get(info.id);
+      await labs.write(s, lesson.filename, lesson.solution);
+      const applied = await labs.command(
+        s,
+        "psql -X -v ON_ERROR_STOP=1 -U postgres -d lab -f /workspace/solution.sql",
+      );
+      assert.equal(applied.code, 0, applied.output);
+      await labs.resetAnswer(lesson.id);
+      assert.equal(
+        (await labs.check(s)).passed,
+        false,
+        "Existing correct role must not make an empty answer pass",
+      );
+      const preserved = await labs.command(
+        s,
+        "psql -X -At -U postgres -d lab -c \"SELECT count(*) FROM pg_roles WHERE rolname='report_reader'\"",
+      );
+      assert.equal(
+        preserved.output.trim(),
+        "1",
+        "Validation cleanup must roll back",
+      );
+      await labs.write(s, lesson.filename, lesson.solution);
+      assert.equal((await labs.checkAnswer(info.id)).passed, true);
+      assert.equal(labs.sessions.has(info.id), false);
     } finally {
       await labs.clear();
     }

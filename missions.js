@@ -191,7 +191,8 @@ export function applyMissions(courses) {
     for (const [index, lesson] of course.lessons.entries()) {
       const story = stories[course.id]?.[index];
       if (story) [lesson.mission, lesson.example] = story;
-      lesson.goal = goals[course.id]?.[index];
+      lesson.goal ??= goals[course.id]?.[index];
+      lesson.example ??= examples[course.id]?.[index];
       lesson.requirements = lesson.task.split(/(?<=[.!?])\s+(?=[A-Z])/);
     }
 }
@@ -300,5 +301,112 @@ const goals = {
   "hands-sql-oracle": [
     "Write a PL/SQL block that prints the correct pass-or-retry result.",
     "Write a PL/SQL numeric FOR loop that prints the integers 1 through 5.",
+  ],
+};
+const examples = {
+  "hands-java-oop-basics": [
+    'Customer(" Maya ").name() → "Maya"; renaming Maya must not change another customer.',
+    "Wallet(100): deposit 50, spend 75 → balance 75; spending 76 then fails without changing it.",
+    "First two JobTickets → IDs 1 and 2; issued() → 2.",
+    'Booking.Contact(" 0123 ").phone() → "0123"; Booking(contact).contact() returns that contact.',
+    'TicketLabel.format(12) → "JOB-12"; callers outside workshop cannot use LabelRules directly.',
+  ],
+  "hands-java-oop-more": [
+    "PriceDesk.quote(new PhoneRepair()) → 3000; a LaptopRepair through the same Repair contract → 7000.",
+    'Dispatch.ship(new BikeCourier(), " box ") → "BIKE:box"; a custom Courier must also work.',
+    'Formatter base = new FancyFormatter(); Object value = "receipt"; format(value) → "fancy", format("receipt") → "text".',
+    "new Estimate().labour(300).parts(200).total() → 500; replacing parts with 50 → 350.",
+    "RECEIVED → REPAIRING is allowed; RECEIVED → READY and READY → READY are rejected.",
+    "Receipt checks [screen] remain [screen] after the caller adds battery to the original list.",
+    "Two Workstations in a fresh JVM → SICIC: static setup once, instance setup then constructor twice.",
+    "reassign(address) leaves the caller’s city KL; mutate(address) changes that same object’s city to Penang.",
+  ],
+  "hands-java-collections": [
+    "Booked [J1, J2] plus J3 → mutable [J1, J2, J3]; changing the original array leaves the result unchanged.",
+    'IDs [" b ", "a", "B"] → [B, A] in that order.',
+    'Rows [[" J1 ", " phone "], ["J2", "laptop"]] → {J1=phone, J2=laptop}; a second J1 is rejected.',
+    "Join A, B, A → next returns A, then B, then A, then null.",
+    "Add first, second, third → undo returns third; oldest still returns first.",
+    "[J1, CANCELLED:a, CANCELLED:b, J2] → [J1, J2], with removed count 2.",
+    "Tray<Integer> with 1, 2 → take returns 1; a saved [1, 2] snapshot stays unchanged.",
+  ],
+  "hands-java-dsa": [
+    "[2, 2, -1] → {2=2, -1=1}",
+    "[2, 5, 8], target 5 → index 1; target 4 → -1",
+  ],
+  "hands-java-solid": [
+    'Repository id → "user:" + id; load(repository, 7) → "user:7".',
+    "3 items × 125 cents → 375 cents; a negative quantity is rejected.",
+  ],
+  "hands-java-patterns": [
+    "checkout(100, amount → amount / 2) → 50; another supplied policy may return 90.",
+    "Listeners A then B receiving saved → A:saved followed by B:saved, once each.",
+  ],
+  "hands-java-contracts": [
+    '"  abc-1 " → "ABC-1"; blank input is rejected.',
+    '" a | 2 " → entry("A", 2); "a|-1" is rejected.',
+    '["a|2", " A |3", "b|1"] → {A=5, B=1}',
+    'Snapshot of ["a|2"] → {A=2}; put("B", 1) on that result is rejected.',
+  ],
+  "hands-java-analysis": [
+    '[" b ", "a", "B"] → [B, A]',
+    '["b|2", "a|3", "b|2"], top 1 → [B]',
+    "[1, 2, 3, 4], width 2 → [3, 5, 7]",
+    '["b|2", "a|3", "b|2"], top 1 → "B=4; total=7"',
+  ],
+  "hands-java-reliability": [
+    "An operation failing once then succeeding returns its success within two attempts; it never exceeds the configured limit.",
+    "The same request key submitted twice returns the same successful result; its action runs only once.",
+    "Two concurrent claims for one message ID → exactly one true result.",
+    "parallelCount(20) → 20 after all jobs finish; repeated calls must not share an old count.",
+  ],
+  "hands-java-capstone": [
+    "A missing user or missing permission → false; explicit matching permission → true.",
+    "A permitted event returns the required next state; an invalid event throws without inventing a new state.",
+    "A message containing token or password values keeps its useful context while redacting those values.",
+    "An authorized repeated request returns the cached summary; an unauthorized user cannot read that cached result.",
+  ],
+  "hands-java-architecture": [
+    'Concurrent ConfigRegistry.getInstance() calls → the same instance; environment() → "production".',
+    "1001 grams → 700 cents standard or 1400 cents express, before item cost.",
+    'ShippingFactory.create(" EXPRESS ").cost(1) → 1200; unknown names are rejected.',
+    "Subscribers A and B each receive paid once; if A throws, B must still receive it.",
+    '105 cents → gateway string "1.05"; the gateway receipt is returned unchanged.',
+    "Delegate returns R1 → audit receives paid:R1; delegate failure → no success audit.",
+    "Stock 5: reserve 3 → 2; undo → 5; a second undo is rejected.",
+    "Build a weekly request, then add a builder tag → the earlier request’s tag list stays unchanged.",
+    "Same normalized request ID and same order → one charge and one notification; changed payload → rejected.",
+  ],
+  "hands-linux-basics": [
+    "Expected file: /workspace/projects/Main.java; contents: class Main {}",
+    "errors.log contains only the original ERROR lines, in their original order; app.log stays unchanged.",
+  ],
+  "hands-linux-admin": [
+    "app.conf mode → 600; permissions.txt contains a long listing of app.conf.",
+    "processes.txt and disk.txt contain snapshots; extracting config-backup.tar.gz reproduces the unchanged app.conf.",
+  ],
+  "hands-linux-operations": [
+    "errors-by-service.txt contains inventory 1 followed by orders 2, one per line.",
+    "incident.log contains every trace=t1 line in original order, including INFO entries.",
+    "report.txt contains errors=2 then services=2, with mode 600; running again does not duplicate lines.",
+    "evidence.tar.gz contains app.log, incident.log and report.txt; sha256sum -c evidence.sha256 succeeds.",
+  ],
+  "hands-sql-queries": [
+    "high_earners contains three rows from the seeded employees table, all salaries at least 70000.",
+    "Maya has Engineering rank 1; Sam has Operations rank 2.",
+  ],
+  "hands-sql-postgres": [
+    "salary_band(90000) → high; salary_band(70000) → mid; salary_band(60000) → base.",
+    "total_payroll() → 312000 for the supplied employee rows.",
+  ],
+  "hands-sql-integrity": [
+    "balance_of(1) → 1000 initially; a missing account → NULL.",
+    "Transfer 300 from account 1 to 2 → balances 700 and 550; a failed transfer changes neither.",
+    "First successful key r1 → true; same key and payload again → false, with no second debit.",
+    "Quiet account 3 remains in the report with paid_out=0 and paid_in=0.",
+  ],
+  "hands-sql-oracle": [
+    "score 80 → output Pass",
+    "Output five lines: 1, 2, 3, 4, 5",
   ],
 };

@@ -1,8 +1,23 @@
-import { java, linux, pg, oracle, make } from "./exercise-factories.js?v=roadmap-1";
+import {
+  java,
+  linux,
+  pg,
+  oracle,
+  make,
+} from "./exercise-factories.js?v=roadmap-1";
 import { advancedCourses } from "./progression.js";
 import { patternCourses } from "./patterns.js";
 import { roadmapCourses } from "./roadmap.js?v=roadmap-1";
-import { applyMissions } from "./missions.js?v=goals-1";
+import { applyMissions } from "./missions.js?v=ops-missions-1";
+import {
+  solidPractice,
+  advancedPatterns,
+} from "./design-practice.js?v=design-1";
+import {
+  linuxBasicsPractice,
+  linuxAdminPractice,
+  sqlAdminPractice,
+} from "./ops-practice.js?v=ops-1";
 export const courses = [
   make(
     "java-dsa",
@@ -213,6 +228,22 @@ export const courses = [
 ];
 courses.push(...advancedCourses, ...patternCourses);
 courses.unshift(...roadmapCourses);
+courses.splice(
+  courses.findIndex((c) => c.id === "hands-java-solid") + 1,
+  0,
+  solidPractice,
+);
+courses.push(advancedPatterns, sqlAdminPractice);
+courses.splice(
+  courses.findIndex((c) => c.id === "hands-linux-basics") + 1,
+  0,
+  linuxBasicsPractice,
+);
+courses.splice(
+  courses.findIndex((c) => c.id === "hands-linux-admin") + 1,
+  0,
+  linuxAdminPractice,
+);
 courses
   .filter((c) => c.track === "java")
   .forEach((c, i) => {

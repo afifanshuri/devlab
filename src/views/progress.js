@@ -1,7 +1,7 @@
-import { courses, allLessons } from "../../curriculum.js?v=missions-2";
+import { courses, allLessons } from "../../curriculum.js?v=operations-1";
 import { state } from "../state.js";
 import { esc, shell } from "../ui.js";
-import { completed, count, route } from "../catalog-data.js?v=missions-2";
+import { completed, count, route } from "../catalog-data.js?v=operations-1";
 function progressPage() {
   const done = completed();
   shell(

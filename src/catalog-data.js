@@ -1,6 +1,6 @@
 import * as store from "../database.js";
 import { state } from "./state.js";
-import { courses, allLessons } from "../curriculum.js?v=missions-2";
+import { courses, allLessons } from "../curriculum.js?v=operations-1";
 const completed = () =>
   allLessons.filter((lesson) => state.records[lesson.id]?.completed).length;
 const count = (c) =>
