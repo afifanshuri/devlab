@@ -1,8 +1,8 @@
-import { courses, allLessons } from "../../content.js";
+import { courses, allLessons } from "../../curriculum.js";
 import * as store from "../../database.js";
 import { state } from "../state.js";
 import { $, esc, icon, shell } from "../ui.js";
-import { completed, count, route } from "../catalog-data.js";
+import { completed, count, route } from "../catalog-data.js?v=docker-1";
 let filter = "all",
   query = "";
 function catalog() {

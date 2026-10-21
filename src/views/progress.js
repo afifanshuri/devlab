@@ -1,7 +1,7 @@
-import { courses, allLessons } from "../../content.js";
+import { courses, allLessons } from "../../curriculum.js";
 import { state } from "../state.js";
 import { esc, shell } from "../ui.js";
-import { completed, count, route } from "../catalog-data.js";
+import { completed, count, route } from "../catalog-data.js?v=docker-1";
 function progressPage() {
   const done = completed();
   shell(

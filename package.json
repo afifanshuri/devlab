@@ -7,13 +7,15 @@
   "scripts": {
     "start": "node server.mjs",
     "test": "node --test tests/*.test.js",
-    "format": "prettier --write app.js content.js database.js linux.js sql-worker.js server.mjs src tests index.html styles.css"
+    "format": "prettier --write app.js content.js curriculum.js database.js server.mjs sql-worker.js runner src tests index.html styles.css",
+    "setup:labs": "node runner/setup.mjs",
+    "test:docker": "node --test tests/docker.integration.js"
   },
   "dependencies": {
     "sql.js": "1.14.1"
   },
   "devDependencies": {
-    "fake-indexeddb": "^6.2.4",
+    "fake-indexeddb": "6.2.4",
     "prettier": "3.8.1"
   }
 }

@@ -1,4 +1,4 @@
-import { allLessons } from "../../content.js";
+import { allLessons } from "../../curriculum.js";
 import * as store from "../../database.js";
 import { state } from "../state.js";
 import { $, esc, toast, shell, download } from "../ui.js";
@@ -49,15 +49,16 @@ function settings() {
       <section class="panel">
         <h2>How these labs work</h2>
         <p class="muted">
-          <strong>SQL:</strong> real SQLite queries run in a disposable worker
-          with a time limit.<br /><strong>Linux:</strong> a virtual filesystem
-          and supported administrative commands are simulated.<br /><strong
-            >Java:</strong
-          >
-          conceptual questions and code structure checks; no JVM is included.<br /><strong
-            >Oracle & PostgreSQL:</strong
-          >
-          dialect-specific guided exercises; procedural code is not executed.
+          Java code is compiled and tested with a real JDK. Linux commands run
+          in a disposable container. PostgreSQL labs execute against a real
+          database. Oracle requires its optional image. Start the local runner
+          with npm start; GitHub Pages only hosts the catalog.
+        </p>
+        <p class="muted">
+          The SQL playground still runs SQLite in the browser. Terminal commands
+          are noninteractive: use the editor or shell redirection instead of
+          vim, nano or interactive psql. Leaving a lab discards container files;
+          saved editor drafts and progress remain in this browser.
         </p>
         <p class="muted">
           Built with

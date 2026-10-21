@@ -100,7 +100,7 @@ export async function importDatabase(bytes, validIds) {
     if (
       rows.some(
         ([id, c, d, t]) =>
-          !validIds.includes(id) ||
+          typeof id !== "string" ||
           ![0, 1].includes(c) ||
           (d !== null && typeof d !== "string") ||
           typeof t !== "string",
@@ -111,7 +111,7 @@ export async function importDatabase(bytes, validIds) {
     db.run("BEGIN");
     try {
       db.run("DELETE FROM progress");
-      for (const row of rows)
+      for (const row of rows.filter((row) => validIds.includes(row[0])))
         db.run("INSERT INTO progress VALUES (?,?,?,?)", row);
       db.run("COMMIT");
     } catch (e) {

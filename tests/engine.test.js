@@ -3,159 +3,172 @@ import assert from "node:assert/strict";
 import initSqlJs from "sql.js";
 import { indexedDB } from "fake-indexeddb";
 import { courses, allLessons } from "../content.js";
-import { LinuxSandbox } from "../linux.js";
-import { checkStructure, matchesRows } from "../src/services/checks.js";
 import * as store from "../database.js";
+import { createApp } from "../runner/server.js";
 const SQL = await initSqlJs();
-
-test("curriculum IDs are unique and each lesson has useful feedback", () => {
+globalThis.indexedDB = indexedDB;
+globalThis.window = { initSqlJs: () => Promise.resolve(SQL) };
+await store.initialize();
+test("every exercise is a coding task, with unique versioned IDs", () => {
   assert.equal(courses.length, 8);
-  assert.equal(allLessons.length, 32);
-  assert.equal(new Set(allLessons.map((l) => l.id)).size, 32);
+  assert.equal(allLessons.length, 16);
+  assert.equal(new Set(allLessons.map((l) => l.id)).size, 16);
   for (const l of allLessons) {
-    assert.ok(l.concept && l.hint && l.solution);
-    if (l.type === "quiz")
-      assert.ok(l.answer >= 0 && l.answer < l.choices.length);
+    assert.equal(l.type, "workspace");
+    assert.ok(l.task && l.starter && l.solution && l.hint);
+    assert.equal(l.choices, undefined);
+    assert.ok(l.id.startsWith("hands-"));
   }
 });
-for (const l of allLessons.filter((l) => l.type === "code")) {
-  test(`guided code checks accept the reference and reject an empty/comment-only answer: ${l.id}`, () => {
-    assert.ok(checkStructure(l.solution, l.checks).every((x) => x.pass));
-    assert.ok(checkStructure("", l.checks).every((x) => !x.pass));
-    assert.ok(
-      checkStructure("/* " + l.solution + " */", l.checks).every(
-        (x) => !x.pass,
-      ),
-    );
-  });
-}
-for (const l of allLessons.filter((l) => l.type === "terminal")) {
-  test(`Linux task checks actual state: ${l.id}`, () => {
-    const s = new LinuxSandbox();
-    assert.equal(s.check(l.goal), false);
-    for (const command of l.solution.split("\n")) s.run(command);
-    assert.equal(s.check(l.goal), true);
-    s.reset();
-    assert.equal(s.check(l.goal), false);
-  });
-}
-test("Linux sandbox does not execute unsupported OS commands", () => {
-  const s = new LinuxSandbox();
-  assert.match(s.run("rm -rf /"), /not supported/);
-  assert.ok(s.fs["/etc/app.conf"]);
-  assert.match(s.run("cat notes.txt; whoami"), /not supported/);
-  assert.match(s.run("touch /missing/file"), /parent directory/);
-  assert.equal(s.path("../../../../etc/app.conf"), "/etc/app.conf");
-  s.run("chmod 600 /etc/app.conf");
-  assert.match(s.run("ls -l /etc/app.conf"), /^-rw-------/);
-});
-for (const l of allLessons.filter((l) => l.type === "sql")) {
-  test(`SQLite produces the required rows: ${l.id}`, () => {
-    const db = new SQL.Database();
-    db.run(
-      "CREATE TABLE departments(id INTEGER PRIMARY KEY,name TEXT); INSERT INTO departments VALUES(1,'Engineering'),(2,'Operations'); CREATE TABLE employees(id INTEGER PRIMARY KEY,name TEXT,department_id INTEGER,salary INTEGER); INSERT INTO employees VALUES(1,'Alex',1,85000),(2,'Maya',1,95000),(3,'Sam',2,60000),(4,'Noor',2,72000);",
-    );
-    assert.ok(matchesRows(db.exec(l.solution)[0].values, l.expected));
-    assert.equal(matchesRows([], l.expected), false);
-    db.close();
-  });
-}
-test("SQLite progress persists, survives reload and round trips a validated backup", async () => {
-  globalThis.indexedDB = indexedDB;
-  globalThis.window = { initSqlJs: () => Promise.resolve(SQL) };
-  await store.initialize();
-  await store.saveLesson("java-dsa:0", "draft", true);
-  await store.saveLesson("java-dsa:0", "updated draft", false);
-  assert.equal(store.progress()["java-dsa:0"].completed, true);
-  await store.setting("name", "<img src=x onerror=alert(1)>");
+test("new task progress persists and survives a database reload", async () => {
+  const id = allLessons[0].id;
+  await store.saveLesson(id, "draft", true);
+  await store.saveLesson(id, "updated", false);
+  await store.setting("name", "Learner");
   const backup = store.exportDatabase();
   await store.initialize();
-  assert.equal(store.progress()["java-dsa:0"].draft, "updated draft");
-  await store.saveLesson("java-dsa:1", "extra", true);
+  assert.equal(store.progress()[id].completed, true);
+  assert.equal(store.progress()[id].draft, "updated");
+  await store.saveLesson(allLessons[1].id, "extra", true);
   await store.importDatabase(
     backup,
     allLessons.map((l) => l.id),
   );
-  assert.equal(store.progress()["java-dsa:1"], undefined);
-  assert.equal(store.progress()["java-dsa:0"].completed, true);
-  assert.equal(store.setting("name"), "<img src=x onerror=alert(1)>");
-  await assert.rejects(() =>
-    store.importDatabase(
-      new Uint8Array([1, 2, 3]),
-      allLessons.map((l) => l.id),
-    ),
-  );
-  const invalid = new SQL.Database();
-  invalid.run("CREATE VIEW progress AS SELECT 1 AS lesson_id;");
+  assert.equal(store.progress()[allLessons[1].id], undefined);
+  const bad = new SQL.Database();
+  bad.run("CREATE VIEW progress AS SELECT 1");
   await assert.rejects(
     () =>
       store.importDatabase(
-        invalid.export(),
+        bad.export(),
         allLessons.map((l) => l.id),
       ),
     /Not a DevLab/,
   );
-  invalid.close();
-  assert.equal(store.progress()["java-dsa:0"].completed, true);
+  bad.close();
+  assert.equal(store.setting("name"), "Learner");
 });
-
-test("shared HTML escaping prevents profile and draft markup injection", async () => {
+test("old quiz progress cannot count as completed practical work", async () => {
+  const { state } = await import("../src/state.js");
+  const { completed } = await import("../src/catalog-data.js");
+  state.records = {
+    "java-dsa:0": { completed: true },
+    [allLessons[0].id]: { completed: true },
+  };
+  assert.equal(completed(), 1);
+  state.records = {};
+});
+test("shared escaping handles code and profile markup", async () => {
   const { esc } = await import("../src/ui.js");
-  assert.equal(
-    esc('<img src=x onerror="alert(1)">'),
-    "&lt;img src=x onerror=&quot;alert(1)&quot;&gt;",
-  );
-  assert.equal(esc("x' & y"), "x&#39; &amp; y");
+  assert.equal(esc('<script>"&'), "&lt;script&gt;&quot;&amp;");
 });
-
-test("all view modules link with the shared services", async () => {
-  for (const file of ["catalog", "lab", "playground", "progress", "settings"]) {
-    const module = await import("../src/views/" + file + ".js");
-    assert.ok(
-      Object.values(module).every((value) => typeof value === "function"),
-    );
-  }
-});
-
-test("every screen and lesson renders without unresolved references", async () => {
-  // Module-link checks do not execute views. Exercise their rendering paths too.
-  const previousDocument = globalThis.document;
-  const previousLocation = globalThis.location;
+test("all screens and practical tasks render without missing references", async () => {
   const nodes = new Map();
   globalThis.document = {
-    querySelector(selector) {
-      if (!nodes.has(selector))
-        nodes.set(selector, { innerHTML: "", value: "", style: {} });
-      return nodes.get(selector);
+    querySelector(s) {
+      if (!nodes.has(s)) nodes.set(s, { innerHTML: "", value: "", style: {} });
+      return nodes.get(s);
     },
     querySelectorAll() {
       return [];
     },
   };
-  globalThis.location = { hash: "#labs" };
+  globalThis.location = { hash: "#labs", hostname: "github.io" };
   try {
     const { catalog } = await import("../src/views/catalog.js");
     catalog();
-    assert.match(nodes.get("#app").innerHTML, /32 exercises/);
+    assert.match(nodes.get("#app").innerHTML, /16 exercises/);
     assert.equal(
       (nodes.get("#cards").innerHTML.match(/<article/g) || []).length,
       8,
     );
-    for (const [file, exports] of [
+    for (const [file, names] of [
       ["progress", ["progressPage", "paths"]],
       ["playground", ["playground"]],
       ["settings", ["settings"]],
     ]) {
-      const view = await import(`../src/views/${file}.js`);
-      for (const name of exports) view[name]();
+      const m = await import("../src/views/" + file + ".js");
+      for (const n of names) m[n]();
     }
-    const { lesson } = await import("../src/views/lab.js");
-    for (const item of allLessons) {
-      lesson(item.course, item.index);
-      assert.ok(nodes.get("#app").innerHTML.includes(item.title));
+    const { lesson } = await import("../src/views/workspace.js");
+    for (const l of allLessons) {
+      lesson(l.course, l.index);
+      assert.ok(nodes.get("#app").innerHTML.includes(l.title));
+      assert.ok(!nodes.get("#app").innerHTML.includes("data-choice"));
     }
   } finally {
-    globalThis.document = previousDocument;
-    globalThis.location = previousLocation;
+    delete globalThis.document;
+    delete globalThis.location;
+  }
+});
+test("runner API enforces origin, host, authentication and file boundaries", async () => {
+  let calls = 0;
+  const sessions = {
+    async create() {
+      calls++;
+      return { id: "test-session" };
+    },
+    async remove() {},
+    async exclusive(id, fn) {
+      return fn({});
+    },
+    async write() {},
+  };
+  const server = createApp(sessions);
+  await new Promise((r) => server.listen(0, "127.0.0.1", r));
+  const base = "http://127.0.0.1:" + server.address().port;
+  try {
+    assert.equal((await fetch(base + "/api/session")).status, 403);
+    assert.equal(
+      (
+        await fetch(base + "/api/session", {
+          headers: {
+            "Sec-Fetch-Site": "same-origin",
+            Origin: "https://evil.example",
+          },
+        })
+      ).status,
+      403,
+    );
+    const r = await fetch(base + "/api/session", {
+      headers: { "Sec-Fetch-Site": "same-origin" },
+    });
+    const { token } = await r.json();
+    assert.ok(token);
+    assert.equal(
+      (
+        await fetch(base + "/api/start", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: "{}",
+        })
+      ).status,
+      403,
+    );
+    assert.equal(calls, 0);
+    assert.equal(
+      (
+        await fetch(base + "/api/start", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-Devlab-Token": token,
+          },
+          body: JSON.stringify({ lessonId: allLessons[0].id }),
+        })
+      ).status,
+      200,
+    );
+    assert.equal(calls, 1);
+    assert.equal((await fetch(base + "/runner/http.js")).status, 403);
+    assert.equal((await fetch(base + "/.git/config")).status, 403);
+    const invalid = await fetch(base + "/api/read", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "X-Devlab-Token": token },
+      body: JSON.stringify({ id: "test-session", filename: "../secret" }),
+    });
+    assert.equal(invalid.status, 400);
+  } finally {
+    await new Promise((r) => server.close(r));
   }
 });

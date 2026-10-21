@@ -1,59 +1,77 @@
-# DevLab
+# DevLab — local Docker labs
 
-A lightweight, static learning workspace for Java, Linux, and SQL. Vanilla JavaScript ES modules and CSS, with SQLite compiled to WebAssembly by sql.js. No account, cloud backend, telemetry, or runtime CDN dependency is required.
+A lightweight browser UI with a real local execution runner. No multiple-choice questions. Write code in the editor or with shell redirection, execute commands, inspect failures, and run task tests.
 
-## Run
+## Start on this computer
 
-Requires Node.js 20 or newer for development tools only.
+1. Start Docker Desktop in **Linux containers** mode.
+2. Open a terminal in `D:\Programming\nextjs\devlab`.
+3. Run:
 
 ```sh
 npm ci
+npm run setup:labs
 npm start
-# http://127.0.0.1:5173
-npm test
 ```
 
-The application is static and has no build step. Commit the bundled vendor files so GitHub Pages can serve them without installing packages. Do not open index.html through file://: WebAssembly, modules and workers need HTTP.
+Open **http://127.0.0.1:5173**. Choose a lab and click **Start lab**. Image setup downloads/builds the official Eclipse Temurin JDK image and the official PostgreSQL image. Subsequent starts reuse them.
 
-## Learning modes
+## Learning workflow
 
-- **Java:** DSA, complexity, SOLID, architecture and design-pattern concept questions; guided code structure checks. No JVM, compilation, or Java execution is included. Structure checks are scaffolding and do not prove correctness for arbitrary code.
-- **Linux:** virtual filesystem, supported shell commands, simulated service administration and resource snapshots. Does not access the host machine. Type `help` in a lab for supported commands.
-- **SQL:** real SQLite queries with joins, grouping and windows. Each run starts a fresh worker with seeded employees/departments tables. Multiple statements in one run share that database; runs do not share state.
-- **Oracle PL/SQL / PostgreSQL PL/pgSQL:** dialect-specific concept questions and guided syntax exercises. SQLite cannot execute these procedural languages.
+- Edit the file and click **Save file**. Alternatively use terminal commands such as `cat > Main.java <<'EOF' ... EOF`.
+- Java: use `javac Main.java`. Task methods are checked with a separate verifier; to run your own executable entry point add `public static void main(String[] args)` and use `java Main`.
+- Linux: enter shell commands or save `notes.sh` and click **Run file**.
+- PostgreSQL: save `solution.sql`; run `psql -U postgres -d lab -f solution.sql` or `psql -U postgres -d lab -c 'SELECT * FROM employees;'`.
+- Click **Check task** to validate real output, Java assertions, SQL results, or filesystem state. It does not automatically solve Linux tasks.
+- **Reload file** pulls terminal edits back into the editor. Save your editor draft before navigating. **Reset lab** discards the container and its files, restores the starter, and reconnects.
 
-Eight labs contain 32 exercises. These are focused practice introductions rather than exhaustive courses.
+The terminal runs noninteractive commands one at a time, with a ten-second limit. It is not a full PTY: vim/nano, interactive prompts and interactive psql are not supported. Use the file editor, heredocs, or command flags. `cd` persists between commands within a session.
 
-## Architecture
+The initial curriculum contains 16 coding tasks across eight labs: Java DSA, SOLID, strategy/observer patterns; Linux navigation, text filtering, permissions and backups; PostgreSQL views, windows, PL/pgSQL branches and cursors; and two optional Oracle PL/SQL tasks.
 
-The router composes views and small services. UI code has no direct SQL storage queries. SQLite persistence and exercise SQL execution use separate databases: learner SQL cannot read or modify progress. Java code is never evaluated as JavaScript. Linux simulation has no OS bridge. Shared HTML helpers escape user text before insertion.
+## Where it runs
 
-Database export/import supports transferring exercise progress between browsers. SQLite bytes are saved to IndexedDB after each update. Clearing site data or using private browsing can remove progress; use Settings → Export SQLite backup regularly. Import validates a DevLab progress table and copies records into the application's own schema rather than adopting untrusted database schema. Import replaces exercise records and preserves the current profile and playground draft.
+- **Local URL:** complete app with Docker execution.
+- **GitHub Pages:** catalog, lesson instructions, editor drafts, progress and the SQLite playground. It cannot run Docker processes. The hosted page explains how to start the local environment; it does not reach into localhost automatically.
+- **Progress:** SQLite bytes saved to IndexedDB in the current browser origin. GitHub Pages and localhost have separate progress. Export/import a SQLite backup under Settings to transfer practical exercise records. Legacy quiz records are retained in the database but do not count toward the new tasks.
 
-No credentials belong in this repository. The app has no Supabase integration. SQLite runs locally, so there is no server-side database or cross-device sync. SQL workers are terminated after three seconds; displayed results are capped at 100 rows per statement. This is resource isolation for a personal practice tool, not a hosted multi-tenant execution service.
+## Isolation and access
 
-## GitHub Pages
+The Node runner binds to 127.0.0.1. Its API requires a per-process token obtained through a same-origin browser request, rejects cross-origin requests and unexpected Host headers, accepts bounded JSON bodies, and does not enable CORS. It is a personal development service; do not expose the port publicly.
 
-Repository: https://github.com/afifanshuri/devlab
+Docker is invoked using Node argument arrays, never a host shell. Shell text executes only in a disposable container. Standard Java/Linux/PostgreSQL containers have no host bind mounts, no network, dropped capabilities, no-new-privileges, CPU/memory/PID limits and a read-only root filesystem with bounded writable tmpfs directories. The Java verifier is written outside the learner-writable workspace. Containers do not receive host environment variables or Git credentials.
 
-In repository Settings → Pages, choose **Deploy from a branch**, branch **main**, folder **/ (root)**, then Save. The `.nojekyll` file ensures plain static hosting. Hash routing and relative asset paths support the repository subpath without a custom 404 page. Expected site URL: https://afifanshuri.github.io/devlab/ (verify after Pages finishes publishing).
+One lab may be active at a time. A new lab removes the previous one. Idle containers expire after 30 minutes. Use Ctrl+C in the runner terminal to shut down and remove its active container. Docker is isolation for personal practice, not a hardened multi-tenant hostile-code platform. Keep Docker and its VM updated.
 
-The CI workflow runs meaningful engine/curriculum checks on push and pull requests. The app itself does not need npm in production. Runtime assets are pinned at sql.js 1.14.1 with the upstream license under `vendor/SQLJS-LICENSE.txt`.
+## Oracle (optional)
 
-## Verification
+The standard image setup does **not** download Oracle. If your Docker VM has at least 3 GB of spare memory and several GB of disk, obtain Oracle's official Database Free image after reviewing its requirements:
 
-Run `npm test` for simulator goals, negative cases, curriculum solutions, real SQLite query outputs, and backup data round trips. Browser checks should cover filters, a wrong and right answer, draft persistence, page reload, SQL execution, backup export/import, and narrow viewport navigation. After publishing repeat the core checks on the actual GitHub Pages URL; a passing local test is not a deployment verification.
+```sh
+docker pull container-registry.oracle.com/database/free:latest
+```
 
-### Source map
+Then start an Oracle lab in DevLab. Initial database setup can take several minutes. The runner uses SQL*Plus and FREEPDB1. Oracle needs a writable container filesystem and a higher memory limit than the standard labs. It still has no network or host-folder mounts. Registry authentication or license acceptance, if requested by Oracle, must be completed directly by you. This optional environment has not been validated on this computer; Java/Linux/PostgreSQL have dedicated integration tests.
 
-- `app.js`: startup and hash routing.
-- `content.js`: curriculum data, independent of UI and persistence.
-- `database.js`: SQLite persistence facade and validated backups.
-- `linux.js`: deterministic virtual Linux environment.
-- `sql-worker.js`: disposable SQLite execution environment.
-- `src/services`: pure checking rules and bounded worker client.
-- `src/ui.js`: escaped text, shared layout, icons and notifications.
-- `src/views`: focused catalog, lab, progress, settings and playground views.
-- `tests`: engine, curriculum, storage and security regression checks.
+## Checks
 
-The modules favor composition and small contracts over unnecessary class hierarchies. Adding lesson data does not require editing storage or the router. A new execution engine can implement the SQL service contract independently of the views.
+```sh
+npm test
+npm run test:docker
+```
+
+The unit suite checks task data, storage/backup behavior, rendered screen paths and API access boundaries. The Docker suite executes every standard starter and reference solution: starters must fail, reference solutions must pass. It also checks isolation settings, verifier write protection and filesystem reset. `npm run test:docker` requires Docker and setup images. GitHub CI builds these images and runs both suites.
+
+## Modules
+
+- `curriculum.js`: tasks, seeded data and verification requirements.
+- `content.js`: curriculum export contract.
+- `runner/docker.js`: bounded Docker process execution.
+- `runner/sessions.js`: container lifecycle, files, command execution and task checks.
+- `runner/http.js`: local API security and dispatch.
+- `runner/server.js`: static files and loopback server.
+- `src/services/runner.js`: browser API client.
+- `src/views/workspace.js`: editor and command-terminal UI.
+- `database.js`: browser SQLite persistence and validated backup import.
+
+There are no added runtime npm dependencies for Docker execution. sql.js is vendored from its upstream package; Prettier and fake-indexeddb are development-only tools. No API keys or cloud service accounts are needed.

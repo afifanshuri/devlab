@@ -1,8 +1,8 @@
 import * as store from "../database.js";
 import { state } from "./state.js";
-import { courses, allLessons } from "../content.js";
+import { courses, allLessons } from "../curriculum.js";
 const completed = () =>
-  Object.values(state.records).filter((x) => x.completed).length;
+  allLessons.filter((lesson) => state.records[lesson.id]?.completed).length;
 const count = (c) =>
   c.lessons.filter((_, i) => state.records[`${c.id}:${i}`]?.completed).length;
 const route = (c) =>
