@@ -122,16 +122,17 @@ export function lesson(courseId, idx) {
               <span id="active-filename">${esc(task.filename)}</span
               ><span>${esc(task.engine.toUpperCase())}</span>
             </div>
-            <textarea
-              id="code"
-              role="tabpanel"
-              class="editor"
-              spellcheck="false"
-              aria-label="Code editor"
-              style="min-height:220px"
-            >
+            <div id="source-panel" role="tabpanel" aria-label="Source code">
+              <textarea
+                id="code"
+                class="editor"
+                spellcheck="false"
+                aria-label="Code editor"
+                style="min-height:220px"
+              >
 ${esc(context.files[context.filename])}</textarea
-            >
+              >
+            </div>
             <div class="workspace-actions">
               <button class="secondary" id="reset">Reset lab</button
               ><button class="primary" id="check" disabled>
@@ -167,7 +168,7 @@ ${esc(context.files[context.filename])}</textarea
                 spellcheck="false"
                 aria-label="Terminal command"
                 placeholder="${task.engine === "java"
-                  ? "javac Main.java"
+                  ? "javac *.java"
                   : task.engine === "postgres"
                     ? "psql -U postgres -d lab -c &quot;SELECT * FROM employees;&quot;"
                     : "ls -la"}"
@@ -212,7 +213,7 @@ ${esc(context.files[context.filename])}</textarea
     $("#file-tabs").innerHTML = Object.keys(context.files)
       .map(
         (name) =>
-          `<button type="button" role="tab" aria-controls="code" tabindex="${name === context.filename ? 0 : -1}" aria-selected="${name === context.filename}" data-file="${esc(name)}">${esc(name)}</button>`,
+          `<button type="button" role="tab" aria-controls="source-panel" tabindex="${name === context.filename ? 0 : -1}" aria-selected="${name === context.filename}" data-file="${esc(name)}">${esc(name)}</button>`,
       )
       .join("");
     $("#active-filename").textContent = context.filename;
