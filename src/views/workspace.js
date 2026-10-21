@@ -1,4 +1,4 @@
-import { courses, allLessons } from "../../curriculum.js?v=operations-1";
+import { courses, allLessons } from "../../curriculum.js?v=cleanup-1";
 import * as store from "../../database.js";
 import { state } from "../state.js";
 import { $, esc, shell, toast } from "../ui.js";
@@ -42,7 +42,6 @@ export function lesson(courseId, idx) {
     };
   active = context;
   context.initialSource = writeDraft(task, context.files);
-  state.current = { id: key };
   store.setting("lastLab", course.id).catch(() => {});
   const available = localRunner();
   const prerequisites = (task.prerequisites || [])

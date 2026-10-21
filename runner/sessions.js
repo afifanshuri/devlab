@@ -238,7 +238,6 @@ export class LabSessions {
         id,
         name,
         lesson,
-        cwd: "/workspace",
         busy: false,
         lastUsed: Date.now(),
       };
@@ -333,27 +332,23 @@ export class LabSessions {
     if (typeof command !== "string" || command.length > 12000)
       throw Error("Command is missing or too long.");
     const script = `cd "$(cat /workspace/.cwd 2>/dev/null || printf /workspace)" || exit 1\n${command}\nstatus=$?\npwd > /workspace/.cwd\nexit $status`;
-    try {
-      return await docker(
-        [
-          "exec",
-          "-i",
-          "--workdir",
-          "/workspace",
-          s.name,
-          "timeout",
-          "-s",
-          "KILL",
-          "10s",
-          "bash",
-          "--noprofile",
-          "--norc",
-        ],
-        { input: script, timeout: 13000 },
-      );
-    } catch (e) {
-      throw e;
-    }
+    return docker(
+      [
+        "exec",
+        "-i",
+        "--workdir",
+        "/workspace",
+        s.name,
+        "timeout",
+        "-s",
+        "KILL",
+        "10s",
+        "bash",
+        "--noprofile",
+        "--norc",
+      ],
+      { input: script, timeout: 13000 },
+    );
   }
   async check(s) {
     let command;

@@ -41,7 +41,7 @@ export function progress() {
   );
 }
 let queue = Promise.resolve();
-export function persist() {
+function persist() {
   if (!storage) return Promise.resolve();
   const bytes = db.export();
   queue = queue

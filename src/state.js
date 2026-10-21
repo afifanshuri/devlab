@@ -1,1 +1,1 @@
-export const state = { records: {}, current: null };
+export const state = { records: {} };

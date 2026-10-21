@@ -1,4 +1,7 @@
-import { make, javaProject as pattern } from "./exercise-factories.js?v=roadmap-1";
+import {
+  make,
+  javaProject as pattern,
+} from "./exercise-factories.js?v=roadmap-1";
 const fixed = (source) => {
   const stubs = {
     StandardShipping:
@@ -226,7 +229,6 @@ lessons.push(
 );
 lessons.at(-1).reuseNote =
   "Reuse your own shipping, payment adapter and observer implementations from earlier exercises. The starter tabs contain only their contracts and method stubs.";
-patternCourses[0].stage = 6;
 patternCourses[0].lessons[0].prerequisites = ["hands-java-capstone:3"];
 for (let i = 1; i < patternCourses[0].lessons.length; i++)
   patternCourses[0].lessons[i].prerequisites = [

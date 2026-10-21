@@ -74,7 +74,7 @@ The unit suite checks task data, storage/backup behavior, rendered screen paths 
 - `src/views/workspace.js`: editor and command-terminal UI.
 - `database.js`: browser SQLite persistence and validated backup import.
 
-There are no added runtime npm dependencies for Docker execution. sql.js is vendored from its upstream package; Prettier and fake-indexeddb are development-only tools. No API keys or cloud service accounts are needed.
+The Node runner has no production npm dependencies. Browser SQLite uses the required vendored sql.js JavaScript/WASM files and their license. The pinned sql.js npm package is used only by tests; Prettier and fake-indexeddb are also development-only tools. No API keys or cloud service accounts are needed.
 
 ## Progressive paths
 

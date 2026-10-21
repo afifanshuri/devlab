@@ -424,9 +424,7 @@ export const roadmapCourses = [
     collections,
   ),
 ];
-for (const [i, course] of roadmapCourses.entries()) {
-  course.stage = i + 1;
+for (const course of roadmapCourses) {
   course.level = "Foundation to intermediate";
   course.minutes = course.lessons.length * 20;
-  course.source = "https://roadmap.sh/java";
 }

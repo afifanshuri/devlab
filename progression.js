@@ -232,7 +232,6 @@ const javaCourses = javaGroups.map(([id, title, description, tags], group) => {
             "}\n",
           hint,
           learn,
-          reuseFrom: previous,
           prerequisites: [previous],
           reuseNote: methods.length
             ? "Only method signatures are provided. Bring your own implementations from earlier exercises; cumulative tests still verify their behavior."
@@ -253,7 +252,6 @@ const javaCourses = javaGroups.map(([id, title, description, tags], group) => {
   return {
     ...make(id, "java", title, description, tags, lessons),
     level: group < 2 ? "Intermediate" : "Advanced",
-    stage: group + 2,
     minutes: 60,
   };
 });
@@ -317,8 +315,9 @@ const linuxCourse = make(
 linuxCourse.stage = 2;
 linuxCourse.minutes = 60;
 linuxCourse.lessons.forEach((l, i) => {
-  l.reuseFrom = i ? `hands-linux-operations:${i - 1}` : "hands-linux-admin:1";
-  l.prerequisites = [l.reuseFrom];
+  l.prerequisites = [
+    i ? `hands-linux-operations:${i - 1}` : "hands-linux-admin:1",
+  ];
   l.reuseNote = i
     ? "A reference output from the earlier step is supplied as a fixture, so you can concentrate on the next operation."
     : "Build on grep, permissions and backup fundamentals.";
@@ -390,7 +389,6 @@ const sqlCourse = make(
       lesson.prerequisites = [
         i ? `hands-sql-integrity:${i - 1}` : "hands-sql-postgres:1",
       ];
-      lesson.reuseFrom = lesson.prerequisites[0];
       lesson.reuseNote = i
         ? "Earlier functions are already installed in this fixture. Call them instead of copying their business rules."
         : "Build on PostgreSQL functions and procedural control flow.";
