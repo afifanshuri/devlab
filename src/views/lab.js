@@ -1,9 +1,8 @@
 import { checkStructure, matchesRows } from "../services/checks.js";
-import { courses, allLessons } from "../../content.js";
+import { courses } from "../../content.js";
 import * as store from "../../database.js";
 import { state } from "../state.js";
-import { $, esc, icon, toast, shell, download } from "../ui.js";
-import { completed, count, route } from "../catalog-data.js";
+import { $, esc, icon, toast, shell } from "../ui.js";
 import { LinuxSandbox } from "../../linux.js";
 import { executeSql, formatResults } from "../services/sql.js";
 let draftTimer, sandbox, chosen;
@@ -38,14 +37,155 @@ function lesson(courseId, idx) {
           ? "Guided structural check · code is not compiled or executed. Complete the checks, then verify your understanding in a real runtime."
           : "Concept check · choose an answer and check your reasoning.";
   shell(
-    `<div class="lab-heading"><div><div class="eyebrow">${c.track} / ${esc(c.title)}</div><h1>${esc(l.title)}</h1><p class="sub">Exercise ${index + 1} of ${c.lessons.length} <span style="padding:0 8px">·</span> ${saved?.completed ? "✓ Completed" : "In progress"}</p></div><a class="secondary" href="#labs">← All labs</a></div><div class="lab-grid"><section class="instructions"><div class="lesson-counter">YOUR MISSION / ${String(index + 1).padStart(2, "0")}</div><div class="step-list">${c.lessons.map((_, i) => `<a class="step-dot ${state.records[`${c.id}:${i}`]?.completed ? "done" : ""}" href="#lab/${c.id}/${i}" aria-label="Exercise ${i + 1}" ${i === index ? 'aria-current="step"' : ""}></a>`).join("")}</div><h2>Understand the idea</h2><p>${esc(l.concept)}</p><h2>Your task</h2><p>${esc(l.task || l.prompt)}</p>${l.type === "sql" ? '<div class="hint">Schema: employees(id, name, department_id, salary)<br>departments(id, name)<br><br>Alex · Engineering · 85,000<br>Maya · Engineering · 95,000<br>Sam · Operations · 60,000<br>Noor · Operations · 72,000</div>' : ""}<div style="display:flex;gap:12px;margin-top:25px"><button class="secondary" id="hint">◇ Get a hint</button><button class="text-link" id="solution">Reference answer</button></div><div id="help-content"></div><div id="completion">${saved?.completed ? '<div class="complete-banner">✓ You completed this exercise. Revisit it any time.</div>' : ""}</div></section><section class="workspace" aria-label="Interactive workspace"><div class="editor-bar"><span>${l.type === "terminal" ? "learner@devlab: ~" : l.type === "sql" ? "query.sql" : l.type === "code" ? (c.track === "java" ? "Practice.java" : "practice.sql") : "THINK IT THROUGH"}</span><span>${l.type === "sql" ? "SQLITE" : l.type === "terminal" ? "SIMULATOR" : l.type === "code" ? "GUIDED CHECK" : "CONCEPT CHECK"}</span></div>${l.type === "terminal" ? '<div class="terminal-log" id="terminal" role="log" aria-label="Terminal output">DevLab Linux sandbox\nType help for supported commands.\n\n</div><form id="terminal-form" class="terminal-form"><label for="command" id="prompt">~ $</label><input id="command" autocomplete="off" spellcheck="false" aria-label="Terminal command"><button type="submit" class="secondary">Enter ↵</button></form>' : l.type === "quiz" ? `<div class="quiz-panel"><div class="eyebrow">TEST YOUR UNDERSTANDING</div><h3>${esc(l.prompt)}</h3><div class="quiz-choices">${l.choices.map((s, i) => `<button data-choice="${i}" aria-pressed="false"><span style="color:#718169;margin-right:12px">${String.fromCharCode(65 + i)}</span>${esc(s)}</button>`).join("")}</div></div>` : `<textarea class="editor" id="code" aria-label="${l.type === "sql" ? "SQL query" : "Code editor"}" spellcheck="false">${esc(saved?.draft ?? l.starter)}</textarea>`}<div class="workspace-actions"><button class="secondary" id="reset">↻ Reset exercise</button><button class="primary" id="check">${l.type === "sql" ? "Run & check query" : "Check answer"} ${icon("arrow")}</button></div><div id="output" class="console" role="status" aria-live="polite">${l.type === "sql" ? "Ready. Run your query to see results." : l.type === "terminal" ? "Complete the task, then check your work." : "Your feedback will appear here."}</div><div class="mode-note">${note}</div></section></div><div class="task-nav"><a class="secondary" href="${index > 0 ? `#lab/${c.id}/${index - 1}` : "#labs"}">← ${index ? "Previous exercise" : "Lab library"}</a><a class="secondary" href="${index < c.lessons.length - 1 ? `#lab/${c.id}/${index + 1}` : "#progress"}">${index < c.lessons.length - 1 ? "Next exercise →" : "View progress →"}</a></div>`,
+    /* HTML */ `<div class="lab-heading">
+        <div>
+          <div class="eyebrow">${c.track} / ${esc(c.title)}</div>
+          <h1>${esc(l.title)}</h1>
+          <p class="sub">
+            Exercise ${index + 1} of ${c.lessons.length}
+            <span style="padding:0 8px">·</span> ${saved?.completed
+              ? "✓ Completed"
+              : "In progress"}
+          </p>
+        </div>
+        <a class="secondary" href="#labs">← All labs</a>
+      </div>
+      <div class="lab-grid">
+        <section class="instructions">
+          <div class="lesson-counter">
+            YOUR MISSION / ${String(index + 1).padStart(2, "0")}
+          </div>
+          <div class="step-list">
+            ${c.lessons
+              .map(
+                (_, i) =>
+                  /* HTML */ `<a
+                    class="step-dot ${state.records[`${c.id}:${i}`]?.completed
+                      ? "done"
+                      : ""}"
+                    href="#lab/${c.id}/${i}"
+                    aria-label="Exercise ${i + 1}"
+                    ${i === index ? 'aria-current="step"' : ""}
+                  ></a>`,
+              )
+              .join("")}
+          </div>
+          <h2>Understand the idea</h2>
+          <p>${esc(l.concept)}</p>
+          <h2>Your task</h2>
+          <p>${esc(l.task || l.prompt)}</p>
+          ${l.type === "sql"
+            ? '<div class="hint">Schema: employees(id, name, department_id, salary)<br>departments(id, name)<br><br>Alex · Engineering · 85,000<br>Maya · Engineering · 95,000<br>Sam · Operations · 60,000<br>Noor · Operations · 72,000</div>'
+            : ""}
+          <div style="display:flex;gap:12px;margin-top:25px">
+            <button class="secondary" id="hint">◇ Get a hint</button
+            ><button class="text-link" id="solution">Reference answer</button>
+          </div>
+          <div id="help-content"></div>
+          <div id="completion">
+            ${saved?.completed
+              ? '<div class="complete-banner">✓ You completed this exercise. Revisit it any time.</div>'
+              : ""}
+          </div>
+        </section>
+        <section class="workspace" aria-label="Interactive workspace">
+          <div class="editor-bar">
+            <span
+              >${l.type === "terminal"
+                ? "learner@devlab: ~"
+                : l.type === "sql"
+                  ? "query.sql"
+                  : l.type === "code"
+                    ? c.track === "java"
+                      ? "Practice.java"
+                      : "practice.sql"
+                    : "THINK IT THROUGH"}</span
+            ><span
+              >${l.type === "sql"
+                ? "SQLITE"
+                : l.type === "terminal"
+                  ? "SIMULATOR"
+                  : l.type === "code"
+                    ? "GUIDED CHECK"
+                    : "CONCEPT CHECK"}</span
+            >
+          </div>
+          ${l.type === "terminal"
+            ? '<div class="terminal-log" id="terminal" role="log" aria-label="Terminal output">DevLab Linux sandbox\nType help for supported commands.\n\n</div><form id="terminal-form" class="terminal-form"><label for="command" id="prompt">~ $</label><input id="command" autocomplete="off" spellcheck="false" aria-label="Terminal command"><button type="submit" class="secondary">Enter ↵</button></form>'
+            : l.type === "quiz"
+              ? /* HTML */ `<div class="quiz-panel">
+                  <div class="eyebrow">TEST YOUR UNDERSTANDING</div>
+                  <h3>${esc(l.prompt)}</h3>
+                  <div class="quiz-choices">
+                    ${l.choices
+                      .map(
+                        (s, i) =>
+                          /* HTML */ `<button
+                            data-choice="${i}"
+                            aria-pressed="false"
+                          >
+                            <span style="color:#718169;margin-right:12px"
+                              >${String.fromCharCode(65 + i)}</span
+                            >${esc(s)}
+                          </button>`,
+                      )
+                      .join("")}
+                  </div>
+                </div>`
+              : /* HTML */ `<textarea
+                  class="editor"
+                  id="code"
+                  aria-label="${l.type === "sql" ? "SQL query" : "Code editor"}"
+                  spellcheck="false"
+                >
+${esc(saved?.draft ?? l.starter)}</textarea
+                >`}
+          <div class="workspace-actions">
+            <button class="secondary" id="reset">↻ Reset exercise</button
+            ><button class="primary" id="check">
+              ${l.type === "sql" ? "Run & check query" : "Check answer"}
+              ${icon("arrow")}
+            </button>
+          </div>
+          <div id="output" class="console" role="status" aria-live="polite">
+            ${l.type === "sql"
+              ? "Ready. Run your query to see results."
+              : l.type === "terminal"
+                ? "Complete the task, then check your work."
+                : "Your feedback will appear here."}
+          </div>
+          <div class="mode-note">${note}</div>
+        </section>
+      </div>
+      <div class="task-nav">
+        <a
+          class="secondary"
+          href="${index > 0 ? `#lab/${c.id}/${index - 1}` : "#labs"}"
+          >← ${index ? "Previous exercise" : "Lab library"}</a
+        ><a
+          class="secondary"
+          href="${index < c.lessons.length - 1
+            ? `#lab/${c.id}/${index + 1}`
+            : "#progress"}"
+          >${index < c.lessons.length - 1
+            ? "Next exercise →"
+            : "View progress →"}</a
+        >
+      </div>`,
   );
   $("#hint").onclick = () => {
-    $("#help-content").innerHTML = `<div class="hint">${esc(l.hint)}</div>`;
+    $("#help-content").innerHTML = /* HTML */ `<div class="hint">
+      ${esc(l.hint)}
+    </div>`;
   };
   $("#solution").onclick = () => {
-    $("#help-content").innerHTML =
-      `<div class="hint"><strong>Reference answer</strong><pre style="white-space:pre-wrap;font:11px/1.8 monospace">${esc(l.solution)}</pre><span>Study the approach, then try it in the workspace.</span></div>`;
+    $("#help-content").innerHTML = /* HTML */ `<div class="hint">
+      <strong>Reference answer</strong>
+      <pre style="white-space:pre-wrap;font:11px/1.8 monospace">
+${esc(l.solution)}</pre
+      >
+      <span>Study the approach, then try it in the workspace.</span>
+    </div>`;
   };
   $("#reset").onclick = async () => {
     if ($("#code")) {

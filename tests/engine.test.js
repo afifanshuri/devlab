@@ -98,3 +98,21 @@ test("SQLite progress persists, survives reload and round trips a validated back
   invalid.close();
   assert.equal(store.progress()["java-dsa:0"].completed, true);
 });
+
+test("shared HTML escaping prevents profile and draft markup injection", async () => {
+  const { esc } = await import("../src/ui.js");
+  assert.equal(
+    esc('<img src=x onerror="alert(1)">'),
+    "&lt;img src=x onerror=&quot;alert(1)&quot;&gt;",
+  );
+  assert.equal(esc("x' & y"), "x&#39; &amp; y");
+});
+
+test("all view modules link with the shared services", async () => {
+  for (const file of ["catalog", "lab", "playground", "progress", "settings"]) {
+    const module = await import("../src/views/" + file + ".js");
+    assert.ok(
+      Object.values(module).every((value) => typeof value === "function"),
+    );
+  }
+});

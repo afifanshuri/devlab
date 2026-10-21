@@ -43,3 +43,17 @@ The CI workflow runs meaningful engine/curriculum checks on push and pull reques
 ## Verification
 
 Run `npm test` for simulator goals, negative cases, curriculum solutions, real SQLite query outputs, and backup data round trips. Browser checks should cover filters, a wrong and right answer, draft persistence, page reload, SQL execution, backup export/import, and narrow viewport navigation. After publishing repeat the core checks on the actual GitHub Pages URL; a passing local test is not a deployment verification.
+
+### Source map
+
+- `app.js`: startup and hash routing.
+- `content.js`: curriculum data, independent of UI and persistence.
+- `database.js`: SQLite persistence facade and validated backups.
+- `linux.js`: deterministic virtual Linux environment.
+- `sql-worker.js`: disposable SQLite execution environment.
+- `src/services`: pure checking rules and bounded worker client.
+- `src/ui.js`: escaped text, shared layout, icons and notifications.
+- `src/views`: focused catalog, lab, progress, settings and playground views.
+- `tests`: engine, curriculum, storage and security regression checks.
+
+The modules favor composition and small contracts over unnecessary class hierarchies. Adding lesson data does not require editing storage or the router. A new execution engine can implement the SQL service contract independently of the views.

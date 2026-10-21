@@ -991,7 +991,7 @@ dialog h2 {
   .navlabel,
   .sidebar-bottom,
   .sidebar .nav.secondary-nav {
-    display: none;
+    display: flex;
   }
   .nav {
     flex-direction: row;
