@@ -1106,3 +1106,97 @@ dialog h2 {
     flex-wrap: wrap;
   }
 }
+
+/* Separate answer authoring from command execution. */
+.exercise-workspace {
+  padding: 16px;
+  gap: 18px;
+  background: #11171c;
+}
+.code-pane,
+.terminal-pane {
+  border: 1px solid #35424d;
+  border-radius: 8px;
+  overflow: hidden;
+  min-width: 0;
+}
+.code-pane {
+  background: #1a2530;
+}
+.workspace-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 17px;
+  font-size: 10px;
+  letter-spacing: 0.7px;
+}
+.workspace-section-header strong {
+  font-weight: 600;
+}
+.workspace-section-header span {
+  font-size: 9px;
+  letter-spacing: 0;
+  color: #a0adb9;
+}
+.code-pane .workspace-section-header {
+  background: #243342;
+  color: #c9e1f8;
+}
+.code-pane .editor-bar {
+  background: #1e2b37;
+  color: #a9bfd2;
+  padding: 9px 17px;
+}
+.code-pane .editor {
+  display: block;
+  background: #1a2530;
+  color: #e1eaf2;
+  min-height: 260px;
+}
+.code-pane .workspace-actions {
+  background: #1c2833;
+}
+.code-pane .console {
+  margin: 0;
+  min-height: 66px;
+  background: #17222c;
+}
+.terminal-pane {
+  background: #090d0c;
+  border-color: #354438;
+}
+.terminal-pane .workspace-section-header {
+  background: #17221b;
+  color: #b8d5ae;
+  border-bottom: 1px solid #304034;
+}
+.terminal-pane .terminal-log {
+  background: #090d0c;
+  color: #a4b7a0;
+  padding: 17px;
+  font-size: 11px;
+}
+.terminal-pane .terminal-form {
+  background: #0f1712;
+  border-color: #304034;
+  padding: 12px 16px;
+}
+.terminal-pane .terminal-form label {
+  color: #c5f578;
+  font-weight: 700;
+}
+.terminal-pane .terminal-form input {
+  color: #d1e5c7;
+}
+@media (max-width: 760px) {
+  .exercise-workspace {
+    padding: 10px;
+    gap: 14px;
+  }
+  .workspace-section-header {
+    padding: 12px;
+    flex-wrap: wrap;
+  }
+}

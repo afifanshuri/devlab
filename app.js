@@ -1,11 +1,11 @@
 import * as store from "./database.js";
 import { state } from "./src/state.js";
 import { $, esc } from "./src/ui.js";
-import { catalog } from "./src/views/catalog.js?v=docker-4";
-import { lesson, flushDraft } from "./src/views/workspace.js?v=docker-4";
-import { progressPage, paths } from "./src/views/progress.js?v=docker-4";
-import { settings } from "./src/views/settings.js?v=docker-4";
-import { playground } from "./src/views/playground.js?v=docker-4";
+import { catalog } from "./src/views/catalog.js?v=docker-5";
+import { lesson, flushDraft } from "./src/views/workspace.js?v=docker-5";
+import { progressPage, paths } from "./src/views/progress.js?v=docker-5";
+import { settings } from "./src/views/settings.js?v=docker-5";
+import { playground } from "./src/views/playground.js?v=docker-5";
 async function render() {
   await flushDraft();
   state.current = null;

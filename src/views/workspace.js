@@ -65,53 +65,67 @@ export function lesson(courseId, idx) {
               : "To execute this lab: start Docker Desktop, run npm run setup:labs and npm start in the project folder, then open http://127.0.0.1:5173. GitHub Pages hosts the catalog; it cannot execute processes."}
           </div>
         </section>
-        <section class="workspace">
-          <div class="editor-bar">
-            <span>${esc(task.filename)}</span
-            ><span id="runner-state">CONNECTING…</span>
-          </div>
-          <textarea
-            id="code"
-            class="editor"
-            spellcheck="false"
-            aria-label="Code editor"
-            style="min-height:220px"
-          >
-${esc(state.records[key]?.draft ?? task.starter)}</textarea
-          >
-          <div
-            class="terminal-log"
-            id="terminal"
-            role="log"
-            aria-label="Terminal output"
-            style="min-height:140px;max-height:300px"
-          >
-            The workspace connects automatically. Commands run one at a time.
-            Full-screen editors and interactive prompts are not supported.
-          </div>
-          <form id="terminal-form" class="terminal-form">
-            <label for="command">$</label
-            ><input
-              id="command"
-              autocomplete="off"
+        <section class="workspace exercise-workspace">
+          <section class="code-pane" aria-label="Code workspace">
+            <div class="workspace-section-header">
+              <strong>&lt;/&gt; CODE EDITOR</strong
+              ><span>Write your answer here</span>
+            </div>
+            <div class="editor-bar">
+              <span>${esc(task.filename)}</span
+              ><span>${esc(task.engine.toUpperCase())}</span>
+            </div>
+            <textarea
+              id="code"
+              class="editor"
               spellcheck="false"
-              aria-label="Terminal command"
-              placeholder="${task.engine === "java"
-                ? "javac Main.java"
-                : task.engine === "postgres"
-                  ? "psql -U postgres -d lab -c &quot;SELECT * FROM employees;&quot;"
-                  : "ls -la"}"
-            /><button class="secondary" type="submit">Run ↵</button>
-          </form>
-          <div class="workspace-actions">
-            <button class="secondary" id="reset">Reset lab</button
-            ><button class="primary" id="check" disabled>Check answer →</button>
-          </div>
-          <div id="output" class="console" role="status" aria-live="polite">
-            ${available
-              ? "Starting your exercise environment…"
-              : "Execution environment not available on this page."}
-          </div>
+              aria-label="Code editor"
+              style="min-height:220px"
+            >
+${esc(state.records[key]?.draft ?? task.starter)}</textarea
+            >
+            <div class="workspace-actions">
+              <button class="secondary" id="reset">Reset lab</button
+              ><button class="primary" id="check" disabled>
+                Check answer →
+              </button>
+            </div>
+            <div id="output" class="console" role="status" aria-live="polite">
+              ${available
+                ? "Starting your exercise environment…"
+                : "Execution environment not available on this page."}
+            </div>
+          </section>
+          <section class="terminal-pane" aria-label="Shell terminal">
+            <div class="workspace-section-header">
+              <strong>&gt;_ TERMINAL</strong
+              ><span id="runner-state">CONNECTING…</span>
+            </div>
+            <div
+              class="terminal-log"
+              id="terminal"
+              role="log"
+              aria-label="Terminal output"
+              style="min-height:140px;max-height:300px"
+            >
+              The workspace connects automatically. Commands run one at a time.
+              Full-screen editors and interactive prompts are not supported.
+            </div>
+            <form id="terminal-form" class="terminal-form">
+              <label for="command">$</label
+              ><input
+                id="command"
+                autocomplete="off"
+                spellcheck="false"
+                aria-label="Terminal command"
+                placeholder="${task.engine === "java"
+                  ? "javac Main.java"
+                  : task.engine === "postgres"
+                    ? "psql -U postgres -d lab -c &quot;SELECT * FROM employees;&quot;"
+                    : "ls -la"}"
+              /><button class="secondary" type="submit">Run ↵</button>
+            </form>
+          </section>
         </section>
       </div>
       <div class="task-nav">
