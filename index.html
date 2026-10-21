@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'"
+    />
+    <meta name="theme-color" content="#111518" />
+    <meta
+      name="description"
+      content="Learn Java, Linux and SQL by solving focused, interactive engineering labs."
+    />
+    <title>DevLab — Learn by doing</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div id="app">
+      <p style="padding: 40px; color: #c5f578">Starting your workspace…</p>
+    </div>
+    <div id="toast" role="status" aria-live="polite"></div>
+    <script src="vendor/sql-wasm.js"></script>
+    <script type="module" src="app.js"></script>
+  </body>
+</html>

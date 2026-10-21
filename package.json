@@ -1,0 +1,19 @@
+{
+  "name": "devlab",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Interactive Java, Linux and SQL learning labs with browser SQLite",
+  "scripts": {
+    "start": "node server.mjs",
+    "test": "node --test tests/*.test.js",
+    "format": "prettier --write app.js content.js database.js linux.js sql-worker.js server.mjs src tests index.html styles.css"
+  },
+  "dependencies": {
+    "sql.js": "1.14.1"
+  },
+  "devDependencies": {
+    "fake-indexeddb": "^6.2.4",
+    "prettier": "3.8.1"
+  }
+}
