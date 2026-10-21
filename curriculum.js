@@ -7,17 +7,17 @@ import {
 } from "./exercise-factories.js?v=roadmap-1";
 import { advancedCourses } from "./progression.js";
 import { patternCourses } from "./patterns.js";
-import { roadmapCourses } from "./roadmap.js?v=roadmap-1";
-import { applyMissions } from "./missions.js?v=ops-missions-1";
+import { roadmapCourses } from "./roadmap.js?v=mission-copy-1";
+import { applyMissions } from "./missions.js?v=mission-copy-1";
 import {
   solidPractice,
   advancedPatterns,
-} from "./design-practice.js?v=design-1";
+} from "./design-practice.js?v=mission-copy-1";
 import {
   linuxBasicsPractice,
   linuxAdminPractice,
   sqlAdminPractice,
-} from "./ops-practice.js?v=ops-1";
+} from "./ops-practice.js?v=mission-copy-1";
 export const courses = [
   make(
     "java-dsa",

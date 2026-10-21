@@ -21,7 +21,7 @@ const basics = [
   lab(
     "Meet your first customer",
     ["Classes and Objects", "Attributes and Methods"],
-    "A neighbourhood repair shop has just signed up its first customer. Until now, everyone kept names on sticky notes. Give each customer an object of their own, so changing one name never changes another customer’s record. Your first delivery is small: create, inspect and rename a customer.",
+    "A neighbourhood repair shop is replacing its customer-name sticky notes with a simple customer register. Let staff add a customer, view their name and correct it later, while leaving every other customer’s name unchanged.",
     "Customer(String name) stores a trimmed, nonblank name. name() returns it; rename(String name) changes it. Null or blank names throw IllegalArgumentException without changing the existing name. Two customers must have independent state.",
     {
       "Customer.java": [
@@ -43,7 +43,7 @@ const basics = [
   lab(
     "Keep the café till honest",
     ["Access Specifiers", "Encapsulation"],
-    "The repair shop adds a small café. A cashier should be able to deposit or spend money, but nobody should be able to overwrite the till’s balance from another part of the app. Put a safe boundary around that state before the first busy lunch shift.",
+    "The shop’s café keeps a balance in its till. Let the cashier add money and record spending, but refuse a payment that would leave too little money or an invalid amount that would corrupt the balance.",
     "Wallet(long initialCents), balance(), deposit(long cents), spend(long cents). Keep all instance fields private. Reject negative initial balance and nonpositive transactions with IllegalArgumentException. Spending above the balance throws IllegalStateException with no mutation. Deposits use overflow-safe addition; overflow throws ArithmeticException without mutation.",
     {
       "Wallet.java": [
@@ -63,7 +63,7 @@ const basics = [
   lab(
     "Number the repair tickets",
     ["Static Keyword", "Final Keyword"],
-    "Two counters are now accepting repair jobs. Both need ticket numbers from the same sequence, while a printed ticket must keep its number forever. Build one shared counter without accidentally sharing every ticket’s identity.",
+    "Two counters issue repair tickets at the same shop. Give every new ticket the next number in one shared sequence, and make sure a ticket keeps that number for its entire life.",
     'JobTicket(): each new ticket gets the next ID, starting at 1. id() returns its permanent int ID; issued() returns the total across all tickets. Provide public static final String PREFIX="JOB". Use an instance final field for the ID and a static counter. Calls in this exercise are single-threaded.',
     {
       "JobTicket.java": [
@@ -84,7 +84,7 @@ const basics = [
   lab(
     "Pack a booking’s contact details",
     ["Nested Classes"],
-    "A customer books a collection slot and leaves a phone number. The booking needs a small contact value that can also be created before a booking exists. Keep that value close to the booking API without making it depend on a particular booking instance.",
+    "A customer leaves a phone number when booking a collection. Let staff prepare those contact details before assigning them to a booking, and refuse a booking that has no contact details.",
     "Booking has a public static nested class Contact(String phone) with phone(). Trim and validate a nonblank phone. Booking(Contact contact) rejects null and contact() returns the supplied contact. Contact must be final with private final state. No phone-format validation beyond nonblank is required.",
     {
       "Booking.java": [
@@ -107,7 +107,7 @@ const basics = [
   lab(
     "Separate the counter from the workshop",
     ["Packages", "Access Specifiers"],
-    "The counter team can print ticket labels, while the workshop owns the formatting rules. Put the API in a package and keep its internal formatter out of the public API. A caller outside that package should still be able to request a label.",
+    "The counter needs to print a repair ticket’s label, while the workshop maintains the naming rules. Let the counter request a finished label without exposing the workshop’s internal formatting rules.",
     "Both source files declare package workshop. TicketLabel.format(int id) is public static: positive IDs become JOB-<id>; nonpositive IDs throw IllegalArgumentException. It delegates to package-private LabelRules.prefix(), which returns JOB. LabelRules itself must be package-private. The runner uses javac -d to create the package output folders; edit the supplied files directly.",
     {
       "TicketLabel.java": [
@@ -137,7 +137,7 @@ const more = [
       "Method Overloading / Overriding",
       "Static vs Dynamic Binding",
     ],
-    "The workshop now repairs phones and laptops. The till should ask every repair for a price without knowing which device it handles. Add a shared abstraction, then let each repair type decide its own price when the till calls it.",
+    "The shop repairs both phones and laptops, each with a different fixed price. Let the till ask for a repair’s price in the same way regardless of the device, and receive the price for that particular repair.",
     "Abstract Repair has public abstract long price(). PhoneRepair and LaptopRepair extend Repair and return 3000 and 7000 cents. PriceDesk.quote(Repair) delegates to price(), rejecting null with IllegalArgumentException. Objects must dispatch correctly when held in a Repair reference.",
     {
       "PriceDesk.java": [
@@ -162,7 +162,7 @@ const more = [
   lab(
     "Let a new courier join without rewriting dispatch",
     ["Interfaces"],
-    "The shop used one courier yesterday; today a bicycle team wants to help. Dispatch should accept either courier through a small contract. Prove that a completely new implementation can join without changing dispatch code.",
+    "The shop wants to use a bicycle courier alongside its other delivery partners. Let dispatch hand a parcel to whichever courier is chosen and return that courier’s tracking code, without favouring one partner.",
     "Courier.send(String parcel) returns a tracking code. Dispatch.ship(Courier,String) rejects null courier and null/blank parcel, trims the parcel and returns send’s result unchanged. BikeCourier returns BIKE:<parcel>. Dispatch must work with any injected Courier, not just BikeCourier.",
     {
       "Dispatch.java": [
@@ -183,7 +183,7 @@ const more = [
   lab(
     "Predict which receipt method Java chooses",
     ["Method Overloading / Overriding", "Static vs Dynamic Binding"],
-    "A receipt screen shows “object” even when the value is a String. The team suspects Java chose the wrong overload. Build a tiny demonstration that distinguishes compile-time overload selection from runtime overriding—then explain the surprising line to your teammate.",
+    "A receipt displays different wording depending on how a value is presented to the formatter. Reproduce the expected object, text and fancy results so the team can distinguish choosing a format from changing an existing formatter’s behaviour.",
     'Formatter.format(Object) returns object; format(String) returns text. FancyFormatter extends Formatter and overrides format(Object) to return fancy. BindingDemo.run() creates Formatter base=new FancyFormatter(), Object value="receipt", then returns base.format(value)+"|"+base.format("receipt"). Expected fancy|text. Implement both format overloads and the override; do not hardcode run’s result.',
     {
       "BindingDemo.java": [
@@ -205,7 +205,7 @@ const more = [
   lab(
     "Build a repair estimate in a fluent conversation",
     ["Method Chaining"],
-    "The counter operator chooses labour, adds parts, then reads the estimate. Make that sequence read like a conversation with one estimate object. A bad price should be rejected without spoiling the estimate already entered.",
+    "A counter operator enters labour and parts prices before quoting a repair. Let them revise either amount and read the latest combined estimate, without losing valid values when an invalid price is entered.",
     "Estimate starts with zero labour and parts. labour(long) and parts(long) set their respective nonnegative cents and return the same Estimate instance. Negative values throw IllegalArgumentException without mutation. total() uses overflow-safe addition. Repeated setters replace the earlier value.",
     {
       "Estimate.java": [
@@ -224,7 +224,7 @@ const more = [
   lab(
     "Put repair status behind a finite set of names",
     ["Enums"],
-    "A typo once marked a job as “reday” and it disappeared from the collection screen. Replace free-form status strings with an enum, then decide which status changes the shop allows. A finished job should stay finished.",
+    "A repair should move from received to repairing, then ready, then collected. Allow only the next step in that sequence so nobody skips unfinished work or moves a collected repair back into progress.",
     "JobStatus has RECEIVED, REPAIRING, READY, COLLECTED. canMoveTo(JobStatus next) returns true only for the next status in that sequence, false for every other case including null and the same status. COLLECTED has no next status.",
     {
       "JobStatus.java": [
@@ -238,7 +238,7 @@ const more = [
   lab(
     "Freeze the handover receipt",
     ["Record", "Encapsulation"],
-    "A customer collects a repaired phone. You issue a receipt with a ticket ID and a list of completed checks. Later, a staff member edits their checklist; the customer’s issued receipt must stay exactly as it was.",
+    "A customer receives a handover receipt listing the checks completed on their repair. Keep that issued receipt unchanged even if a staff member later edits the checklist they used to prepare it.",
     "Create public record Handover(String ticketId, java.util.List<String> checks). Its compact constructor trims the nonblank ID and stores an immutable defensive copy of the nonnull checks list. Reject null/blank IDs and null list with IllegalArgumentException. Lists containing null elements are rejected by List.copyOf. Use record-provided accessors and value equality.",
     {
       "Handover.java": [
@@ -257,7 +257,7 @@ const more = [
   lab(
     "Watch a workstation come to life",
     ["Object Lifecycle", "Initializer Block"],
-    "The workshop boots a shared workstation class once, then opens two workstation objects. The setup log will reveal what runs once and what runs for each object. Make the log tell the real construction story rather than manufacturing the final string.",
+    "A workshop performs shared setup the first time its workstations are used, then prepares each workstation separately. Record the setup and construction events in their actual order when two workstations are created.",
     "LifecycleLog.events is a public static final StringBuilder. Workstation uses a static initializer appending S, an instance initializer appending I, and its constructor appending C. LifecycleDemo.run() creates two Workstations and returns the log. A fresh JVM must produce SICIC. Implement actual initializer blocks; Workstation must remain constructible. Do not call run multiple times in one fresh-log expectation.",
     {
       "Workstation.java": [
@@ -282,7 +282,7 @@ const more = [
   lab(
     "Why did the customer’s address still change?",
     ["Pass by Value / Pass by Reference"],
-    "A teammate says “Java passes objects by reference,” because an address changed after a helper call. Another helper replaces its parameter, but the caller sees no replacement. Reproduce both effects so the team can explain what Java actually copies.",
+    "Two helpers handle the same customer address: one edits its city, while the other replaces the address only for its own use. Make the first change visible to the caller and leave the caller’s address unchanged by the second.",
     'Address(String city) has city() and setCity(String). Validate and trim nonblank cities. AddressDemo.mutate(Address) changes its city to Penang. reassign(Address) assigns a new Address("Ipoh") only to its local parameter and does not mutate the caller’s object. Both reject null with IllegalArgumentException. Implement both effects; Java passes all arguments by value, including copied reference values.',
     {
       "AddressDemo.java": [
@@ -302,7 +302,7 @@ const collections = [
   lab(
     "Expand today’s repair list",
     ["Array vs ArrayList"],
-    "The morning’s fixed appointment array is already full when a walk-in customer arrives. Turn it into a growable working list, add the walk-in, and let the original appointment snapshot remain untouched.",
+    "The morning appointment list is full when a walk-in customer arrives. Produce a new working list with that customer at the end, let staff add more appointments, and keep the original morning list unchanged.",
     "DayPlan.append(String[] booked,String walkIn) returns a new mutable ArrayList<String> containing the original entries then walkIn. Reject null array, null/blank entries and null/blank walkIn with IllegalArgumentException. Preserve text and order; do not change or retain an array-backed view of the original array.",
     {
       "DayPlan.java": [
@@ -316,7 +316,7 @@ const collections = [
   lab(
     "One reminder per customer",
     ["Set"],
-    "A customer can have three repair jobs, but should receive only one collection reminder. Keep the first-seen order so the counter team can work through reminders predictably.",
+    "A customer may have several repairs ready for collection but should receive only one reminder. Prepare a reminder list with each customer appearing once, in the order they first appeared in the repair list.",
     "Reminders.unique(String[] customers) returns a LinkedHashSet<String>. Trim and uppercase IDs with Locale.ROOT, deduplicate, preserve first-seen order. Reject null array or null/blank entries with IllegalArgumentException. Empty input returns an empty set.",
     {
       "Reminders.java": [
@@ -330,7 +330,7 @@ const collections = [
   lab(
     "Find a repair without scanning the shelf",
     ["Map"],
-    "The counter has a ticket ID and needs the repair’s description immediately. Build an index from the day’s rows. Duplicate ticket IDs are a data error, not permission to silently replace somebody’s repair.",
+    "The counter needs to look up a repair description from its ticket ID. Build that lookup from the supplied rows, and reject duplicate ticket IDs rather than silently replacing one customer’s repair with another.",
     "RepairIndex.build(String[][] rows) returns Map<String,String>, each row exactly [id,description]. Trim both fields; reject null arrays, malformed rows, null/blank fields and duplicate trimmed IDs with IllegalArgumentException. IDs are case-sensitive. Return an independent map; empty input gives an empty map.",
     {
       "RepairIndex.java": [
@@ -344,7 +344,7 @@ const collections = [
   lab(
     "Serve the next customer fairly",
     ["Queue"],
-    "Three customers are waiting at the collection counter. The next person served should be the one who arrived first. When nobody is waiting, the display should calmly say there is no next customer rather than crash.",
+    "Customers join the collection queue throughout the day. Serve them in arrival order, show how many are still waiting, and report that nobody is next when the queue is empty.",
     "WaitingLine.join(String id) rejects null/blank IDs and stores trimmed IDs. next() returns and removes the oldest ID or null when empty. size() returns waiting count. Use a Queue<String> implementation such as ArrayDeque; duplicate IDs are permitted in this exercise.",
     {
       "WaitingLine.java": [
@@ -358,7 +358,7 @@ const collections = [
   lab(
     "Undo the last counter note",
     ["Dequeue", "Stack"],
-    "A cashier enters three notes and notices the latest one is wrong. Add an undo history that removes the newest note first. Use a deque so the team can avoid the legacy Stack class.",
+    "A cashier needs to undo the most recent note without removing earlier notes. Keep notes in order, return the newest one when undone, and let the cashier inspect the oldest remaining note without removing it.",
     "NoteHistory.add(String) validates and trims nonblank text; undo() removes and returns the most recently added note, or null if empty; oldest() returns the earliest remaining note without removal. Use Deque<String>/ArrayDeque. Independent history instances must not share state.",
     {
       "NoteHistory.java": [
@@ -372,7 +372,7 @@ const collections = [
   lab(
     "Clear cancelled jobs during a shelf walk",
     ["Iterator"],
-    "The workshop walks a mutable list of shelf labels, removing cancelled jobs as it goes. An enhanced for-loop plus list.remove caused a production exception. Make the cleanup safe without skipping neighbouring cancellations.",
+    "The workshop’s shelf list still includes cancelled repairs, sometimes next to one another. Remove every cancelled entry, keep the remaining labels in their original order, and report how many were removed.",
     "ShelfCleanup.removeCancelled(List<String> jobs) mutates the supplied list, removing entries starting CANCELLED:, and returns the removed count. Reject null list or null entries with IllegalArgumentException before any mutation. Use Iterator.remove rather than indexed removal or removeIf for this drill. Preserve other entries and their order. Input is a mutable ArrayList.",
     {
       "ShelfCleanup.java": [
@@ -386,7 +386,7 @@ const collections = [
   lab(
     "Reuse one tray for different kinds of work",
     ["Generic Collections"],
-    "The workshop has a tray for ticket numbers and another for customer names. Both trays behave identically. Write the container once with a type parameter, so the compiler keeps the two kinds of contents separate.",
+    "The workshop uses trays for both ticket numbers and customer names. Give both trays the same arrival-order behaviour while keeping their contents separate, and let staff save a list of contents that later tray changes cannot alter.",
     "Tray<T> has add(T), take() and snapshot(). Reject null additions with IllegalArgumentException. take removes the oldest value or returns null when empty. snapshot returns an immutable, independent List<T> in arrival order. Do not use raw types, Object casts or static shared storage. The class must declare one generic type parameter.",
     {
       "Tray.java": [

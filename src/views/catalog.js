@@ -1,7 +1,7 @@
-import { courses, allLessons } from "../../curriculum.js?v=cleanup-1";
+import { courses, allLessons } from "../../curriculum.js?v=mission-copy-1";
 import * as store from "../../database.js";
 import { $, esc, icon, shell } from "../ui.js";
-import { completed, count, route } from "../catalog-data.js?v=cleanup-1";
+import { completed, count, route } from "../catalog-data.js?v=mission-copy-1";
 let filter = "all",
   query = "";
 function catalog() {

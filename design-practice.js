@@ -37,7 +37,7 @@ const solid = [
   task(
     "SRP: split a receipt into three jobs",
     "Single responsibility",
-    "A customer buys two cables for 150 cents each. The till must calculate 300 cents, format “Total: 300 cents”, and send that text once. Finance changes calculation rules; the counter team changes wording; delivery may become email later. Keep those three reasons to change in separate components.",
+    "A customer buys two cables at 150 cents each and needs a receipt showing a total of 300 cents. Calculate the total, prepare the receipt text and deliver it once, keeping those jobs separate so changing the wording does not change the arithmetic.",
     "Implement ReceiptCalculator, ReceiptFormatter and ReceiptService so calculation, formatting and delivery have separate responsibilities.",
     "ReceiptCalculator.total(int quantity,long unitCents) rejects negatives with IllegalArgumentException and uses overflow-safe multiplication. ReceiptFormatter.format(long cents) rejects negatives and returns exactly Total: <cents> cents. ReceiptService(ReceiptCalculator,ReceiptFormatter,java.util.function.Consumer<String>) rejects null dependencies. issue(int,long) calculates, formats, delivers once and returns the text. Failed validation or overflow must deliver nothing. Use the injected components.",
     {
@@ -76,7 +76,7 @@ const solid = [
   task(
     "OCP: add a discount without editing checkout",
     "Open/closed",
-    "The shop has a ten-percent discount today. Tomorrow a partner supplies a completely different promotion. Checkout must accept that new policy without adding another if/switch branch for its name.",
+    "The shop offers a ten-percent discount today and may accept a partner’s promotion tomorrow. Let checkout use whichever discount it is given, while refusing a discount that would increase the price or make the total negative.",
     "Implement DiscountCheckout and TenPercentOff against DiscountPolicy, so new policies work without changing checkout.",
     "DiscountPolicy.discount(long subtotal) returns the amount to subtract. DiscountCheckout(DiscountPolicy) rejects null. total(long subtotal) rejects negative subtotals, calls the policy once and subtracts its discount. Reject a policy result below zero or above subtotal with IllegalArgumentException. TenPercentOff returns subtotal/10 using integer division and rejects negative input. No policy-name branching in checkout.",
     {
@@ -115,7 +115,7 @@ const solid = [
   task(
     "LSP: do not promise withdrawals you cannot honour",
     "Liskov substitution",
-    "Customers can inspect both a spending account and a locked savings balance. Only the spending account supports withdrawals. Avoid a locked account that advertises withdrawal and then throws “unsupported” when the payment service uses it.",
+    "Customers can inspect both spending and locked savings balances, but only a spending account permits withdrawals. Let the payment service use an account that genuinely supports payment, without asking locked savings to pretend it can withdraw money.",
     "Implement separate BalanceView and WithdrawableAccount contracts, then make PaymentService depend only on withdrawal capability.",
     "BalanceView.balance() returns long cents. WithdrawableAccount extends BalanceView and declares withdraw(long). SpendingAccount(long) implements WithdrawableAccount: reject negative initial balance and nonpositive withdrawals with IllegalArgumentException; insufficient funds throw IllegalStateException without mutation. LockedBalance(long) implements BalanceView only and rejects negative initial balance. PaymentService.pay(WithdrawableAccount,long) rejects null and delegates exactly once. LockedBalance must not implement WithdrawableAccount.",
     {
@@ -166,7 +166,7 @@ const solid = [
   task(
     "ISP: a printer should not pretend to scan",
     "Interface segregation",
-    "The front counter owns a basic printer; the workshop has a scanner. A receipt job only needs printing, while a copy job needs both devices. Do not force the printer to provide a fake scan implementation.",
+    "The counter has a basic printer and the workshop has a scanner. Let a receipt job use just the printer, and let a copy job scan one page then print that result, without requiring either device to offer a capability it does not have.",
     "Implement narrow Printer and ScannerDevice interfaces and workflows that request only the capabilities they use.",
     "Printer.print(String) returns void; ScannerDevice.scan() returns String. PrintDesk.receipt(Printer,String) rejects null printer and null/blank text before printing once. CopyDesk.copy(ScannerDevice,Printer) rejects null dependencies, scans once, rejects null/blank scanned text with IllegalArgumentException, then prints it once unchanged. Do not add scan to Printer or print to ScannerDevice.",
     {
@@ -197,7 +197,7 @@ const solid = [
   task(
     "DIP: fetch a customer only after authorization",
     "Dependency inversion",
-    "A customer asks the support portal for their profile. The access decision must happen before storage is touched. Tests should supply fake authorization and storage functions, and a later database migration should not alter the use case.",
+    "A customer asks the support portal for their profile. Check whether that user is allowed to see it before looking it up, and return the fetched profile only when access is allowed; denied requests must not touch storage.",
     "Implement ProfileService using injected AccessPolicy and CustomerRepository contracts, with authorization before lookup.",
     "AccessPolicy.allowed(String user,long id) returns boolean; CustomerRepository.find(long id) returns String. ProfileService(AccessPolicy,CustomerRepository) rejects null dependencies. load(String user,long id) rejects null/blank user and id<=0 with IllegalArgumentException; trim user before authorization. Denied access throws SecurityException and must not call the repository. Allowed access calls find once and returns its result unchanged. Propagate repository exceptions without retry.",
     {
@@ -232,7 +232,7 @@ const patterns = [
   task(
     "Template Method: fix the import workflow",
     "Template Method",
-    "Two partner feeds import repair tickets. Both must validate, transform and report a result in that order. Each partner transforms differently, but a subclass must not skip validation or invent its own workflow.",
+    "Two partners send repair-ticket imports with different text conventions. Give both imports the same validation and completion steps, while letting each partner change how valid text is transformed; invalid input must never reach that transformation.",
     "Implement a final ImportJob.run template and two subclasses that customize only transformation.",
     "ImportJob is abstract. public final String run(String raw) rejects null/blank input, trims it, calls protected abstract String transform(String value) once, and returns imported:<result>. UpperImport transforms using Locale.ROOT uppercase; LowerImport uses Locale.ROOT lowercase. Subclasses extend ImportJob. Invalid input must not reach transform.",
     {
@@ -261,7 +261,7 @@ const patterns = [
   task(
     "Chain of Responsibility: explain the first rejection",
     "Chain of Responsibility",
-    "A parts order must have a positive quantity, then stay within available stock. The caller needs the first rejection reason. A rejected request must not continue through later checks or trigger side effects.",
+    "A parts order must request a positive quantity and stay within the available stock. Check those rules in order, return the first rejection reason, and do not run later checks after an order has already been rejected.",
     "Implement linked Rule objects that stop at the first failure and forward valid requests to the next rule.",
     "Rule.check(int quantity,int stock) returns a String. QuantityRule(Rule next) returns invalid quantity for quantity<=0; otherwise delegates, or returns ok with null next. StockRule(Rule next) returns insufficient stock when quantity>stock, otherwise delegates or returns ok. Implement both against Rule. The chain in this exercise is QuantityRule followed by StockRule. Later rules must not be invoked after rejection; chain construction is acyclic.",
     {
@@ -299,7 +299,7 @@ const patterns = [
   task(
     "Composite: count a nested evidence bundle",
     "Composite",
-    "An incident bundle contains files and folders inside folders. Support wants the total byte count without writing separate traversal logic for every nesting depth. A folder should behave like any other sized bundle item.",
+    "An incident evidence bundle contains files and folders inside other folders. Report the total size of the whole bundle, including every nested file, while allowing an empty folder to contribute zero.",
     "Implement FileItem and BundleFolder through SizedItem so a client can total nested bundles uniformly.",
     "SizedItem.bytes() returns long. FileItem(long bytes) rejects negative values. BundleFolder(List<SizedItem> children) rejects null list or null entries with IllegalArgumentException and takes an independent copy. bytes() sums child bytes recursively using overflow-safe addition. An empty folder is zero. Supplied trees are acyclic; no names or real filesystem access are required.",
     {
@@ -340,7 +340,7 @@ const patterns = [
   task(
     "Proxy: protect access even when data is cached",
     "Protection and caching proxy",
-    "A profile lookup is expensive, so the portal caches successful results. An unauthorized user must still be denied even if another user has already warmed the cache. A failed fetch should be retried on a later request, not remembered as success.",
+    "A profile lookup is expensive, so the portal remembers successful results. Check permission every time a user asks, including when a result is already remembered, and let a later request retry a lookup that previously failed.",
     "Implement ProfileProxy so it authorizes every read and caches only successful repository results.",
     "ReadPolicy.allowed(String user,long id) returns boolean; ProfileStore.fetch(long id) returns String. ProfileProxy(ReadPolicy,ProfileStore) rejects null dependencies. get(String user,long id) validates nonblank user and positive id, trims user, then authorizes on every call before checking a cache keyed by id. Denial throws SecurityException without fetching or returning cached data. Authorized repeated IDs reuse successful results, including null. Exceptions must propagate and not be cached. Single-threaded; no eviction required.",
     {
@@ -373,7 +373,7 @@ const patterns = [
   task(
     "State: an order that changes what it accepts",
     "State",
-    "An order starts as a draft. Paying makes shipping possible; shipping makes the order final. A repeated payment or shipping before payment must be rejected without moving the order into a different state.",
+    "An order begins as a draft, becomes paid after payment, then becomes shipped after dispatch. Let each stage accept only its permitted next action, and leave the order unchanged when someone repeats payment or tries to ship too early.",
     "Implement OrderContext and concrete OrderState classes so each state owns its legal next event.",
     'OrderState has name() and next(String event). DraftState.name() returns draft; next("pay") returns PaidState. PaidState.name() returns paid; next("ship") returns ShippedState. ShippedState.name() returns shipped and accepts no event. All other events, including null, throw IllegalArgumentException. OrderContext(OrderState) rejects null; state() returns the current name; apply(String) replaces state only after next succeeds. No enum or event switch in OrderContext; delegate to the state.',
     {
@@ -425,7 +425,7 @@ const patterns = [
   task(
     "Memento: restore yesterday’s draft without aliasing",
     "Memento",
-    "A support engineer saves a draft, adds a mistaken note, then restores the saved version. Further editing must not change the saved snapshot. The history feature should restore data without exposing a mutable copy of the editor’s internals.",
+    "A support engineer saves a draft before adding a mistaken note. Let them restore the saved version, and keep that saved copy unchanged by any further editing in this or another draft.",
     "Implement DraftPad with immutable Snapshot mementos and independent restore behaviour.",
     "DraftPad.add(String) trims and rejects null/blank notes. notes() returns an immutable independent List<String>. save() returns Snapshot(List<String> notes), a public record with a defensive immutable copy. Snapshot rejects null lists with IllegalArgumentException; null elements may throw NullPointerException. restore(Snapshot) rejects null and replaces editor content with an independent mutable copy of the snapshot. Different pads can restore the same snapshot without sharing future edits.",
     {
@@ -461,7 +461,7 @@ const patterns = [
   task(
     "Abstract Factory: keep notification parts compatible",
     "Abstract Factory",
-    "The shop sends either email or SMS notices. Each channel needs a matching formatter and sender. An email-formatted message sent through the SMS sender is a configuration bug. Let one factory supply a coherent family of both parts.",
+    "The shop sends collection notices by email or SMS, and each channel needs matching wording and delivery. Select both parts together so an email notice stays on the email path, while allowing another channel to be added later.",
     "Implement channel factories and NoticeService so it formats and sends using components from the same NoticeFactory.",
     "NoticeFormatter.format(String) returns String; NoticeSender.send(String) returns String; NoticeFactory.formatter() and sender() supply those contracts. EmailFactory supplies formatting email:<body> and sending email-sent:<formatted>. SmsFactory uses sms: and sms-sent: respectively. NoticeService(NoticeFactory) rejects null factory; notify(String) rejects null/blank body, trims it, formats once then sends once, returning the send result. It must also work with a custom factory without testing concrete factory types.",
     {

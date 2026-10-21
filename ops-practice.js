@@ -30,7 +30,7 @@ const basics = [
   shellTask(
     "A workspace with spaces in its name",
     "Paths, copying and moving",
-    "The support team wants a folder named team notes. Move a customer note through draft and final locations without losing its contents. The space in the folder name must not become a second command argument.",
+    "The support team keeps a customer note in a folder named team notes. Place a copy in its final location, remove the temporary draft folder, and leave the original customer note unchanged.",
     "Create the requested directory tree, copy the supplied note, rename it and remove only the temporary draft directory.",
     "Create /workspace/team notes/final and /workspace/team notes/draft. Copy customer.txt into draft, move that copied file to final/note.txt, then remove the empty draft directory. Leave the original customer.txt unchanged. Quote paths containing spaces.",
     'mkdir -p "/workspace/team notes/final" "/workspace/team notes/draft"\ncp /workspace/customer.txt "/workspace/team notes/draft/customer.txt"\nmv "/workspace/team notes/draft/customer.txt" "/workspace/team notes/final/note.txt"\nrmdir "/workspace/team notes/draft"',
@@ -40,7 +40,7 @@ const basics = [
   shellTask(
     "Two names, one file",
     "Hard links and symbolic links",
-    "Operations wants a second name for a note, plus a shortcut that points to the original path. After editing through the hard link, both names should show the change. The symbolic link should remain a link rather than a copied file.",
+    "Operations needs two additional ways to reach the same note. Make one name share the file itself and another point to its original path, then ensure an edit through the shared-file name appears in the original too.",
     "Create one hard link and one relative symbolic link, then append through the hard link.",
     "From /workspace/original.txt create hard.txt as a hard link and shortcut.txt as a relative symbolic link targeting original.txt. Append exactly next followed by a newline through hard.txt. The original initially contains start followed by a newline. Make your answer safe to run again without appending a second next line.",
     'cd /workspace\nln -f original.txt hard.txt\nln -sfn original.txt shortcut.txt\nif ! grep -qx next hard.txt; then printf "next\\n" >> hard.txt; fi',
@@ -50,7 +50,7 @@ const basics = [
   shellTask(
     "Turn a CSV column into a tiny report",
     "Pipes, cut, sort and uniq",
-    "Three customers ordered fruit: two apples and one pear. The counter needs a count per fruit, not the customer names or CSV header. Produce a predictable two-line report using a shell pipeline.",
+    "The counter has a customer-order CSV with two apple orders and one pear order. Produce a two-line fruit count without customer names or the header, sorted by fruit name.",
     "Extract the fruit column, skip its header, count repeated values and save the sorted counts.",
     "Read /workspace/fruit.csv. Write /workspace/fruit-counts.txt with exactly 2 apple then 1 pear, one line each and no header. Sort alphabetically by fruit. Keep fruit.csv unchanged.",
     "tail -n +2 /workspace/fruit.csv | cut -d, -f2 | sort | uniq -c | awk '{print $1, $2}' > /workspace/fruit-counts.txt",
@@ -60,7 +60,7 @@ const basics = [
   shellTask(
     "One script for training and production",
     "Environment variables and defaults",
-    "The same script runs on a trainee laptop and a production host. Without environment variables it should write training settings. When operations supplies APP_ENV and PORT, those values must replace the defaults.",
+    "One settings script is used in both training and production. Write training settings when nothing is supplied, and use the supplied environment and port when operations provides them.",
     "Write notes.sh to generate settings.env from environment variables with documented defaults.",
     "Your notes.sh writes /workspace/settings.env with ENV=<APP_ENV> then PORT=<PORT>, one line each. Default APP_ENV to training and PORT to 8080 when unset or empty. With APP_ENV=production PORT=9090, write ENV=production and PORT=9090. Do not hardcode only one of these environments.",
     'printf "ENV=%s\\nPORT=%s\\n" "${APP_ENV:-training}" "${PORT:-8080}" > /workspace/settings.env',
@@ -69,7 +69,7 @@ const basics = [
   shellTask(
     "A missing input is a normal condition",
     "Shell conditions and exit behaviour",
-    "A batch input may not have arrived yet. The health script must report ready when the input file exists and missing when it does not, without crashing either time.",
+    "A batch input may not have arrived when the health check runs. Report ready when the input file is present and missing when it is absent, replacing the previous result on every run.",
     "Use a file-existence condition in notes.sh to produce the correct status file.",
     "Write /workspace/status.txt containing ready if /workspace/input.txt is a regular file, otherwise missing. Include a newline. Both cases must exit successfully. Re-running the script must replace the old result, not append another line.",
     'if [ -f /workspace/input.txt ]; then printf "ready\\n"; else printf "missing\\n"; fi > /workspace/status.txt',
@@ -79,7 +79,7 @@ const basics = [
   shellTask(
     "Find the logs, not the lookalikes",
     "find, file types and sorting",
-    "An inbox contains logs in nested folders, a text file, and a directory whose name also ends in .log. Hand the investigator only the real log files in a stable order.",
+    "An inbox contains logs in nested folders, a text file and a directory whose name ends in .log. List only the real log files, including those in nested folders, in a predictable sorted order.",
     "Find regular .log files recursively and write their relative paths to logs.list.",
     "Search /workspace/inbox. Write /workspace/logs.list with inbox/a.log and inbox/nested/b.log, sorted, one per line. Exclude c.txt and the directory named directory.log. Do not alter the inbox.",
     'cd /workspace\nfind inbox -type f -name "*.log" | sort > /workspace/logs.list',
@@ -92,7 +92,7 @@ const admin = [
   shellTask(
     "Private by default",
     "umask and default permissions",
-    "An admin script creates a credentials file and a working directory. Setting one file to private afterwards leaves a window with broad permissions. Make newly created files and directories private from the start.",
+    "An administration job creates a credentials file inside its working directory. Make both private to their owner as soon as they are created, rather than leaving them broadly accessible until a later correction.",
     "Use umask 077 before creating a new credentials file and private directory.",
     "Create /workspace/private and /workspace/private/credentials.env using a restrictive umask. Directory mode must be 700; file mode 600; file contents TOKEN=training followed by a newline. Do not rely on chmod to fix defaults afterwards. Existing unrelated files must remain untouched.",
     'umask 077\nmkdir -p /workspace/private\nprintf "TOKEN=training\\n" > /workspace/private/credentials.env',
@@ -101,7 +101,7 @@ const admin = [
   shellTask(
     "A shared directory with inherited group ownership",
     "Setgid directories",
-    "Two operations jobs share a handover directory. New files should inherit that directory’s group, while users outside the group receive no access. Prepare the directory and prove the group inheritance on a new file.",
+    "Two operations jobs share a handover directory. Let their group work with its notes, make new notes inherit that group, and keep unrelated users out.",
     "Configure a setgid handover directory and create a group-writable note inside it.",
     "Create /workspace/handover with mode 2770. Create note.txt inside with contents ready and a newline, mode 660. Its group ID must equal the directory group ID. Use the current training user/group; no host users or real user provisioning are involved.",
     'mkdir -p /workspace/handover\nchmod 2770 /workspace/handover\numask 007\nprintf "ready\\n" > /workspace/handover/note.txt',
@@ -110,7 +110,7 @@ const admin = [
   shellTask(
     "Stop only the process named by the PID file",
     "Process inspection and signals",
-    "A disposable demo service is running, and its PID is recorded in service.pid. Stop that service for maintenance without killing unrelated processes or relying on a hardcoded PID.",
+    "A demo service must stop for maintenance, and its current process number is recorded in a file. Stop that service, record that it has stopped, and leave the container and every unrelated process running.",
     "Read the supplied PID file, terminate that process, and save a stopped marker.",
     "The runner starts a sleep process and writes /workspace/service.pid. Send that PID a termination signal and write stopped to /workspace/service-status.txt. Do not kill the container’s PID 1 or unrelated processes. A terminated process awaiting reaping may remain visible as a zombie; it is no longer running.",
     'pid=$(cat /workspace/service.pid)\nkill "$pid" 2>/dev/null || true\nprintf "stopped\\n" > /workspace/service-status.txt',
@@ -121,7 +121,7 @@ const admin = [
   shellTask(
     "Rotate a log without losing its history",
     "Log rotation and gzip",
-    "The application log contains three important startup events. Before a fresh shift begins, archive that history in gzip format and provide an empty log at the original path for new events.",
+    "A new shift needs a fresh application log without losing the previous shift’s three events. Keep that history in a compressed archive and leave an empty, correctly protected log ready for new events.",
     "Compress the original app.log into app.log.1.gz and recreate an empty app.log with mode 640.",
     "Preserve the exact original contents in /workspace/app.log.1.gz. /workspace/app.log must remain as an empty regular file with mode 640. Do not append, duplicate or discard the archived events. Make a second run preserve the first archive when the current log is empty.",
     "if [ -s /workspace/app.log ]; then gzip -c /workspace/app.log > /workspace/app.log.1.gz; fi\n: > /workspace/app.log\nchmod 640 /workspace/app.log",
@@ -131,7 +131,7 @@ const admin = [
   shellTask(
     "Recover the last good configuration",
     "Backup restoration",
-    "A deployment replaced the service configuration with a broken file. A known-good tar.gz backup is already available. Restore the file from that archive, then secure its permissions before handing the service back.",
+    "A deployment replaced the service configuration with a broken version. Recover the known-good configuration from the supplied backup, restrict the restored file’s access, and keep the backup available.",
     "Restore app.conf from known-good.tar.gz and set the restored file to mode 600.",
     "Extract /workspace/known-good.tar.gz into /workspace so app.conf contains MODE=training then PORT=8080, one per line. Set app.conf mode 600. Preserve the archive. Do not merely recreate the configuration from the example; practise extracting the supplied backup.",
     "tar -xzf /workspace/known-good.tar.gz -C /workspace\nchmod 600 /workspace/app.conf",
@@ -142,7 +142,7 @@ const admin = [
   shellTask(
     "Measure a directory before approving cleanup",
     "Disk usage and file counts",
-    "Operations suspects the data directory is growing. Before anyone deletes files, collect its allocated size and count regular files, including files under nested folders. The report should describe the directory rather than hardcode a size that varies across machines.",
+    "Operations suspects that a data directory is growing but has not approved deleting anything. Report its measured disk usage and the number of regular files inside it, including nested files, without changing the data.",
     "Generate a two-line disk report containing allocated KiB and the recursive regular-file count.",
     "For /workspace/data write /workspace/disk-report.txt: allocated_kib=<du -sk first column> then files=3, one per line. Use du for allocated usage and find for the regular-file count. Do not change the data files or count directories as files.",
     'size=$(du -sk /workspace/data | cut -f1)\ncount=$(find /workspace/data -type f | wc -l)\nprintf "allocated_kib=%s\\nfiles=%s\\n" "$size" "$count" > /workspace/disk-report.txt',
@@ -184,7 +184,7 @@ const sql = [
   sqlTask(
     "Inspect the schema instead of guessing",
     "information_schema",
-    "You inherited an employee table without a data dictionary. Before writing a migration, list its columns and nullability from PostgreSQL’s metadata. The primary-key column should be recognizable as non-nullable.",
+    "You inherited an employee table without a data dictionary. Produce an accurate list of its columns, types and whether they allow missing values, using the database’s own description of that table.",
     "Create employee_columns as a view of the supplied employees table’s column metadata.",
     "Create or replace employee_columns with columns column_name text, data_type text, is_nullable text, ordered by ordinal_position. Read information_schema.columns for public.employees. Include all four columns: id, name, department, salary. Do not hardcode the metadata rows.",
     "CREATE OR REPLACE VIEW employee_columns AS SELECT column_name::text,data_type::text,is_nullable::text FROM information_schema.columns WHERE table_schema='public' AND table_name='employees' ORDER BY ordinal_position;",
@@ -193,7 +193,7 @@ const sql = [
   sqlTask(
     "Protect imported customer rows with constraints",
     "Schema constraints",
-    "A customer import accidentally repeats an email address and assigns a negative balance. Move those protections into the database so every writer must obey them, while preserving the two valid rows already present.",
+    "A customer import may repeat an email address, omit it or assign a negative balance. Make the database refuse all three kinds of invalid row while preserving the valid customers already stored.",
     "Add the named uniqueness and balance constraints, and make customer email non-null.",
     "The seeded customers table has id, email and balance. Set email NOT NULL. Add UNIQUE(email) named customers_email_unique and CHECK(balance>=0) named customers_balance_nonnegative. Keep existing rows unchanged. Tests will attempt duplicate email, null email and negative balance inserts; each must fail.",
     "ALTER TABLE customers ALTER COLUMN email SET NOT NULL; ALTER TABLE customers ADD CONSTRAINT customers_email_unique UNIQUE(email); ALTER TABLE customers ADD CONSTRAINT customers_balance_nonnegative CHECK(balance>=0);",
@@ -204,7 +204,7 @@ const sql = [
   sqlTask(
     "Give reporting the minimum database access",
     "Roles and grants",
-    "A reporting component needs to read employees, but it must not insert, update, delete or administer the database. Create a role with just that access. This lab changes only its disposable PostgreSQL instance.",
+    "A reporting component needs to read employee data but must not change it or administer the database. Give its reporting role the required read access without giving it login, write or administrative powers.",
     "Create report_reader as a non-login, non-administrative role and grant only the required schema usage and table read access.",
     "Create role report_reader with NOLOGIN, NOSUPERUSER, NOCREATEDB, NOCREATEROLE and NOINHERIT. Grant USAGE on schema public and SELECT on public.employees. Do not grant INSERT, UPDATE or DELETE, ownership, or membership in another role. This is an access configuration exercise; no production connection or login is created.",
     "CREATE ROLE report_reader NOLOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOINHERIT; GRANT USAGE ON SCHEMA public TO report_reader; GRANT SELECT ON public.employees TO report_reader;",
@@ -215,7 +215,7 @@ const sql = [
   sqlTask(
     "Reserve stock and record its audit together",
     "Atomic database functions",
-    "A customer reserves two parts. Stock must decrease and an audit row must appear as one operation. An invalid reservation must do neither; support should never have to reconcile an audit entry for a reservation that failed.",
+    "A customer reserves two parts from a stock of five. Leave three available and record the reservation together, while ensuring an invalid or oversized reservation changes neither stock nor its audit history.",
     "Create reserve_parts to update stock and write an audit entry atomically, returning the remaining quantity.",
     "Create reserve_parts(part_id int,amount int) returning int in PL/pgSQL. Reject null/nonpositive amount, null/missing part and insufficient stock by raising an error. Lock the stock row FOR UPDATE, decrement available and insert an audit row with that part_id and amount. Return the new available count. Do not create an audit record on failure. Seed: part 1 has 5 available; part 2 has 2.",
     "CREATE OR REPLACE FUNCTION reserve_parts(part_id int,amount int) RETURNS int LANGUAGE plpgsql AS $$ DECLARE current_stock int; BEGIN IF part_id IS NULL OR amount IS NULL OR amount<=0 THEN RAISE EXCEPTION 'invalid input'; END IF; SELECT s.available INTO current_stock FROM stock s WHERE s.id=part_id FOR UPDATE; IF NOT FOUND OR current_stock<amount THEN RAISE EXCEPTION 'unavailable'; END IF; UPDATE stock SET available=available-amount WHERE id=part_id RETURNING available INTO current_stock; INSERT INTO stock_audit(part_id,amount) VALUES(part_id,amount); RETURN current_stock; END $$;",
@@ -225,7 +225,7 @@ const sql = [
   sqlTask(
     "Prepare an index for a service timeline",
     "Composite indexes and query plans",
-    "Support repeatedly opens the newest checkout-service logs. Give PostgreSQL an index that matches filtering by service and ordering by time, and expose the recent subset in a view. A small training table may still legitimately use a sequential scan.",
+    "Support regularly needs the newest checkout-service log entries. Provide the requested recent checkout timeline and prepare the database to find entries by service and time efficiently.",
     "Create the named composite index and recent_checkout view, then inspect their query plan in the terminal.",
     "Create btree index logs_service_time on service_logs(service,occurred_at DESC). Create or replace view recent_checkout exposing id,service,occurred_at for service='checkout' and occurred_at >= TIMESTAMP '2025-01-02', ordered by occurred_at DESC then id ASC. Inspect EXPLAIN SELECT * FROM recent_checkout in the terminal. Tests check index definition and result rows, not whether this tiny table chooses an index scan.",
     "CREATE INDEX logs_service_time ON service_logs(service,occurred_at DESC); CREATE OR REPLACE VIEW recent_checkout AS SELECT id,service,occurred_at FROM service_logs WHERE service='checkout' AND occurred_at>=TIMESTAMP '2025-01-02' ORDER BY occurred_at DESC,id;",
@@ -236,7 +236,7 @@ const sql = [
   sqlTask(
     "Clean old audit rows in bounded batches",
     "Retention maintenance",
-    "An audit table is growing. Maintenance must remove old rows gradually rather than issue one unbounded delete. Rows exactly on the cutoff stay, and each call reports how much it deleted.",
+    "The audit table has old entries that can be removed after an agreed cutoff. Remove only a limited oldest-first batch per run, report how many were deleted, and retain entries exactly on or after the cutoff.",
     "Create purge_audit to delete only a bounded, oldest-first batch before a cutoff timestamp.",
     "Create purge_audit(cutoff timestamp,batch_size int) returning int. Reject null cutoff and null/batch_size outside 1..1000 with an error. Delete at most batch_size rows with created_at strictly before cutoff, oldest created_at then id first. Return the actual deleted count. Keep rows at or after cutoff. Seed IDs 1..3 are before 2025-01-04; ID 4 is exactly at cutoff and ID 5 is newer.",
     "CREATE OR REPLACE FUNCTION purge_audit(cutoff timestamp,batch_size int) RETURNS int LANGUAGE plpgsql AS $$ DECLARE removed int; BEGIN IF cutoff IS NULL OR batch_size IS NULL OR batch_size<1 OR batch_size>1000 THEN RAISE EXCEPTION 'invalid batch'; END IF; WITH doomed AS (SELECT id FROM audit_events WHERE created_at<cutoff ORDER BY created_at,id LIMIT batch_size) DELETE FROM audit_events WHERE id IN (SELECT id FROM doomed); GET DIAGNOSTICS removed=ROW_COUNT; RETURN removed; END $$;",
