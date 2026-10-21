@@ -242,11 +242,18 @@ test("opening an exercise auto-connects and Check answer saves and validates", a
     const code = document.querySelector("#code");
     code.value = allLessons[0].starter;
     await lesson(allLessons[0].course, 0);
+    assert.equal(
+      nodes.get("#check").disabled,
+      true,
+      "Untouched starter cannot be submitted",
+    );
     assert.ok(calls.some((c) => c.op === "start"));
     const markup = nodes.get("#app").innerHTML;
     for (const id of ["start", "save", "read", "run"])
       assert.ok(!markup.includes('id="' + id + '"'));
     code.value = "public class Main {}";
+    code.oninput();
+    assert.equal(nodes.get("#check").disabled, false);
     await nodes.get("#check").onclick();
     assert.ok(
       calls.some((c) => c.op === "write" && c.data.source === code.value),
@@ -261,6 +268,16 @@ test("opening an exercise auto-connects and Check answer saves and validates", a
       "public class Main {}",
       "Reopening preserves the saved draft instead of overwriting it with the container file",
     );
+    code.value = "   \n";
+    code.oninput();
+    assert.equal(
+      nodes.get("#check").disabled,
+      true,
+      "Clearing the answer disables submission",
+    );
+    const count = calls.filter((c) => c.op === "check").length;
+    await nodes.get("#check").onclick();
+    assert.equal(calls.filter((c) => c.op === "check").length, count);
   } finally {
     globalThis.fetch = previousFetch;
     delete globalThis.document;

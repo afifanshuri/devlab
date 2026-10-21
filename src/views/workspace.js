@@ -105,7 +105,7 @@ ${esc(state.records[key]?.draft ?? task.starter)}</textarea
           </form>
           <div class="workspace-actions">
             <button class="secondary" id="reset">Reset lab</button
-            ><button class="primary" id="check">Check answer →</button>
+            ><button class="primary" id="check" disabled>Check answer →</button>
           </div>
           <div id="output" class="console" role="status" aria-live="polite">
             ${available
@@ -131,6 +131,14 @@ ${esc(state.records[key]?.draft ?? task.starter)}</textarea
       </div>`,
   );
   const live = () => active === context;
+  const hasAnswer = () => {
+    const source = $("#code").value.trim();
+    return source.length > 0 && source !== task.starter.trim();
+  };
+  const updateCheckState = () => {
+    if (live())
+      $("#check").disabled = !available || context.busy || !hasAnswer();
+  };
   const log = (text) => {
     if (live()) {
       $("#terminal").textContent += text;
@@ -194,6 +202,7 @@ ${esc(state.records[key]?.draft ?? task.starter)}</textarea
       context.busy = false;
       if (live()) {
         buttons.forEach((b) => (b.disabled = false));
+        updateCheckState();
       }
     }
   };
@@ -203,7 +212,10 @@ ${esc(state.records[key]?.draft ?? task.starter)}</textarea
     lastActivity = Date.now();
     callRunner("touch", { lessonId: key }).catch(() => {});
   };
-  $("#code").oninput = noteActivity;
+  $("#code").oninput = () => {
+    updateCheckState();
+    noteActivity();
+  };
   $("#command").oninput = noteActivity;
   const run = async (command) => {
     await ensure();
@@ -240,9 +252,11 @@ ${esc(state.records[key]?.draft ?? task.starter)}</textarea
         e.target.selectionEnd,
         "end",
       );
+      updateCheckState();
     }
   };
   $("#check").onclick = action(async () => {
+    if (!hasAnswer()) return;
     await save();
     const r = await callRunner("check", { id: context.session });
     log(r.output);
