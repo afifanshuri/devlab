@@ -7,7 +7,7 @@
   "scripts": {
     "start": "node server.mjs",
     "test": "node --test tests/*.test.js",
-    "format": "prettier --write app.js content.js curriculum.js exercise-factories.js progression.js database.js server.mjs sql-worker.js runner src tests index.html styles.css",
+    "format": "prettier --write app.js content.js curriculum.js exercise-factories.js progression.js patterns.js database.js server.mjs sql-worker.js runner src tests index.html styles.css",
     "setup:labs": "node runner/setup.mjs",
     "test:docker": "node --test tests/docker.integration.js"
   },

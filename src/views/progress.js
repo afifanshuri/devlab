@@ -1,7 +1,7 @@
-import { courses, allLessons } from "../../curriculum.js?v=progression-1";
+import { courses, allLessons } from "../../curriculum.js?v=multifile-1";
 import { state } from "../state.js";
 import { esc, shell } from "../ui.js";
-import { completed, count, route } from "../catalog-data.js?v=progression-1";
+import { completed, count, route } from "../catalog-data.js?v=multifile-1";
 function progressPage() {
   const done = completed();
   shell(
@@ -57,7 +57,7 @@ function paths() {
     [
       "java",
       "Build reliable backend services",
-      "Contracts → algorithms → reliability → secure workflows. Earlier helper methods are included in later starters, and cumulative regression tests protect what you already built.",
+      "Contracts → algorithms → reliability → secure workflows → multi-file design patterns. Earlier helper methods are included in later starters, and cumulative regression tests protect what you already built.",
     ],
     [
       "linux",

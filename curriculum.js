@@ -1,5 +1,6 @@
 import { java, linux, pg, oracle, make } from "./exercise-factories.js";
 import { advancedCourses } from "./progression.js";
+import { patternCourses } from "./patterns.js";
 export const courses = [
   make(
     "java-dsa",
@@ -208,7 +209,7 @@ export const courses = [
     ],
   ),
 ];
-courses.push(...advancedCourses);
+courses.push(...advancedCourses, ...patternCourses);
 
 // Prerequisites guide the learning order without locking users out of practice.
 for (const track of ["java", "linux", "sql"]) {

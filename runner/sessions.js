@@ -245,6 +245,8 @@ export class LabSessions {
       this.sessions.set(id, session);
       if (lesson.starter !== undefined)
         await this.write(session, lesson.filename, lesson.starter);
+      for (const [file, body] of Object.entries(lesson.editableFiles || {}))
+        await this.write(session, file, body);
       for (const [file, body] of Object.entries(lesson.files || {}))
         await this.write(session, file, body);
       if (lesson.verify)
@@ -350,10 +352,19 @@ export class LabSessions {
   }
   async check(s) {
     let command;
-    if (s.lesson.engine === "java")
-      command =
-        "mkdir -p /tmp/verify && rm -f /tmp/verify/*.class && javac -cp /tmp/verify -d /tmp/verify /workspace/Main.java /checks/Verify.java && java -Xmx128m -cp /tmp/verify Verify";
-    else if (s.lesson.engine === "postgres") {
+    if (s.lesson.engine === "java") {
+      const files = [
+        s.lesson.filename,
+        ...Object.keys(s.lesson.editableFiles || {}),
+      ];
+      if (
+        files.some(
+          (name) => !/^[A-Za-z0-9][A-Za-z0-9_.-]{0,79}\.java$/.test(name),
+        )
+      )
+        throw Error("Invalid Java source filename.");
+      command = `mkdir -p /tmp/verify && rm -f /tmp/verify/*.class && javac -cp /tmp/verify -d /tmp/verify ${files.map((name) => "/workspace/" + name).join(" ")} /checks/Verify.java && java -Xmx128m -cp /tmp/verify Verify`;
+    } else if (s.lesson.engine === "postgres") {
       const object = s.lesson.solution.match(
         /CREATE OR REPLACE (VIEW|FUNCTION) (\w+)(\([^)]*\))?/i,
       );
@@ -399,6 +410,8 @@ export class LabSessions {
     if (!session) return { id: null };
     return this.exclusive(session.id, async (s) => {
       await this.write(s, s.lesson.filename, s.lesson.starter);
+      for (const [file, body] of Object.entries(s.lesson.editableFiles || {}))
+        await this.write(s, file, body);
       return { id: s.id };
     });
   }

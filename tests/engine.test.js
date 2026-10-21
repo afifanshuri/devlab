@@ -10,9 +10,9 @@ globalThis.indexedDB = indexedDB;
 globalThis.window = { initSqlJs: () => Promise.resolve(SQL) };
 await store.initialize();
 test("every exercise is a coding task, with unique versioned IDs", () => {
-  assert.equal(courses.length, 14);
-  assert.equal(allLessons.length, 40);
-  assert.equal(new Set(allLessons.map((l) => l.id)).size, 40);
+  assert.equal(courses.length, 15);
+  assert.equal(allLessons.length, 49);
+  assert.equal(new Set(allLessons.map((l) => l.id)).size, 49);
   for (const l of allLessons) {
     assert.equal(l.type, "workspace");
     assert.ok(l.task && l.starter && l.solution && l.hint);
@@ -77,10 +77,10 @@ test("all screens and practical tasks render without missing references", async 
   try {
     const { catalog } = await import("../src/views/catalog.js");
     catalog();
-    assert.match(nodes.get("#app").innerHTML, /40 exercises/);
+    assert.match(nodes.get("#app").innerHTML, /49 exercises/);
     assert.equal(
       (nodes.get("#cards").innerHTML.match(/<article/g) || []).length,
-      14,
+      15,
     );
     for (const [file, names] of [
       ["progress", ["progressPage", "paths"]],
@@ -206,6 +206,7 @@ test("runner registry restores containers and idle timestamps after restart", as
 test("opening an exercise auto-connects and Check answer saves and validates", async () => {
   const nodes = new Map();
   const calls = [];
+  let remoteSources = {};
   let reused = false;
   const previousFetch = globalThis.fetch;
   globalThis.document = {
@@ -234,7 +235,13 @@ test("opening an exercise auto-connects and Check answer saves and validates", a
             ? { id: "reused-session", output: "Connected", reused }
             : op === "check"
               ? { passed: false, output: "Internal test failed" }
-              : { output: "Saved" },
+              : op === "read"
+                ? {
+                    output:
+                      remoteSources[JSON.parse(options.body).filename] ??
+                      "Saved",
+                  }
+                : { output: "Saved" },
     };
   };
   try {
@@ -278,6 +285,51 @@ test("opening an exercise auto-connects and Check answer saves and validates", a
     const count = calls.filter((c) => c.op === "check").length;
     await nodes.get("#check").onclick();
     assert.equal(calls.filter((c) => c.op === "check").length, count);
+
+    const multi = allLessons.find(
+      (l) => l.course === "hands-java-architecture",
+    );
+    const names = [multi.filename, ...Object.keys(multi.editableFiles)];
+    code.value = multi.starter;
+    reused = true;
+    remoteSources = { [multi.filename]: multi.starter, ...multi.editableFiles };
+    await lesson(multi.course, multi.index);
+    assert.match(nodes.get("#file-tabs").innerHTML, /RegistryClient.java/);
+    code.value = multi.solution;
+    code.oninput();
+    const switchTo = (name) =>
+      nodes
+        .get("#file-tabs")
+        .onclick({ target: { closest: () => ({ dataset: { file: name } }) } });
+    switchTo(names[1]);
+    assert.equal(code.value, multi.editableFiles[names[1]]);
+    code.value = multi.solutionFiles[names[1]];
+    code.oninput();
+    switchTo(names[0]);
+    assert.equal(code.value, multi.solution, "Tab switching retains edits");
+    await nodes.get("#check").onclick();
+    for (const name of names)
+      assert.ok(
+        calls.some((c) => c.op === "write" && c.data.filename === name),
+      );
+    const saved = JSON.parse(store.progress()[multi.id].draft);
+    assert.equal(saved.files[names[1]], multi.solutionFiles[names[1]]);
+    await lesson(multi.course, multi.index);
+    // The browser initializes the textarea from the rendered saved draft.
+    assert.ok(
+      nodes
+        .get("#app")
+        .innerHTML.includes((await import("../src/ui.js")).esc(multi.solution)),
+    );
+    switchTo(names[1]);
+    assert.equal(code.value, multi.solutionFiles[names[1]]);
+    await nodes.get("#reset").onclick();
+    assert.equal(code.value, multi.editableFiles[names[1]]);
+    assert.equal(nodes.get("#check").disabled, true);
+    assert.equal(
+      JSON.parse(store.progress()[multi.id].draft).files[names[0]],
+      multi.starter,
+    );
   } finally {
     globalThis.fetch = previousFetch;
     delete globalThis.document;
@@ -309,4 +361,27 @@ test("progression prerequisites are valid and acyclic; Java stages retain previo
   assert.ok(capstone.starter.includes("executeOnce("));
   assert.ok(capstone.starter.includes("summary("));
   assert.ok(capstone.verify.includes("SecurityException"));
+});
+
+test("multi-file drafts preserve allowed sources and ignore injected filenames", async () => {
+  const { readDraft, writeDraft, starterFiles, hasChanges } =
+    await import("../src/workspace-files.js");
+  const task = allLessons.find((l) => l.course === "hands-java-architecture");
+  const files = starterFiles(task);
+  assert.equal(hasChanges(task, files), false);
+  files[task.filename] = task.solution;
+  assert.equal(hasChanges(task, files), true);
+  const saved = writeDraft(task, files);
+  await store.saveLesson(task.id, saved);
+  await store.initialize();
+  assert.deepEqual(readDraft(task, store.progress()[task.id].draft), files);
+  const bad = JSON.parse(saved);
+  bad.files["../escape.java"] = "bad";
+  bad.files["__proto__"] = "bad";
+  assert.deepEqual(readDraft(task, JSON.stringify(bad)), files);
+  assert.deepEqual(readDraft(task, "corrupted"), starterFiles(task));
+  assert.equal(
+    readDraft(allLessons[0], "legacy draft")["Main.java"],
+    "legacy draft",
+  );
 });

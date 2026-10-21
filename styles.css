@@ -1295,3 +1295,29 @@ dialog h2 {
     padding: 0 12px;
   }
 }
+.file-tabs {
+  display: flex;
+  gap: 4px;
+  overflow-x: auto;
+  padding: 8px 10px 0;
+  background: #18232e;
+}
+.file-tabs button {
+  border: 1px solid transparent;
+  border-radius: 5px 5px 0 0;
+  padding: 8px 12px;
+  background: transparent;
+  color: #a8b6c4;
+  font: 12px monospace;
+  white-space: nowrap;
+}
+.file-tabs button[aria-selected="true"] {
+  color: #eef5fc;
+  background: #263747;
+  border-color: #526d84;
+  border-bottom-color: transparent;
+}
+.file-tabs button:focus-visible {
+  outline: 2px solid #9bc5ec;
+  outline-offset: -2px;
+}

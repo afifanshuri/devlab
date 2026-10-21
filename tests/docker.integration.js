@@ -15,6 +15,8 @@ for (const lesson of allLessons.filter((l) => l.engine !== "oracle")) {
         const before = await labs.check(s);
         assert.equal(before.passed, false, before.output);
         await labs.write(s, lesson.filename, lesson.solution);
+        for (const [name, body] of Object.entries(lesson.solutionFiles || {}))
+          await labs.write(s, name, body);
         const after = await labs.check(s);
         assert.equal(after.passed, true, after.output);
         if (lesson === allLessons[0]) {
@@ -76,6 +78,56 @@ test(
       const empty = await labs.resetAnswer(lesson.id);
       assert.equal(empty.id, null);
       assert.equal(labs.sessions.size, 0);
+    } finally {
+      await labs.clear();
+    }
+  },
+);
+
+test(
+  "multi-file reset restores every source while preserving the reused container",
+  { timeout: 60000 },
+  async () => {
+    const labs = new LabSessions();
+    try {
+      const lesson = allLessons.find(
+        (l) => l.id === "hands-java-architecture:0",
+      );
+      const first = await labs.create(lesson.id),
+        session = labs.get(first.id);
+      const sources = {
+        [lesson.filename]: lesson.solution,
+        ...lesson.solutionFiles,
+      };
+      for (const [name, body] of Object.entries(sources))
+        await labs.write(session, name, body);
+      assert.equal((await labs.check(session)).passed, true);
+      await labs.command(session, "echo keep > /workspace/personal-notes.txt");
+      assert.equal((await labs.create(lesson.id)).id, first.id);
+      await labs.resetAnswer(lesson.id);
+      for (const [name, body] of Object.entries({
+        [lesson.filename]: lesson.starter,
+        ...lesson.editableFiles,
+      }))
+        assert.equal(
+          (await labs.command(session, "cat /workspace/" + name)).output,
+          body,
+        );
+      assert.equal(
+        (
+          await labs.command(session, "cat /workspace/personal-notes.txt")
+        ).output.trim(),
+        "keep",
+      );
+      assert.equal(
+        (await labs.check(session)).passed,
+        false,
+        "Old compiled classes cannot satisfy reset sources",
+      );
+      for (const [name, body] of Object.entries(sources))
+        await labs.write(session, name, body);
+      assert.equal((await labs.checkAnswer(first.id)).passed, true);
+      assert.equal(labs.sessions.has(first.id), false);
     } finally {
       await labs.clear();
     }

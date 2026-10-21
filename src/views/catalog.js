@@ -1,8 +1,8 @@
-import { courses, allLessons } from "../../curriculum.js?v=progression-1";
+import { courses, allLessons } from "../../curriculum.js?v=multifile-1";
 import * as store from "../../database.js";
 import { state } from "../state.js";
 import { $, esc, icon, shell } from "../ui.js";
-import { completed, count, route } from "../catalog-data.js?v=progression-1";
+import { completed, count, route } from "../catalog-data.js?v=multifile-1";
 let filter = "all",
   query = "";
 function catalog() {

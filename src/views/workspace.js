@@ -1,15 +1,24 @@
-import { courses, allLessons } from "../../curriculum.js?v=progression-1";
+import { courses, allLessons } from "../../curriculum.js?v=multifile-1";
 import * as store from "../../database.js";
 import { state } from "../state.js";
 import { $, esc, shell, toast } from "../ui.js";
 import { callRunner, localRunner } from "../services/runner.js";
+import {
+  starterFiles,
+  readDraft,
+  writeDraft,
+  solutionFiles,
+  hasChanges,
+} from "../workspace-files.js";
 let active;
 export async function flushDraft() {
   const old = active;
   active = null;
   if (!old) return;
+  clearTimeout(old.saveTimer);
   if ($("#code")) {
-    await store.saveLesson(old.key, $("#code").value);
+    old.files[old.filename] = $("#code").value;
+    await store.saveLesson(old.key, writeDraft(old.task, old.files));
     state.records = store.progress();
   }
 }
@@ -22,9 +31,17 @@ export function lesson(courseId, idx) {
     return;
   }
   const key = `${course.id}:${index}`,
-    context = { key, session: null, lastSaved: null, busy: false };
+    context = {
+      key,
+      task,
+      filename: task.filename,
+      files: readDraft(task, state.records[key]?.draft),
+      session: null,
+      lastSaved: {},
+      busy: false,
+    };
   active = context;
-  context.initialSource = state.records[key]?.draft ?? task.starter;
+  context.initialSource = writeDraft(task, context.files);
   state.current = { id: key };
   store.setting("lastLab", course.id).catch(() => {});
   const available = localRunner();
@@ -53,6 +70,9 @@ export function lesson(courseId, idx) {
         <section class="instructions">
           <h2>Your mission</h2>
           <p>${esc(task.task)}</p>
+          ${task.interview
+            ? `<h2>Interview discussion</h2><p>${esc(task.interview)}</p>`
+            : ""}
           <h2>How it works</h2>
           <p>${esc(task.concept)}</p>
           <div class="learning-scaffold">
@@ -92,18 +112,25 @@ export function lesson(courseId, idx) {
               <strong>&lt;/&gt; CODE EDITOR</strong
               ><span>Write your answer here</span>
             </div>
+            <div
+              id="file-tabs"
+              class="file-tabs"
+              role="tablist"
+              aria-label="Exercise files"
+            ></div>
             <div class="editor-bar">
-              <span>${esc(task.filename)}</span
+              <span id="active-filename">${esc(task.filename)}</span
               ><span>${esc(task.engine.toUpperCase())}</span>
             </div>
             <textarea
               id="code"
+              role="tabpanel"
               class="editor"
               spellcheck="false"
               aria-label="Code editor"
               style="min-height:220px"
             >
-${esc(state.records[key]?.draft ?? task.starter)}</textarea
+${esc(context.files[context.filename])}</textarea
             >
             <div class="workspace-actions">
               <button class="secondary" id="reset">Reset lab</button
@@ -170,10 +197,60 @@ ${esc(state.records[key]?.draft ?? task.starter)}</textarea
       </div>`,
   );
   const live = () => active === context;
-  const hasAnswer = () => {
-    const source = $("#code").value.trim();
-    return source.length > 0 && source !== task.starter.trim();
+  const capture = () => {
+    context.files[context.filename] = $("#code").value;
   };
+  const draft = () => {
+    capture();
+    return writeDraft(task, context.files);
+  };
+  const hasAnswer = () => {
+    capture();
+    return hasChanges(task, context.files);
+  };
+  const renderTabs = () => {
+    $("#file-tabs").innerHTML = Object.keys(context.files)
+      .map(
+        (name) =>
+          `<button type="button" role="tab" aria-controls="code" tabindex="${name === context.filename ? 0 : -1}" aria-selected="${name === context.filename}" data-file="${esc(name)}">${esc(name)}</button>`,
+      )
+      .join("");
+    $("#active-filename").textContent = context.filename;
+    $("#code").setAttribute?.("aria-label", "Code editor: " + context.filename);
+  };
+  $("#file-tabs").onclick = (event) => {
+    const name = event.target.closest("[data-file]")?.dataset.file;
+    if (context.busy || !Object.hasOwn(context.files, name)) return;
+    capture();
+    context.filename = name;
+    $("#code").value = context.files[name];
+    renderTabs();
+    updateCheckState();
+  };
+  $("#file-tabs").onkeydown = (event) => {
+    if (
+      !["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key) ||
+      context.busy
+    )
+      return;
+    event.preventDefault();
+    const names = Object.keys(context.files),
+      current = names.indexOf(context.filename);
+    const index =
+      event.key === "Home"
+        ? 0
+        : event.key === "End"
+          ? names.length - 1
+          : (current + (event.key === "ArrowRight" ? 1 : -1) + names.length) %
+            names.length;
+    capture();
+    context.filename = names[index];
+    $("#code").value = context.files[context.filename];
+    renderTabs();
+    updateCheckState();
+    document.querySelector('#file-tabs [aria-selected="true"]').focus();
+  };
+  renderTabs();
   const updateCheckState = () => {
     if (live())
       $("#check").disabled = !available || context.busy || !hasAnswer();
@@ -192,19 +269,20 @@ ${esc(state.records[key]?.draft ?? task.starter)}</textarea
     const changed = context.session !== result.id;
     context.session = result.id;
     if (changed) {
-      context.lastSaved = task.starter;
+      context.lastSaved = starterFiles(task);
       if (result.reused) {
-        const file = await callRunner("read", {
-          id: result.id,
-          filename: task.filename,
-        });
-        if (!live()) throw Error("Lab navigation changed.");
-        if (
-          state.records[key]?.draft == null &&
-          $("#code").value === context.initialSource
-        )
-          $("#code").value = file.output;
-        context.lastSaved = file.output;
+        const unchanged = draft() === context.initialSource;
+        const remote = {};
+        for (const filename of Object.keys(context.files)) {
+          const file = await callRunner("read", { id: result.id, filename });
+          if (!live()) throw Error("Lab navigation changed.");
+          remote[filename] = file.output;
+        }
+        if (state.records[key]?.draft == null && unchanged) {
+          context.files = remote;
+          $("#code").value = remote[context.filename];
+        }
+        context.lastSaved = { ...remote };
       }
     }
     $("#runner-state").textContent = "CONNECTED · " + task.engine.toUpperCase();
@@ -212,22 +290,22 @@ ${esc(state.records[key]?.draft ?? task.starter)}</textarea
   };
   const save = async () => {
     await ensure();
-    const source = $("#code").value;
-    if (source !== context.lastSaved) {
-      await callRunner("write", {
-        id: context.session,
-        filename: task.filename,
-        source,
-      });
-      context.lastSaved = source;
+    capture();
+    for (const [filename, source] of Object.entries(context.files)) {
+      if (source !== context.lastSaved[filename]) {
+        await callRunner("write", { id: context.session, filename, source });
+        context.lastSaved[filename] = source;
+      }
     }
-    await store.saveLesson(key, source);
+    await store.saveLesson(key, draft());
     state.records = store.progress();
   };
   const action = (work) => async (e) => {
     e?.preventDefault();
     if (context.busy) return;
     context.busy = true;
+    clearTimeout(context.saveTimer);
+    $("#code").readOnly = true;
     const buttons = [...document.querySelectorAll(".workspace button")];
     buttons.forEach((b) => (b.disabled = true));
     try {
@@ -240,6 +318,7 @@ ${esc(state.records[key]?.draft ?? task.starter)}</textarea
     } finally {
       context.busy = false;
       if (live()) {
+        $("#code").readOnly = false;
         buttons.forEach((b) => (b.disabled = false));
         updateCheckState();
       }
@@ -254,6 +333,16 @@ ${esc(state.records[key]?.draft ?? task.starter)}</textarea
   $("#code").oninput = () => {
     updateCheckState();
     noteActivity();
+    clearTimeout(context.saveTimer);
+    context.saveTimer = setTimeout(async () => {
+      if (!live()) return;
+      try {
+        await store.saveLesson(key, draft());
+        state.records = store.progress();
+      } catch {
+        toast("Draft could not be saved locally. Keep this tab open.");
+      }
+    }, 350);
   };
   $("#command").oninput = noteActivity;
   const run = async (command) => {
@@ -291,7 +380,7 @@ ${esc(state.records[key]?.draft ?? task.starter)}</textarea
         e.target.selectionEnd,
         "end",
       );
-      updateCheckState();
+      $("#code").oninput();
     }
   };
   $("#check").onclick = action(async () => {
@@ -306,9 +395,9 @@ ${esc(state.records[key]?.draft ?? task.starter)}</textarea
     $("#output").className = "console " + (r.passed ? "success" : "error");
     if (r.passed) {
       context.session = null;
-      context.lastSaved = null;
+      context.lastSaved = {};
       $("#runner-state").textContent = "PASSED · CONTAINER DELETED";
-      await store.saveLesson(key, $("#code").value, true);
+      await store.saveLesson(key, draft(), true);
       state.records = store.progress();
       $("#completion").innerHTML =
         '<div class="complete-banner">✓ Exercise complete. Progress saved.</div>';
@@ -316,12 +405,13 @@ ${esc(state.records[key]?.draft ?? task.starter)}</textarea
     }
   });
   $("#reset").onclick = action(async () => {
-    $("#code").value = task.starter;
-    await store.saveLesson(key, task.starter);
+    context.files = starterFiles(task);
+    $("#code").value = context.files[context.filename];
+    await store.saveLesson(key, draft());
     if (available) {
       const result = await callRunner("reset", { lessonId: key });
       context.session = result.id;
-      context.lastSaved = result.id ? task.starter : null;
+      context.lastSaved = result.id ? starterFiles(task) : {};
     }
     log("Answer reset. Other container files and state are unchanged.\n");
   });
@@ -330,7 +420,11 @@ ${esc(state.records[key]?.draft ?? task.starter)}</textarea
       `<div class="hint">${esc(task.hint)}</div>`);
   $("#solution").onclick = () =>
     ($("#help-content").innerHTML =
-      `<div class="hint"><strong>Reference solution</strong><pre style="white-space:pre-wrap;font:11px/1.7 monospace">${esc(task.solution)}</pre></div>`);
+      `<div class="hint"><strong>Reference solution</strong><pre style="white-space:pre-wrap;font:11px/1.7 monospace">${esc(
+        Object.entries(solutionFiles(task))
+          .map(([name, body]) => `// ${name}\n${body}`)
+          .join("\n\n"),
+      )}</pre></div>`);
   if (available) {
     return action(async () => {
       await ensure();
