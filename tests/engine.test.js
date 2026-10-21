@@ -10,9 +10,9 @@ globalThis.indexedDB = indexedDB;
 globalThis.window = { initSqlJs: () => Promise.resolve(SQL) };
 await store.initialize();
 test("every exercise is a coding task, with unique versioned IDs", () => {
-  assert.equal(courses.length, 15);
-  assert.equal(allLessons.length, 49);
-  assert.equal(new Set(allLessons.map((l) => l.id)).size, 49);
+  assert.equal(courses.length, 18);
+  assert.equal(allLessons.length, 69);
+  assert.equal(new Set(allLessons.map((l) => l.id)).size, 69);
   for (const l of allLessons) {
     assert.equal(l.type, "workspace");
     assert.ok(l.task && l.starter && l.solution && l.hint);
@@ -77,10 +77,10 @@ test("all screens and practical tasks render without missing references", async 
   try {
     const { catalog } = await import("../src/views/catalog.js");
     catalog();
-    assert.match(nodes.get("#app").innerHTML, /49 exercises/);
+    assert.match(nodes.get("#app").innerHTML, /69 exercises/);
     assert.equal(
       (nodes.get("#cards").innerHTML.match(/<article/g) || []).length,
-      15,
+      18,
     );
     for (const [file, names] of [
       ["progress", ["progressPage", "paths"]],
@@ -382,7 +382,10 @@ test("multi-file drafts preserve allowed sources and ignore injected filenames",
   assert.deepEqual(readDraft(task, JSON.stringify(bad)), files);
   assert.deepEqual(readDraft(task, "corrupted"), starterFiles(task));
   assert.equal(
-    readDraft(allLessons[0], "legacy draft")["Main.java"],
+    readDraft(
+      allLessons.find((l) => l.id === "hands-java-dsa:0"),
+      "legacy draft",
+    )["Main.java"],
     "legacy draft",
   );
 });
@@ -408,5 +411,53 @@ test("progressive starters contain contracts instead of earlier reference implem
           name,
         );
     }
+  }
+});
+
+test("roadmap sections are covered and missions keep story separate from requirements", () => {
+  const required = [
+    "Classes and Objects",
+    "Attributes and Methods",
+    "Access Specifiers",
+    "Static Keyword",
+    "Final Keyword",
+    "Nested Classes",
+    "Packages",
+    "Object Lifecycle",
+    "Inheritance",
+    "Abstraction",
+    "Method Chaining",
+    "Encapsulation",
+    "Interfaces",
+    "Enums",
+    "Record",
+    "Method Overloading / Overriding",
+    "Initializer Block",
+    "Static vs Dynamic Binding",
+    "Pass by Value / Pass by Reference",
+    "Array vs ArrayList",
+    "Set",
+    "Map",
+    "Queue",
+    "Dequeue",
+    "Stack",
+    "Iterator",
+    "Generic Collections",
+  ];
+  const topics = new Set(allLessons.flatMap((l) => l.roadmapTopics || []));
+  for (const topic of required)
+    assert.ok(topics.has(topic), "Missing roadmap topic: " + topic);
+  assert.deepEqual(
+    courses.slice(0, 3).map((c) => c.id),
+    ["hands-java-oop-basics", "hands-java-oop-more", "hands-java-collections"],
+  );
+  for (const l of allLessons) {
+    assert.ok(l.mission?.length > 50, "Missing meaningful mission: " + l.id);
+    assert.ok(l.requirements.length > 0);
+    assert.equal(l.requirements.join(" "), l.task);
+    assert.ok(
+      l.starter.length < 6500,
+      "Starter should contain contracts, not solutions",
+    );
   }
 });

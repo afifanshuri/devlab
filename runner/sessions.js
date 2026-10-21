@@ -363,7 +363,7 @@ export class LabSessions {
         )
       )
         throw Error("Invalid Java source filename.");
-      command = `mkdir -p /tmp/verify && rm -f /tmp/verify/*.class && javac -cp /tmp/verify -d /tmp/verify ${files.map((name) => "/workspace/" + name).join(" ")} /checks/Verify.java && java -Xmx128m -cp /tmp/verify Verify`;
+      command = `rm -rf /tmp/verify && mkdir -p /tmp/verify && javac -cp /tmp/verify -d /tmp/verify ${files.map((name) => "/workspace/" + name).join(" ")} /checks/Verify.java && java -Xmx128m -cp /tmp/verify Verify`;
     } else if (s.lesson.engine === "postgres") {
       const object = s.lesson.solution.match(
         /CREATE OR REPLACE (VIEW|FUNCTION) (\w+)(\([^)]*\))?/i,

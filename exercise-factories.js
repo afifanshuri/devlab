@@ -71,3 +71,48 @@ const make = (id, track, title, description, tags, lessons) => ({
 });
 
 export { java, linux, pg, oracle, make };
+
+export function javaProject(
+  title,
+  concept,
+  task,
+  interview,
+  sources,
+  tests,
+  hint,
+) {
+  const [filename, [starter, solution]] = Object.entries(sources)[0];
+  return {
+    title,
+    concept,
+    task,
+    interview,
+    hint,
+    engine: "java",
+    type: "workspace",
+    filename,
+    starter,
+    solution,
+    editableFiles: Object.fromEntries(
+      Object.entries(sources)
+        .slice(1)
+        .map(([name, pair]) => [name, pair[0]]),
+    ),
+    solutionFiles: Object.fromEntries(
+      Object.entries(sources)
+        .slice(1)
+        .map(([name, pair]) => [name, pair[1]]),
+    ),
+    learn: [
+      title,
+      "Separate contracts from implementations",
+      "Behavioural and edge-case tests",
+    ],
+    verify: `import java.util.*; import java.util.concurrent.*; import java.util.concurrent.atomic.*;
+public class Verify {
+ static void expect(boolean ok) { if (!ok) throw new AssertionError("Pattern contract failed"); }
+ static void rejects(Runnable r) { try { r.run(); } catch (IllegalArgumentException e) { return; } throw new AssertionError("Expected IllegalArgumentException"); }
+ public static void main(String[] args) throws Exception { ${tests} System.out.println("DEVLAB_TESTS_PASSED"); }
+}`,
+  };
+}

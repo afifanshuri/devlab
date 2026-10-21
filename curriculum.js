@@ -1,6 +1,8 @@
 import { java, linux, pg, oracle, make } from "./exercise-factories.js";
 import { advancedCourses } from "./progression.js";
 import { patternCourses } from "./patterns.js";
+import { roadmapCourses } from "./roadmap.js";
+import { applyMissions } from "./missions.js";
 export const courses = [
   make(
     "java-dsa",
@@ -12,7 +14,7 @@ export const courses = [
       java(
         "Count frequencies",
         "A frequency map counts each distinct value in expected O(n) time.",
-        "Implement counts(int[] nums). Return an empty map for an empty array; count negative values too. Use the terminal to compile: javac Main.java. Check task runs additional tests.",
+        "Implement counts(int[] nums). Return an empty map for an empty array; count negative values too. Check answer compiles your code and runs additional tests.",
         "public static Map<Integer,Integer> counts(int[] nums)",
         "Map<Integer,Integer> result = new HashMap<>();\n    for(int n : nums) result.merge(n,1,Integer::sum);\n    return result;",
         "expect(Main.counts(new int[]{}).isEmpty());\nexpect(Main.counts(new int[]{2,2,-1,3,-1}).equals(Map.of(2,2,-1,2,3,1)));",
@@ -210,6 +212,13 @@ export const courses = [
   ),
 ];
 courses.push(...advancedCourses, ...patternCourses);
+courses.unshift(...roadmapCourses);
+courses
+  .filter((c) => c.track === "java")
+  .forEach((c, i) => {
+    c.stage = i + 1;
+  });
+applyMissions(courses);
 
 // Prerequisites guide the learning order without locking users out of practice.
 for (const track of ["java", "linux", "sql"]) {

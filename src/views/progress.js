@@ -1,7 +1,7 @@
-import { courses, allLessons } from "../../curriculum.js?v=minimal-starters-1";
+import { courses, allLessons } from "../../curriculum.js?v=missions-1";
 import { state } from "../state.js";
 import { esc, shell } from "../ui.js";
-import { completed, count, route } from "../catalog-data.js?v=minimal-starters-1";
+import { completed, count, route } from "../catalog-data.js?v=missions-1";
 function progressPage() {
   const done = completed();
   shell(
@@ -57,7 +57,7 @@ function paths() {
     [
       "java",
       "Build reliable backend services",
-      "Contracts → algorithms → reliability → secure workflows → multi-file design patterns. Earlier helper signatures are included in later starters, and cumulative regression tests protect what you already built.",
+      "OOP basics → deeper OOP → collections → algorithms → SOLID → reliability → secure workflows → design patterns. Earlier helper signatures are included in later starters, and cumulative regression tests protect what you already built.",
     ],
     [
       "linux",

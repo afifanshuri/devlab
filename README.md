@@ -27,7 +27,7 @@ Open **http://127.0.0.1:5173**. Open an exercise; its container starts or reconn
 
 The terminal runs noninteractive commands one at a time, with a ten-second limit. It is not a full PTY: vim/nano, interactive prompts and interactive psql are not supported. Use the file editor, heredocs, or command flags. `cd` persists between commands within a session.
 
-The curriculum contains 49 coding tasks across fifteen labs: Java DSA, SOLID, strategy/observer patterns; Linux navigation, text filtering, permissions and backups; PostgreSQL views, windows, PL/pgSQL branches and cursors; and two optional Oracle PL/SQL tasks.
+The curriculum contains 69 coding tasks across eighteen labs: Java DSA, SOLID, strategy/observer patterns; Linux navigation, text filtering, permissions and backups; PostgreSQL views, windows, PL/pgSQL branches and cursors; and two optional Oracle PL/SQL tasks.
 
 ## Where it runs
 
@@ -89,3 +89,17 @@ The curriculum emphasizes production-oriented backend and support skills. No CV,
 ### Multi-file design pattern labs
 
 The Design patterns in production stage adds nine exercises: Singleton, Strategy, Simple Factory, Observer, Adapter, Decorator, Command, Builder and an integrated checkout capstone. Each includes real-world constraints, failure cases and interview discussion prompts. File tabs edit separate Java sources; Check answer saves and compiles every exercise source together. Reset restores all answer files and keeps the container. Drafts persist as one versioned multi-file record; existing single-file drafts still load. Interfaces and method stubs are editable and verified through their callers. These labs teach tradeoffs as well as implementations; local observers and command undo do not pretend to provide distributed delivery or transactions.
+
+### Scenario missions and Java roadmap
+
+Missions introduce a concrete problem, followed by separate acceptance criteria. Concept notes are optional, examples are shown where useful, and direct shell drills stay concise. Existing IDs and saved answers are preserved.
+
+The Java path now begins with 20 exercises covering the Basics of OOP, More about OOP and Collections sections of [the Java roadmap](https://roadmap.sh/java) ([topic diagram](https://roadmap.sh/pdfs/roadmaps/java.pdf)).
+
+| Chapter | Exercises | Coverage |
+| --- | --- | --- |
+| Open the repair shop | 5 | Classes, objects, attributes, methods, access, static, final, nested classes, packages |
+| Grow the workshop | 8 | Inheritance, abstraction, interfaces, overloading, overriding, binding, chaining, enums, records, object lifecycle, initializer blocks, encapsulation, pass-by-value |
+| Run the busy counter | 7 | Array vs ArrayList, Set, Map, Queue, Deque/Stack, Iterator, generic collections |
+
+All new tasks use minimal signatures/TODOs and real JDK verification. Runtime checks verify observable behavior and selected reflection-visible structure. Instructions also request implementation techniques such as Iterator.remove; behavioral tests alone do not prove every internal technique. The package exercise uses flat source files with package declarations; javac -d creates the package directories in the disposable compilation output.

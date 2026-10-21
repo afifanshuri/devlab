@@ -1,4 +1,4 @@
-import { courses, allLessons } from "../../curriculum.js?v=minimal-starters-1";
+import { courses, allLessons } from "../../curriculum.js?v=missions-1";
 import * as store from "../../database.js";
 import { state } from "../state.js";
 import { $, esc, shell, toast } from "../ui.js";
@@ -69,12 +69,23 @@ export function lesson(courseId, idx) {
       <div class="lab-grid">
         <section class="instructions">
           <h2>Your mission</h2>
-          <p>${esc(task.task)}</p>
+          <p class="mission-story">${esc(task.mission || task.task)}</p>
+          ${task.example
+            ? `<div class="mission-example"><strong>For example</strong><pre>${esc(task.example)}</pre></div>`
+            : ""}
+          <h2>Acceptance criteria</h2>
+          <ul class="mission-criteria">
+            ${(task.requirements || [task.task])
+              .map((item) => `<li>${esc(item)}</li>`)
+              .join("")}
+          </ul>
           ${task.interview
             ? `<h2>Interview discussion</h2><p>${esc(task.interview)}</p>`
             : ""}
-          <h2>How it works</h2>
-          <p>${esc(task.concept)}</p>
+          <details class="concept-note">
+            <summary>Explore the concept</summary>
+            <p>${esc(task.concept)}</p>
+          </details>
           <div class="learning-scaffold">
             <h3>What you’ll practise</h3>
             <ul>

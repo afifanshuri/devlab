@@ -19,6 +19,14 @@ for (const lesson of allLessons.filter((l) => l.engine !== "oracle")) {
           await labs.write(s, name, body);
         const after = await labs.check(s);
         assert.equal(after.passed, true, after.output);
+        if (lesson.id === "hands-java-oop-basics:4") {
+          await labs.write(s, lesson.filename, "");
+          assert.equal(
+            (await labs.check(s)).passed,
+            false,
+            "Packaged class output must not survive source deletion",
+          );
+        }
         if (lesson === allLessons[0]) {
           const config = JSON.parse(await must(["inspect", s.name]))[0];
           assert.equal(config.HostConfig.NetworkMode, "none");
