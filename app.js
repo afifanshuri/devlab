@@ -5,7 +5,7 @@ import { catalog } from "./src/views/catalog.js?v=roadmap-expansion-1";
 import {
   lesson,
   flushDraft,
-} from "./src/views/workspace.js?v=roadmap-expansion-1";
+} from "./src/views/workspace.js?v=terminal-prompt-1";
 import {
   progressPage,
   paths,

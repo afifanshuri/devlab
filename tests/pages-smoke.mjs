@@ -15,6 +15,7 @@ const files = [
   "spring-practice.js",
   "src/views/workspace.js",
   "src/editor-input.js",
+  "src/terminal-prompt.js",
   "styles.css",
   "vendor/sql-wasm.wasm",
 ];

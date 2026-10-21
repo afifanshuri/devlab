@@ -65,12 +65,28 @@ export class LabSessions {
       ...(s.pool ? { pool: s.pool, secret: s.secret } : {}),
     };
   }
-  info(s, reused = false) {
+  async directory(s) {
+    const root = s.workspace || "/workspace";
+    const result = await docker([
+      "exec",
+      ...this.pools.options(s),
+      s.name,
+      "cat",
+      root + "/.cwd",
+    ]);
+    const cwd = result.output.trim();
+    return result.code === 0 && cwd.startsWith("/") && cwd.length <= 4096
+      ? cwd
+      : root;
+  }
+  async info(s, reused = false) {
     return {
       id: s.id,
       engine: s.lesson.engine,
       filename: s.lesson.filename,
       reused,
+      workspace: s.workspace || "/workspace",
+      cwd: await this.directory(s),
       output: reused
         ? "Reconnected to the existing exercise workspace.\n"
         : `Workspace ready: ${s.lesson.title}\n${s.pool ? "Shared " + s.pool + " runtime; exercise files: " + s.workspace : "Isolated exercise container."}\n${s.lesson.engine === "postgres" ? "PostgreSQL connection variables are set. Use psql -c for queries or psql -f solution.sql." : "Write code in the editor or use noninteractive commands in the terminal."}\n`,
@@ -394,7 +410,7 @@ export class LabSessions {
       throw Error("Command is missing or too long.");
     const root = s.workspace || "/workspace";
     const script = `cd "$(cat ${root}/.cwd 2>/dev/null || printf ${root})" || exit 1\n${command}\nstatus=$?\npwd > ${root}/.cwd\nexit $status`;
-    return docker(
+    const result = await docker(
       [
         "exec",
         "-i",
@@ -412,6 +428,7 @@ export class LabSessions {
       ],
       { input: script, timeout: (seconds + 3) * 1000 },
     );
+    return { ...result, cwd: await this.directory(s) };
   }
   async check(s) {
     let command;

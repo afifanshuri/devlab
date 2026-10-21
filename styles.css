@@ -1117,12 +1117,22 @@ dialog h2 {
 .terminal-pane .terminal-form label {
   color: #c5f578;
   font-weight: 700;
+  max-width: 50%;
+  overflow-wrap: anywhere;
+  line-height: 1.5;
 }
 .terminal-pane .terminal-form input,
 .terminal-pane .terminal-form textarea {
   color: #d1e5c7;
 }
 @media (max-width: 760px) {
+  .terminal-form {
+    flex-wrap: wrap;
+  }
+  .terminal-pane .terminal-form label {
+    flex-basis: 100%;
+    max-width: 100%;
+  }
   .exercise-workspace {
     padding: 10px;
     gap: 14px;

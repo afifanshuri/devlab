@@ -4,6 +4,7 @@ import { state } from "../state.js";
 import { $, esc, shell, toast } from "../ui.js";
 import { callRunner, localRunner } from "../services/runner.js";
 import { editKey } from "../editor-input.js";
+import { terminalPrompt } from "../terminal-prompt.js";
 import {
   starterFiles,
   readDraft,
@@ -174,7 +175,7 @@ ${esc(context.files[context.filename])}</textarea
               Full-screen editors and interactive prompts are not supported.
             </div>
             <form id="terminal-form" class="terminal-form">
-              <label for="command">$</label
+              <label for="command" id="terminal-prompt">afif@devlab:~$</label
               ><textarea
                 rows="1"
                 id="command"
@@ -287,6 +288,12 @@ ${esc(context.files[context.filename])}</textarea
     }
     const changed = context.session !== result.id;
     context.session = result.id;
+    context.home = result.workspace || "/workspace";
+    context.cwd = result.cwd || context.home;
+    $("#terminal-prompt").textContent = terminalPrompt(
+      context.cwd,
+      context.home,
+    );
     if (changed) {
       context.lastSaved = starterFiles(task);
       if (result.reused) {
@@ -375,9 +382,16 @@ ${esc(context.files[context.filename])}</textarea
   };
   const run = async (command) => {
     await ensure();
-    log("$ " + command + "\n");
+    log(terminalPrompt(context.cwd, context.home) + " " + command + "\n");
     const r = await callRunner("command", { id: context.session, command });
     log(r.output + `\n[exit ${r.code}]\n`);
+    if (live()) {
+      context.cwd = r.cwd || context.cwd;
+      $("#terminal-prompt").textContent = terminalPrompt(
+        context.cwd,
+        context.home,
+      );
+    }
   };
   let history = [],
     cursor = 0;
