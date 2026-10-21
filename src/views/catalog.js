@@ -1,4 +1,4 @@
-import { courses } from "../../content.js";
+import { courses, allLessons } from "../../content.js";
 import * as store from "../../database.js";
 import { state } from "../state.js";
 import { $, esc, icon, shell } from "../ui.js";

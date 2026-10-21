@@ -116,3 +116,46 @@ test("all view modules link with the shared services", async () => {
     );
   }
 });
+
+test("every screen and lesson renders without unresolved references", async () => {
+  // Module-link checks do not execute views. Exercise their rendering paths too.
+  const previousDocument = globalThis.document;
+  const previousLocation = globalThis.location;
+  const nodes = new Map();
+  globalThis.document = {
+    querySelector(selector) {
+      if (!nodes.has(selector))
+        nodes.set(selector, { innerHTML: "", value: "", style: {} });
+      return nodes.get(selector);
+    },
+    querySelectorAll() {
+      return [];
+    },
+  };
+  globalThis.location = { hash: "#labs" };
+  try {
+    const { catalog } = await import("../src/views/catalog.js");
+    catalog();
+    assert.match(nodes.get("#app").innerHTML, /32 exercises/);
+    assert.equal(
+      (nodes.get("#cards").innerHTML.match(/<article/g) || []).length,
+      8,
+    );
+    for (const [file, exports] of [
+      ["progress", ["progressPage", "paths"]],
+      ["playground", ["playground"]],
+      ["settings", ["settings"]],
+    ]) {
+      const view = await import(`../src/views/${file}.js`);
+      for (const name of exports) view[name]();
+    }
+    const { lesson } = await import("../src/views/lab.js");
+    for (const item of allLessons) {
+      lesson(item.course, item.index);
+      assert.ok(nodes.get("#app").innerHTML.includes(item.title));
+    }
+  } finally {
+    globalThis.document = previousDocument;
+    globalThis.location = previousLocation;
+  }
+});
