@@ -47,8 +47,9 @@ export function lesson(courseId, idx) {
           <h2>How it works</h2>
           <p>${esc(task.concept)}</p>
           <p>
-            Start the lab, edit and save your file, then run shell commands.
-            “Check answer” validates actual program results or container state.
+            The lab connects automatically. Write your answer, then select
+            “Check answer” to compile, run, and validate it against internal
+            test cases.
           </p>
           <button class="secondary" id="hint">Get a hint</button>
           <button class="text-link" id="solution">Reference solution</button>
@@ -67,7 +68,7 @@ export function lesson(courseId, idx) {
         <section class="workspace">
           <div class="editor-bar">
             <span>${esc(task.filename)}</span
-            ><span id="runner-state">NOT STARTED</span>
+            ><span id="runner-state">CONNECTING…</span>
           </div>
           <textarea
             id="code"
@@ -78,15 +79,6 @@ export function lesson(courseId, idx) {
           >
 ${esc(state.records[key]?.draft ?? task.starter)}</textarea
           >
-          <div class="workspace-actions">
-            <button class="secondary" id="start" ${available ? "" : "disabled"}>
-              Start lab</button
-            ><button class="secondary" id="save">Save file</button
-            ><button class="secondary" id="read">Reload file</button
-            ><button class="secondary" id="run">
-              ${task.engine === "java" ? "Compile" : "Run file"}
-            </button>
-          </div>
           <div
             class="terminal-log"
             id="terminal"
@@ -94,8 +86,8 @@ ${esc(state.records[key]?.draft ?? task.starter)}</textarea
             aria-label="Terminal output"
             style="min-height:140px;max-height:300px"
           >
-            Start a lab to connect to a real container. Commands run one at a
-            time. Full-screen editors and interactive prompts are not supported.
+            The workspace connects automatically. Commands run one at a time.
+            Full-screen editors and interactive prompts are not supported.
           </div>
           <form id="terminal-form" class="terminal-form">
             <label for="command">$</label
@@ -117,7 +109,7 @@ ${esc(state.records[key]?.draft ?? task.starter)}</textarea
           </div>
           <div id="output" class="console" role="status" aria-live="polite">
             ${available
-              ? "Ready to connect."
+              ? "Starting your exercise environment…"
               : "Execution environment not available on this page."}
           </div>
         </section>
@@ -160,7 +152,10 @@ ${esc(state.records[key]?.draft ?? task.starter)}</textarea
           filename: task.filename,
         });
         if (!live()) throw Error("Lab navigation changed.");
-        if ($("#code").value === context.initialSource)
+        if (
+          state.records[key]?.draft == null &&
+          $("#code").value === context.initialSource
+        )
           $("#code").value = file.output;
         context.lastSaved = file.output;
       }
@@ -199,11 +194,9 @@ ${esc(state.records[key]?.draft ?? task.starter)}</textarea
       context.busy = false;
       if (live()) {
         buttons.forEach((b) => (b.disabled = false));
-        $("#start").disabled = !available;
       }
     }
   };
-  $("#start").onclick = action(ensure);
   let lastActivity = 0;
   const noteActivity = () => {
     if (!available || Date.now() - lastActivity < 60000) return;
@@ -212,39 +205,12 @@ ${esc(state.records[key]?.draft ?? task.starter)}</textarea
   };
   $("#code").oninput = noteActivity;
   $("#command").oninput = noteActivity;
-  $("#save").onclick = action(async () => {
-    await save();
-    log(`Saved ${task.filename}\n`);
-  });
-  $("#read").onclick = action(async () => {
-    await ensure();
-    const result = await callRunner("read", {
-      id: context.session,
-      filename: task.filename,
-    });
-    if (live()) {
-      $("#code").value = result.output;
-      context.lastSaved = result.output;
-    }
-  });
   const run = async (command) => {
     await ensure();
     log("$ " + command + "\n");
     const r = await callRunner("command", { id: context.session, command });
     log(r.output + `\n[exit ${r.code}]\n`);
   };
-  $("#run").onclick = action(async () => {
-    await save();
-    await run(
-      task.engine === "java"
-        ? "javac Main.java"
-        : task.engine === "postgres"
-          ? "psql -X -v ON_ERROR_STOP=1 -U postgres -d lab -f /workspace/solution.sql"
-          : task.engine === "oracle"
-            ? "printf 'ALTER SESSION SET CONTAINER=FREEPDB1;\\n@/workspace/solution.sql\\nEXIT\\n' | sqlplus -s / as sysdba"
-            : "bash /workspace/notes.sh",
-    );
-  });
   let history = [],
     cursor = 0;
   $("#terminal-form").onsubmit = action(async () => {
@@ -312,4 +278,14 @@ ${esc(state.records[key]?.draft ?? task.starter)}</textarea
   $("#solution").onclick = () =>
     ($("#help-content").innerHTML =
       `<div class="hint"><strong>Reference solution</strong><pre style="white-space:pre-wrap;font:11px/1.7 monospace">${esc(task.solution)}</pre></div>`);
+  if (available) {
+    return action(async () => {
+      await ensure();
+      if (live())
+        $("#output").textContent =
+          "Ready. Write your answer, then select Check answer.";
+    })();
+  } else {
+    $("#runner-state").textContent = "LOCAL RUNNER REQUIRED";
+  }
 }

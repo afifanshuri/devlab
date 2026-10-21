@@ -202,3 +202,68 @@ test("runner registry restores containers and idle timestamps after restart", as
     await (await import("node:fs/promises")).rmdir(folder);
   }
 });
+
+test("opening an exercise auto-connects and Check answer saves and validates", async () => {
+  const nodes = new Map();
+  const calls = [];
+  let reused = false;
+  const previousFetch = globalThis.fetch;
+  globalThis.document = {
+    querySelector(s) {
+      if (!nodes.has(s))
+        nodes.set(s, { innerHTML: "", value: "", style: {}, textContent: "" });
+      return nodes.get(s);
+    },
+    querySelectorAll() {
+      return [];
+    },
+  };
+  globalThis.location = {
+    hash: "#lab/" + allLessons[0].course + "/0",
+    hostname: "127.0.0.1",
+  };
+  globalThis.fetch = async (url, options) => {
+    const op = url.split("/").pop();
+    calls.push({ op, data: options ? JSON.parse(options.body) : null });
+    return {
+      ok: true,
+      json: async () =>
+        op === "session"
+          ? { token: "unit-token" }
+          : op === "start"
+            ? { id: "reused-session", output: "Connected", reused }
+            : op === "check"
+              ? { passed: false, output: "Internal test failed" }
+              : { output: "Saved" },
+    };
+  };
+  try {
+    const { lesson } = await import("../src/views/workspace.js");
+    const code = document.querySelector("#code");
+    code.value = allLessons[0].starter;
+    await lesson(allLessons[0].course, 0);
+    assert.ok(calls.some((c) => c.op === "start"));
+    const markup = nodes.get("#app").innerHTML;
+    for (const id of ["start", "save", "read", "run"])
+      assert.ok(!markup.includes('id="' + id + '"'));
+    code.value = "public class Main {}";
+    await nodes.get("#check").onclick();
+    assert.ok(
+      calls.some((c) => c.op === "write" && c.data.source === code.value),
+    );
+    assert.equal(calls.at(-1).op, "check");
+    assert.match(nodes.get("#output").textContent, /Tests failed/);
+    reused = true;
+    await lesson(allLessons[0].course, 0);
+    assert.ok(calls.some((c) => c.op === "read"));
+    assert.equal(
+      code.value,
+      "public class Main {}",
+      "Reopening preserves the saved draft instead of overwriting it with the container file",
+    );
+  } finally {
+    globalThis.fetch = previousFetch;
+    delete globalThis.document;
+    delete globalThis.location;
+  }
+});

@@ -14,16 +14,16 @@ npm run setup:labs
 npm start
 ```
 
-Open **http://127.0.0.1:5173**. Choose a lab and click **Start lab**. Image setup downloads/builds the official Eclipse Temurin JDK image and the official PostgreSQL image. Subsequent starts reuse them.
+Open **http://127.0.0.1:5173**. Open an exercise; its container starts or reconnects automatically. Image setup downloads/builds the official Eclipse Temurin JDK image and the official PostgreSQL image. Subsequent starts reuse them.
 
 ## Learning workflow
 
-- Edit the file and click **Save file**. Alternatively use terminal commands such as `cat > Main.java <<'EOF' ... EOF`.
+- Edit your answer. **Check answer** saves it automatically, compiles/runs it, and validates the internal test cases. You can also enter shell commands.
 - Java: use `javac Main.java`. Task methods are checked with a separate verifier; to run your own executable entry point add `public static void main(String[] args)` and use `java Main`.
-- Linux: enter shell commands or save `notes.sh` and click **Run file**.
+- Linux: write commands in `notes.sh`. **Check answer** runs that script and checks the resulting state.
 - PostgreSQL: save `solution.sql`; run `psql -U postgres -d lab -f solution.sql` or `psql -U postgres -d lab -c 'SELECT * FROM employees;'`.
 - Click **Check answer** to validate real output, Java assertions, SQL results, or filesystem state. It does not automatically solve Linux tasks.
-- **Reload file** pulls terminal edits back into the editor. Save your editor draft before navigating. **Reset lab** restores the starter answer in the editor and existing container without recreating the container.
+- Drafts are saved when checking an answer or navigating. Reconnecting restores the existing answer file if you have not edited the draft. **Reset lab** restores the starter answer in the editor and existing container without recreating the container.
 
 The terminal runs noninteractive commands one at a time, with a ten-second limit. It is not a full PTY: vim/nano, interactive prompts and interactive psql are not supported. Use the file editor, heredocs, or command flags. `cd` persists between commands within a session.
 

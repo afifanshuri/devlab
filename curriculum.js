@@ -25,7 +25,7 @@ const linux = (
   engine: "linux",
   type: "workspace",
   filename: "notes.sh",
-  starter: "# Write commands here, save, then run: bash notes.sh\n",
+  starter: "# Write your commands here. Check answer runs this script.\n",
   solution,
   check: "set -eu\n" + check + "\necho DEVLAB_TESTS_PASSED",
   files,
@@ -40,7 +40,7 @@ const pg = (title, concept, task, solution, assertion, hint) => ({
   type: "workspace",
   filename: "solution.sql",
   starter:
-    "-- Write your PostgreSQL solution here.\n-- Save, then run: psql -U postgres -d lab -f solution.sql\n",
+    "-- Write your PostgreSQL solution here.\n-- Check answer runs this SQL and verifies its results.\n",
   solution,
   seed,
   check: `DO $$ BEGIN IF (${assertion}) IS DISTINCT FROM TRUE THEN RAISE EXCEPTION 'Task result does not match requirements'; END IF; END $$;\nSELECT 'DEVLAB_TESTS_PASSED';`,

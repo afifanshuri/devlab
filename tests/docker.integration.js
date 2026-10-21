@@ -15,10 +15,6 @@ for (const lesson of allLessons.filter((l) => l.engine !== "oracle")) {
         const before = await labs.check(s);
         assert.equal(before.passed, false, before.output);
         await labs.write(s, lesson.filename, lesson.solution);
-        if (lesson.engine === "linux") {
-          const run = await labs.command(s, "bash notes.sh");
-          assert.equal(run.code, 0, run.output);
-        }
         const after = await labs.check(s);
         assert.equal(after.passed, true, after.output);
         if (lesson === allLessons[0]) {
@@ -53,6 +49,7 @@ test(
       const lesson = allLessons.find((l) => l.id === "hands-java-dsa:0");
       const first = await labs.create(lesson.id);
       await labs.command(labs.get(first.id), "touch /workspace/keep");
+      labs.sessions.get(first.id).lastUsed = Date.now() - 59 * 60 * 1000;
       const second = await labs.create(lesson.id);
       assert.equal(second.id, first.id);
       await labs.write(labs.get(first.id), lesson.filename, lesson.solution);
