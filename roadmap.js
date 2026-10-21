@@ -1,4 +1,4 @@
-import { make, javaProject } from "./exercise-factories.js";
+import { make, javaProject } from "./exercise-factories.js?v=roadmap-1";
 const todo = 'throw new UnsupportedOperationException("TODO");';
 const same = (source) => [source, source];
 function lab(title, topics, mission, requirements, sources, tests, concept) {

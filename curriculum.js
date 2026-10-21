@@ -1,8 +1,8 @@
-import { java, linux, pg, oracle, make } from "./exercise-factories.js";
+import { java, linux, pg, oracle, make } from "./exercise-factories.js?v=roadmap-1";
 import { advancedCourses } from "./progression.js";
 import { patternCourses } from "./patterns.js";
-import { roadmapCourses } from "./roadmap.js";
-import { applyMissions } from "./missions.js";
+import { roadmapCourses } from "./roadmap.js?v=roadmap-1";
+import { applyMissions } from "./missions.js?v=goals-1";
 export const courses = [
   make(
     "java-dsa",

@@ -1,4 +1,4 @@
-import { make, javaProject as pattern } from "./exercise-factories.js";
+import { make, javaProject as pattern } from "./exercise-factories.js?v=roadmap-1";
 const fixed = (source) => {
   const stubs = {
     StandardShipping:
