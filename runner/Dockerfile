@@ -5,7 +5,8 @@ RUN mvn -B -q org.apache.maven.plugins:maven-dependency-plugin:3.8.1:copy-depend
 
 FROM eclipse-temurin:21-jdk-jammy
 COPY --from=spring /opt/spring/lib /opt/spring/lib
-RUN apt-get update && apt-get install -y --no-install-recommends procps && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y --no-install-recommends procps nano && rm -rf /var/lib/apt/lists/*
+RUN groupadd --gid 1000 afif && useradd --uid 1000 --gid 1000 --no-create-home --home-dir /workspace --shell /bin/bash afif
 ENV HOME=/workspace
 ENV CLASSPATH=/opt/spring/lib/*:.
 WORKDIR /workspace

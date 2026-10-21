@@ -21,6 +21,10 @@ for (const lesson of allLessons.filter((l) => l.engine !== "oracle")) {
         await labs.write(s, lesson.filename, lesson.solution);
         for (const [name, body] of Object.entries(lesson.solutionFiles || {}))
           await labs.write(s, name, body);
+        if (lesson.engine === "linux") {
+          const executed = await labs.command(s, "bash /workspace/notes.sh");
+          assert.equal(executed.code, 0, executed.output);
+        }
         const after = await labs.check(s);
         assert.equal(after.passed, true, after.output);
         if (lesson.id === "hands-linux-admin-workshop:2") {

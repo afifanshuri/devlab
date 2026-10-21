@@ -1,10 +1,11 @@
-import { courses, allLessons } from "../../curriculum.js?v=roadmap-expansion-1";
+import { courses, allLessons } from "../../curriculum.js?v=interactive-linux-1";
 import * as store from "../../database.js";
 import { state } from "../state.js";
 import { $, esc, shell, toast } from "../ui.js";
 import { callRunner, localRunner } from "../services/runner.js";
 import { editKey } from "../editor-input.js";
 import { terminalPrompt } from "../terminal-prompt.js";
+import { linuxPane, mountLinux } from "./linux-workspace.js";
 import {
   starterFiles,
   readDraft,
@@ -18,6 +19,7 @@ export async function flushDraft() {
   active = null;
   if (!old) return;
   clearTimeout(old.saveTimer);
+  old.terminal?.dispose();
   if ($("#code")) {
     old.files[old.filename] = $("#code").value;
     await store.saveLesson(old.key, writeDraft(old.task, old.files));
@@ -46,6 +48,7 @@ export function lesson(courseId, idx) {
   context.initialSource = writeDraft(task, context.files);
   store.setting("lastLab", course.id).catch(() => {});
   const available = localRunner();
+  const interactive = task.engine === "linux";
   const prerequisites = (task.prerequisites || [])
     .map((id) => allLessons.find((l) => l.id === id))
     .filter(Boolean);
@@ -102,9 +105,9 @@ export function lesson(courseId, idx) {
             ${task.reuseNote ? `<p>${esc(task.reuseNote)}</p>` : ""}
           </div>
           <p>
-            The lab connects automatically. Write your answer, then select
-            “Check answer” to compile, run, and validate it against internal
-            test cases.
+            ${interactive
+              ? "The lab connects automatically. Complete the mission in Bash; use nano to edit scripts or configuration files. Run any required scripts yourself, then select Check answer to verify the resulting files and state."
+              : "The lab connects automatically. Write your answer, then select Check answer to compile, run, and validate it against internal test cases."}
           </p>
           <button class="secondary" id="hint">Get a hint</button>
           <button class="text-link" id="solution">Reference solution</button>
@@ -116,12 +119,20 @@ export function lesson(courseId, idx) {
           </div>
           <div class="hint">
             ${available
-              ? "Local exercise runtime · no host folders mounted · network disabled · commands have a 10-second limit (Spring checks: 45 seconds)."
+              ? interactive
+                ? "Interactive Linux container · nano included · no host folders mounted · network disabled · expires after one idle hour."
+                : "Local exercise runtime · no host folders mounted · network disabled · commands have a 10-second limit (Spring checks: 45 seconds)."
               : "To execute this lab: start Docker Desktop, run npm run setup:labs and npm start in the project folder, then open http://127.0.0.1:5173. GitHub Pages hosts the catalog; it cannot execute processes."}
           </div>
         </section>
-        <section class="workspace exercise-workspace">
-          <section class="code-pane" aria-label="Code workspace">
+        <section
+          class="workspace exercise-workspace ${interactive
+            ? "linux-workspace"
+            : ""}"
+        >
+          ${interactive
+            ? linuxPane(available)
+            : `<section class="code-pane" aria-label="Code workspace">
             <div class="workspace-section-header">
               <strong>&lt;/&gt; CODE EDITOR</strong
               ><span>Write your answer here</span>
@@ -154,9 +165,11 @@ ${esc(context.files[context.filename])}</textarea
               </button>
             </div>
             <div id="output" class="console" role="status" aria-live="polite">
-              ${available
-                ? "Starting your exercise environment…"
-                : "Execution environment not available on this page."}
+              ${
+                available
+                  ? "Starting your exercise environment…"
+                  : "Execution environment not available on this page."
+              }
             </div>
           </section>
           <section class="terminal-pane" aria-label="Shell terminal">
@@ -182,18 +195,20 @@ ${esc(context.files[context.filename])}</textarea
                 autocomplete="off"
                 spellcheck="false"
                 aria-label="Terminal command"
-                placeholder="${task.engine === "java"
-                  ? "javac *.java"
-                  : task.engine === "postgres"
-                    ? "psql -c &quot;SELECT * FROM employees;&quot;"
-                    : "ls -la"}"
+                placeholder="${
+                  task.engine === "java"
+                    ? "javac *.java"
+                    : task.engine === "postgres"
+                      ? "psql -c &quot;SELECT * FROM employees;&quot;"
+                      : "ls -la"
+                }"
               ></textarea
               ><button class="secondary" type="submit">Run ↵</button>
             </form>
             <p class="muted terminal-help">
               Enter runs · Shift+Enter adds an indented line · Tab indents
             </p>
-          </section>
+          </section>`}
         </section>
       </div>
       <div class="task-nav">
@@ -217,6 +232,22 @@ ${esc(context.files[context.filename])}</textarea
       </div>`,
   );
   const live = () => active === context;
+  const help = () => {
+    $("#hint").onclick = () =>
+      ($("#help-content").innerHTML =
+        `<div class="hint">${esc(task.hint)}</div>`);
+    $("#solution").onclick = () =>
+      ($("#help-content").innerHTML =
+        `<div class="hint"><strong>Reference solution</strong><pre>${esc(
+          Object.entries(solutionFiles(task))
+            .map(([name, body]) => `// ${name}\n${body}`)
+            .join("\n\n"),
+        )}</pre></div>`);
+  };
+  if (interactive) {
+    help();
+    return mountLinux(context, available, live);
+  }
   const capture = () => {
     context.files[context.filename] = $("#code").value;
   };

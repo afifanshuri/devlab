@@ -16,6 +16,11 @@ const files = [
   "src/views/workspace.js",
   "src/editor-input.js",
   "src/terminal-prompt.js",
+  "src/views/linux-workspace.js",
+  "src/services/interactive-terminal.js",
+  "vendor/terminal/xterm.js",
+  "vendor/terminal/xterm.css",
+  "vendor/terminal/addon-fit.js",
   "styles.css",
   "vendor/sql-wasm.wasm",
 ];

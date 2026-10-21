@@ -4,23 +4,23 @@ import {
   pg,
   oracle,
   make,
-} from "./exercise-factories.js?v=roadmap-1";
+} from "./exercise-factories.js?v=interactive-linux-1";
 import { advancedCourses } from "./progression.js";
 import { patternCourses } from "./patterns.js";
-import { sqlRoadmapCourses } from "./sql-roadmap.js?v=roadmap-expansion-1";
-import { linuxRoadmapCourses } from "./linux-roadmap.js?v=roadmap-expansion-1";
-import { springCourses } from "./spring-practice.js?v=roadmap-expansion-1";
-import { roadmapCourses } from "./roadmap.js?v=roadmap-expansion-1";
-import { applyMissions } from "./missions.js?v=roadmap-expansion-1";
+import { sqlRoadmapCourses } from "./sql-roadmap.js?v=interactive-linux-1";
+import { linuxRoadmapCourses } from "./linux-roadmap.js?v=interactive-linux-1";
+import { springCourses } from "./spring-practice.js?v=interactive-linux-1";
+import { roadmapCourses } from "./roadmap.js?v=interactive-linux-1";
+import { applyMissions } from "./missions.js?v=interactive-linux-1";
 import {
   solidPractice,
   advancedPatterns,
-} from "./design-practice.js?v=roadmap-expansion-1";
+} from "./design-practice.js?v=interactive-linux-1";
 import {
   linuxBasicsPractice,
   linuxAdminPractice,
   sqlAdminPractice,
-} from "./ops-practice.js?v=roadmap-expansion-1";
+} from "./ops-practice.js?v=interactive-linux-1";
 export const courses = [
   make(
     "java-dsa",

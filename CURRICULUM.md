@@ -29,6 +29,8 @@ Based on [roadmap.sh/linux](https://roadmap.sh/linux).
 
 Live tasks run normal Linux commands in disposable restricted containers. Administrative configuration tasks write **reviewable workspace files**. They do not install packages, change real users, mount/partition disks, operate the host's systemd, edit its bootloader, change host networking or run nested Docker. The mission explicitly identifies fixture-based diagnosis. Full boot, partition/LVM creation, firewall/DHCP deployment and live SSH administration require an appropriate VM; these tasks practise the relevant reasoning/configuration without claiming to execute those privileged operations. The workspace is mounted noexec; run authored shell scripts with `bash`, even when their executable mode bits are set.
 
+Linux missions now use interactive Bash and GNU nano through xterm.js. Create and inspect the mission's files directly, then submit their resulting state. Scripting missions may also run your saved script against their defined cases; the runner does not replay a general answer script before every check.
+
 ## Spring and Spring Boot
 
 Continue after OOP, collections, SOLID and design patterns. Uses the real libraries described in the [Spring Boot documentation](https://docs.spring.io/spring-boot/3.5/index.html), not annotation-shaped substitutes.

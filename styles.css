@@ -1044,6 +1044,23 @@ dialog h2 {
   gap: 18px;
   background: #11171c;
 }
+.linux-workspace {
+  display: block;
+  min-width: 0;
+}
+.interactive-terminal {
+  height: 520px;
+  padding: 12px;
+  background: #0f1712;
+  overflow: hidden;
+}
+.linux-terminal .terminal-help {
+  padding-top: 10px;
+  line-height: 1.7;
+}
+.linux-terminal .workspace-actions {
+  flex-wrap: wrap;
+}
 .code-pane,
 .terminal-pane {
   border: 1px solid #35424d;

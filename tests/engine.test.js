@@ -96,6 +96,11 @@ test("all screens and practical tasks render without missing references", async 
       assert.ok(nodes.get("#app").innerHTML.includes(l.title));
       const markup = nodes.get("#app").innerHTML;
       assert.ok(!markup.includes("data-choice"));
+      if (l.engine === "linux") {
+        assert.ok(markup.includes('id="interactive-terminal"'));
+        assert.ok(!markup.includes('id="code"'));
+        assert.ok(!markup.includes('id="terminal-form"'));
+      }
       assert.ok(markup.indexOf("Your mission") < markup.indexOf("Your goal"));
       assert.ok(
         markup.indexOf("Your goal") < markup.indexOf("Acceptance criteria"),

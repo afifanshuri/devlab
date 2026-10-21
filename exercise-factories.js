@@ -25,7 +25,7 @@ const linux = (
   engine: "linux",
   type: "workspace",
   filename: "notes.sh",
-  starter: "# Write your commands here. Check answer runs this script.\n",
+  starter: "# Write your script here, then run it with bash notes.sh.\n# Check answer verifies the mission's files, state and script test cases.\n",
   solution,
   check: "set -eu\n" + check + "\necho DEVLAB_TESTS_PASSED",
   files,

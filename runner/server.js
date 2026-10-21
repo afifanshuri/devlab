@@ -4,6 +4,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { LabSessions } from "./sessions.js";
 import { runnerApi } from "./http.js";
+import { InteractiveTerminals } from "./terminals.js";
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const types = {
   ".html": "text/html; charset=utf-8",
@@ -15,20 +16,19 @@ export function createApp(
   sessions = new LabSessions(),
   ready = Promise.resolve(),
 ) {
-  const api = runnerApi(sessions);
-  return http.createServer(async (req, res) => {
+  const terminals = new InteractiveTerminals(sessions, ready);
+  const api = runnerApi(sessions, terminals);
+  const server = http.createServer(async (req, res) => {
     if (req.url.startsWith("/api/")) {
       try {
         await ready;
       } catch {
-        res
-          .writeHead(503, { "Content-Type": "application/json" })
-          .end(
-            JSON.stringify({
-              error:
-                "Docker recovery failed. Check Docker Desktop and restart the runner.",
-            }),
-          );
+        res.writeHead(503, { "Content-Type": "application/json" }).end(
+          JSON.stringify({
+            error:
+              "Docker recovery failed. Check Docker Desktop and restart the runner.",
+          }),
+        );
         return;
       }
       return api(req, res);
@@ -66,6 +66,9 @@ export function createApp(
       res.writeHead(404).end("Not found");
     }
   });
+  terminals.bind(server);
+  server.terminals = terminals;
+  return server;
 }
 export function start() {
   const sessions = new LabSessions(path.join(root, ".devlab-sessions.json")),
@@ -83,6 +86,7 @@ export function start() {
   const shutdown = async () => {
     clearInterval(cleanup);
     sessions.persist();
+    app.terminals.dispose();
     app.close(() => process.exit(0));
   };
   process.on("SIGINT", shutdown);

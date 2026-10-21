@@ -20,12 +20,14 @@ Open **http://127.0.0.1:5173**. Open an exercise; its container starts or reconn
 
 - Edit your answer. **Check answer** saves it automatically, compiles/runs it, and validates the internal test cases. You can also enter shell commands.
 - Java: use `javac Main.java`. Task methods are checked with a separate verifier; to run your own executable entry point add `public static void main(String[] args)` and use `java Main`.
-- Linux: write commands in `notes.sh`. **Check answer** runs that script and checks the resulting state.
+- Linux: use the interactive Bash terminal directly. Edit files with `nano filename` (Ctrl+O, Enter to save; Ctrl+X to close). **Check answer** verifies the files and state you created, without replaying a general answer script. Scripting missions also exercise your saved script with their specified input cases. Save and close nano before checking.
 - PostgreSQL: save `solution.sql`; run `psql -f solution.sql` or `psql -c 'SELECT * FROM employees;'`.
 - Click **Check answer** to validate real output, Java assertions, SQL results, or filesystem state. It does not automatically solve Linux tasks.
 - Drafts are saved when checking an answer or navigating. Reconnecting restores the existing answer file if you have not edited the draft. **Reset lab** restores the starter answer in the editor and existing container without recreating the container.
 
-Enter runs a terminal command; Shift+Enter adds an indented line. The code editor preserves leading whitespace, indents after an opening block, and supports Tab/Shift+Tab on selections. The terminal runs noninteractive commands one at a time, with a ten-second limit (Spring checks: 45 seconds). It is not a full PTY: vim/nano, interactive prompts and interactive psql are not supported. Use the file editor, heredocs, or command flags. `cd` persists between commands within a session. The prompt uses the display identity `afif@devlab` and shows the current directory; `~` means the exercise workspace. This label does not rename the underlying container account.
+Linux uses a real Docker PTY, with Bash history, Ctrl+C, Tab completion, nano and terminal resizing. Its prompt shows `afif@devlab` and the current directory; `~` means `/workspace`. New Java/Linux images contain a non-root account named afif with UID/GID 1000. Reopening an exercise reattaches to its existing shell while the runner stays open. A runner restart replaces the old shell but preserves saved files in the existing container. Unsaved nano buffers do not survive container deletion or a runner restart. Terminal output replay is bounded, and unattended output does not extend the one-hour inactivity timeout.
+
+Java and database exercises retain the file editor and noninteractive command terminal: Enter runs, Shift+Enter adds an indented line. Commands have a ten-second limit (Spring checks: 45 seconds). The editor preserves indentation and supports Tab/Shift+Tab on selections. Interactive database prompts are not supported there; use `psql -c` or `psql -f`.
 
 The curriculum contains **142 coding tasks across 30 labs**, including 9 real Spring/Spring Boot exercises. See [roadmap coverage](CURRICULUM.md) for the SQL/Linux progression and its environment boundaries. There are no new basic SQL syntax or standalone DDL chapters. Existing advanced administration/function exercises still use SQL object definitions where their actual topic requires them.
 
@@ -75,10 +77,16 @@ The unit suite checks task data, storage/backup behavior, rendered screen paths 
 - `runner/http.js`: local API security and dispatch.
 - `runner/server.js`: static files and loopback server.
 - `src/services/runner.js`: browser API client.
-- `src/views/workspace.js`: editor and command-terminal UI.
+- `src/views/workspace.js`: shared missions and Java/database editor UI.
+- `src/views/linux-workspace.js`: terminal-first Linux submissions.
+- `src/services/interactive-terminal.js`: lazily loaded xterm.js connection and resizing.
+- `runner/terminals.js`: authenticated WebSocket sessions and bounded terminal replay.
+- `runner/terminal-engine.js`: local Docker PTY transport.
 - `database.js`: browser SQLite persistence and validated backup import.
 
-The Node runner has no production npm dependencies. Browser SQLite uses the required vendored sql.js JavaScript/WASM files and their license. The pinned sql.js npm package is used only by tests; Prettier and fake-indexeddb are also development-only tools. No API keys or cloud service accounts are needed.
+The Node runner uses one production npm dependency: the official `ws` WebSocket library, pinned to 8.22.0. Browser terminal assets come from official `@xterm/xterm` 6.0.0 and its first-party `@xterm/addon-fit` 0.11.0; they are vendored with their licenses and loaded only for Linux exercises. Regenerate them with `npm run vendor:terminal` after an intentional version update. No CDN resources are used. Browser SQLite uses vendored sql.js JavaScript/WASM. xterm packages, sql.js, Prettier and fake-indexeddb are development dependencies; no API keys or cloud accounts are needed.
+
+The interactive terminal reaches only its assigned Linux container as UID 1000. The browser never receives the Docker socket. The runner uses Docker's official Exec API through a local Unix socket or Windows named pipe; remote TCP/SSH Docker contexts are unsupported. WebSocket upgrades require an exact localhost Host/Origin match and an authenticated, single-use ticket expiring after 30 seconds. Input, replay and socket buffers are bounded, compression is disabled, and checking rejects an active foreground command/editor. Idle cleanup and pass deletion retain the existing container lifecycle. Reset restores only notes.sh, not unrelated files or the shell history.
 
 ## Progressive paths
 

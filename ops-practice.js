@@ -1,4 +1,4 @@
-import { linux, pg, make } from "./exercise-factories.js?v=roadmap-1";
+import { linux, pg, make } from "./exercise-factories.js?v=interactive-linux-1";
 function shellTask(
   title,
   topic,

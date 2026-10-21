@@ -491,7 +491,7 @@ export class LabSessions {
           result.code === 0 &&
           JSON.stringify(lines) === JSON.stringify(s.lesson.expectedOutput),
       };
-    } else command = `bash /workspace/notes.sh && (\n${s.lesson.check}\n)`;
+    } else command = `(cd /workspace && (\n${s.lesson.check}\n))`;
     const result = await this.command(
       s,
       command,
