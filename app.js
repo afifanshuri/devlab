@@ -1,7 +1,7 @@
 import * as store from "./database.js";
 import { state } from "./src/state.js";
 import { $, esc } from "./src/ui.js";
-import { catalog } from "./src/views/catalog.js";
+import { catalog } from "./src/views/catalog.js?v=20261021-2";
 import { lesson, flushDraft } from "./src/views/lab.js";
 import { progressPage, paths } from "./src/views/progress.js";
 import { settings } from "./src/views/settings.js";
