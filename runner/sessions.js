@@ -1,14 +1,106 @@
 import { randomUUID } from "node:crypto";
 import { docker, must } from "./docker.js";
 import { allLessons } from "../content.js";
+import { readFileSync, writeFileSync, renameSync } from "node:fs";
 
 export class LabSessions {
-  constructor() {
+  constructor(registry = null) {
     this.sessions = new Map();
+    this.registry = registry;
+    if (registry) {
+      try {
+        for (const row of JSON.parse(readFileSync(registry, "utf8"))) {
+          const lesson =
+            allLessons.find((l) => l.id === row.lessonId) ||
+            (row.lessonId === null ? { id: null } : null);
+          if (
+            lesson &&
+            /^[a-f0-9-]{36}$/.test(row.id) &&
+            row.name === "devlab-" + row.id &&
+            Number.isFinite(row.lastUsed)
+          )
+            this.sessions.set(row.id, { ...row, lesson, busy: false });
+        }
+      } catch (error) {
+        if (error.code !== "ENOENT")
+          console.error("Could not restore lab registry:", error.message);
+      }
+    }
+  }
+  persist() {
+    if (!this.registry) return;
+    const rows = [...this.sessions.values()].map((s) => ({
+      id: s.id,
+      name: s.name,
+      lessonId: s.lesson.id,
+      lastUsed: s.lastUsed,
+    }));
+    writeFileSync(this.registry + ".tmp", JSON.stringify(rows));
+    renameSync(this.registry + ".tmp", this.registry);
+  }
+  async adoptUntracked() {
+    const result = await docker([
+      "ps",
+      "--filter",
+      "label=devlab.managed=true",
+      "--format",
+      "{{.Names}}",
+    ]);
+    if (result.code !== 0) return;
+    for (const name of result.output.trim().split(/\r?\n/)) {
+      if (!/^devlab-[a-f0-9-]{36}$/.test(name)) continue;
+      const id = name.slice(7);
+      if (this.sessions.has(id)) continue;
+      const label = await docker([
+        "inspect",
+        "--format",
+        '{{index .Config.Labels "devlab.lesson"}}',
+        name,
+      ]);
+      const lesson = allLessons.find((l) => l.id === label.output.trim()) || {
+        id: null,
+      };
+      this.sessions.set(id, {
+        id,
+        name,
+        lesson,
+        lastUsed: Date.now(),
+        busy: false,
+      });
+    }
+    this.persist();
   }
   async create(lessonId) {
     const lesson = allLessons.find((l) => l.id === lessonId);
     if (!lesson) throw Error("Unknown exercise.");
+    const existing = [...this.sessions.values()].find(
+      (s) => s.lesson.id === lessonId,
+    );
+    const running = existing
+      ? await docker([
+          "inspect",
+          "--format",
+          "{{.State.Running}}",
+          existing.name,
+        ])
+      : null;
+    if (
+      existing &&
+      running.code === 0 &&
+      running.output.trim() === "true" &&
+      Date.now() - existing.lastUsed <= 60 * 60 * 1000
+    ) {
+      existing.lastUsed = Date.now();
+      this.persist();
+      return {
+        id: existing.id,
+        engine: lesson.engine,
+        filename: lesson.filename,
+        reused: true,
+        output: "Reconnected to the existing lab.\n",
+      };
+    }
+    if (existing) await this.remove(existing.id);
     const oracle = lesson.engine === "oracle";
     if (oracle) {
       const image = await docker([
@@ -21,7 +113,6 @@ export class LabSessions {
           "Optional Oracle image is not installed. Run docker pull container-registry.oracle.com/database/free:latest, then retry. Oracle needs several GB of disk and at least 3 GB of available Docker memory.",
         );
     }
-    await this.clear(); // One personal workspace at a time; no idle accumulation.
     const id = randomUUID(),
       name = "devlab-" + id;
     const postgres = lesson.engine === "postgres";
@@ -33,6 +124,8 @@ export class LabSessions {
       name,
       "--label",
       "devlab.managed=true",
+      "--label",
+      `devlab.lesson=${lessonId}`,
       "--network",
       "none",
       "--cpus",
@@ -182,6 +275,7 @@ export class LabSessions {
           ],
           { input: lesson.seed },
         );
+      this.persist();
       return {
         id,
         engine: lesson.engine,
@@ -198,6 +292,7 @@ export class LabSessions {
     const s = this.sessions.get(id);
     if (!s) throw Error("Workspace expired. Start or reset this lab.");
     s.lastUsed = Date.now();
+    this.persist();
     return s;
   }
   async exclusive(id, work) {
@@ -208,6 +303,8 @@ export class LabSessions {
       return await work(s);
     } finally {
       s.busy = false;
+      s.lastUsed = Date.now();
+      this.persist();
     }
   }
   async write(s, filename, body) {
@@ -245,7 +342,6 @@ export class LabSessions {
         { input: script, timeout: 13000 },
       );
     } catch (e) {
-      await this.remove(s.id);
       throw e;
     }
   }
@@ -253,10 +349,16 @@ export class LabSessions {
     let command;
     if (s.lesson.engine === "java")
       command =
-        "mkdir -p /tmp/verify && javac -d /tmp/verify /workspace/Main.java /checks/Verify.java && java -Xmx128m -cp /tmp/verify Verify";
-    else if (s.lesson.engine === "postgres")
-      command = `psql -X -v ON_ERROR_STOP=1 -U postgres -d lab -f /workspace/solution.sql && psql -X -v ON_ERROR_STOP=1 -U postgres -d lab <<'DEVLAB_CHECK'\n${s.lesson.check}\nDEVLAB_CHECK`;
-    else if (s.lesson.engine === "oracle") {
+        "mkdir -p /tmp/verify && rm -f /tmp/verify/*.class && javac -cp /tmp/verify -d /tmp/verify /workspace/Main.java /checks/Verify.java && java -Xmx128m -cp /tmp/verify Verify";
+    else if (s.lesson.engine === "postgres") {
+      const object = s.lesson.solution.match(
+        /CREATE OR REPLACE (VIEW|FUNCTION) (\w+)(\([^)]*\))?/i,
+      );
+      const drop = `DROP ${object[1]} IF EXISTS ${object[2]}${object[1].toUpperCase() === "FUNCTION" ? object[3] : ""};`;
+      // Validate the submitted SQL against fresh answer objects, without
+      // clearing unrelated database work or retaining old passing definitions.
+      command = `psql -X -v ON_ERROR_STOP=1 -U postgres -d lab <<'DEVLAB_CHECK'\nBEGIN;\n${drop}\n\\i /workspace/solution.sql\n${s.lesson.check}\nROLLBACK;\nDEVLAB_CHECK`;
+    } else if (s.lesson.engine === "oracle") {
       const result = await docker(
         ["exec", "-i", s.name, "sqlplus", "-s", "/", "as", "sysdba"],
         {
@@ -284,14 +386,32 @@ export class LabSessions {
     if (s) {
       this.sessions.delete(id);
       await docker(["rm", "-f", s.name]);
+      this.persist();
     }
+  }
+  async resetAnswer(lessonId) {
+    const session = [...this.sessions.values()].find(
+      (s) => s.lesson.id === lessonId,
+    );
+    if (!session) return { id: null };
+    return this.exclusive(session.id, async (s) => {
+      await this.write(s, s.lesson.filename, s.lesson.starter);
+      return { id: s.id };
+    });
+  }
+  async checkAnswer(id) {
+    return this.exclusive(id, async (session) => {
+      const result = await this.check(session);
+      if (result.passed) await this.remove(id);
+      return result;
+    });
   }
   async clear() {
     for (const id of this.sessions.keys()) await this.remove(id);
   }
   async expire() {
     for (const [id, s] of this.sessions)
-      if (!s.busy && Date.now() - s.lastUsed > 30 * 60 * 1000)
+      if (!s.busy && Date.now() - s.lastUsed > 60 * 60 * 1000)
         await this.remove(id);
   }
 }

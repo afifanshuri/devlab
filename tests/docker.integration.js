@@ -43,26 +43,62 @@ for (const lesson of allLessons.filter((l) => l.engine !== "oracle")) {
     },
   );
 }
+
 test(
-  "reset discards filesystem changes and starts a fresh task",
+  "reuse, reset, pass cleanup, navigation and one-hour expiry",
+  { timeout: 60000 },
+  async () => {
+    const labs = new LabSessions();
+    try {
+      const lesson = allLessons.find((l) => l.id === "hands-java-dsa:0");
+      const first = await labs.create(lesson.id);
+      await labs.command(labs.get(first.id), "touch /workspace/keep");
+      const second = await labs.create(lesson.id);
+      assert.equal(second.id, first.id);
+      await labs.write(labs.get(first.id), lesson.filename, lesson.solution);
+      await labs.resetAnswer(lesson.id);
+      assert.equal(
+        (await labs.command(labs.get(first.id), "test -f /workspace/keep"))
+          .code,
+        0,
+      );
+      assert.equal((await labs.checkAnswer(first.id)).passed, false);
+      assert.ok(labs.sessions.has(first.id));
+      const other = await labs.create("hands-linux-basics:0");
+      assert.ok(labs.sessions.has(first.id));
+      await labs.write(labs.get(first.id), lesson.filename, lesson.solution);
+      assert.equal((await labs.checkAnswer(first.id)).passed, true);
+      assert.equal(labs.sessions.has(first.id), false);
+      const shell = labs.sessions.get(other.id);
+      shell.lastUsed = Date.now() - 59 * 60 * 1000;
+      await labs.expire();
+      assert.ok(labs.sessions.has(other.id));
+      shell.lastUsed = Date.now() - 61 * 60 * 1000;
+      await labs.expire();
+      assert.equal(labs.sessions.has(other.id), false);
+      const empty = await labs.resetAnswer(lesson.id);
+      assert.equal(empty.id, null);
+      assert.equal(labs.sessions.size, 0);
+    } finally {
+      await labs.clear();
+    }
+  },
+);
+
+test(
+  "reset SQL answer cannot reuse an old correct database definition",
   { timeout: 30000 },
   async () => {
     const labs = new LabSessions();
     try {
-      const id = "hands-linux-basics:0";
-      const first = await labs.create(id);
-      await labs.command(labs.get(first.id), "touch /workspace/temporary");
-      const second = await labs.create(id);
-      assert.notEqual(first.id, second.id);
-      assert.equal(
-        (
-          await labs.command(
-            labs.get(second.id),
-            "test -f /workspace/temporary",
-          )
-        ).code,
-        1,
-      );
+      const lesson = allLessons.find((l) => l.id === "hands-sql-postgres:0");
+      const info = await labs.create(lesson.id);
+      const session = labs.get(info.id);
+      await labs.write(session, lesson.filename, lesson.solution);
+      await labs.command(session, "psql -U postgres -d lab -f solution.sql");
+      await labs.resetAnswer(lesson.id);
+      assert.equal((await labs.checkAnswer(info.id)).passed, false);
+      assert.ok(labs.sessions.has(info.id));
     } finally {
       await labs.clear();
     }

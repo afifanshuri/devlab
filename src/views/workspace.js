@@ -12,8 +12,6 @@ export async function flushDraft() {
     await store.saveLesson(old.key, $("#code").value);
     state.records = store.progress();
   }
-  if (old.session)
-    await callRunner("stop", { id: old.session }).catch(() => {});
 }
 export function lesson(courseId, idx) {
   const course = courses.find((c) => c.id === courseId),
@@ -26,6 +24,7 @@ export function lesson(courseId, idx) {
   const key = `${course.id}:${index}`,
     context = { key, session: null, lastSaved: null, busy: false };
   active = context;
+  context.initialSource = state.records[key]?.draft ?? task.starter;
   state.current = { id: key };
   store.setting("lastLab", course.id).catch(() => {});
   const available = localRunner();
@@ -49,7 +48,7 @@ export function lesson(courseId, idx) {
           <p>${esc(task.concept)}</p>
           <p>
             Start the lab, edit and save your file, then run shell commands.
-            “Check task” validates actual program results or container state.
+            “Check answer” validates actual program results or container state.
           </p>
           <button class="secondary" id="hint">Get a hint</button>
           <button class="text-link" id="solution">Reference solution</button>
@@ -114,7 +113,7 @@ ${esc(state.records[key]?.draft ?? task.starter)}</textarea
           </form>
           <div class="workspace-actions">
             <button class="secondary" id="reset">Reset lab</button
-            ><button class="primary" id="check">Check task →</button>
+            ><button class="primary" id="check">Check answer →</button>
           </div>
           <div id="output" class="console" role="status" aria-live="polite">
             ${available
@@ -147,16 +146,27 @@ ${esc(state.records[key]?.draft ?? task.starter)}</textarea
     }
   };
   const ensure = async () => {
-    if (context.session) return;
     const result = await callRunner("start", { lessonId: key });
     if (!live()) {
-      await callRunner("stop", { id: result.id });
       throw Error("Lab navigation changed.");
     }
+    const changed = context.session !== result.id;
     context.session = result.id;
-    context.lastSaved = task.starter;
+    if (changed) {
+      context.lastSaved = task.starter;
+      if (result.reused) {
+        const file = await callRunner("read", {
+          id: result.id,
+          filename: task.filename,
+        });
+        if (!live()) throw Error("Lab navigation changed.");
+        if ($("#code").value === context.initialSource)
+          $("#code").value = file.output;
+        context.lastSaved = file.output;
+      }
+    }
     $("#runner-state").textContent = "CONNECTED · " + task.engine.toUpperCase();
-    log(result.output);
+    if (changed) log(result.output);
   };
   const save = async () => {
     await ensure();
@@ -194,6 +204,14 @@ ${esc(state.records[key]?.draft ?? task.starter)}</textarea
     }
   };
   $("#start").onclick = action(ensure);
+  let lastActivity = 0;
+  const noteActivity = () => {
+    if (!available || Date.now() - lastActivity < 60000) return;
+    lastActivity = Date.now();
+    callRunner("touch", { lessonId: key }).catch(() => {});
+  };
+  $("#code").oninput = noteActivity;
+  $("#command").oninput = noteActivity;
   $("#save").onclick = action(async () => {
     await save();
     log(`Saved ${task.filename}\n`);
@@ -268,6 +286,9 @@ ${esc(state.records[key]?.draft ?? task.starter)}</textarea
       : "Tests failed. Read the terminal output, fix your solution and try again.";
     $("#output").className = "console " + (r.passed ? "success" : "error");
     if (r.passed) {
+      context.session = null;
+      context.lastSaved = null;
+      $("#runner-state").textContent = "PASSED · CONTAINER DELETED";
       await store.saveLesson(key, $("#code").value, true);
       state.records = store.progress();
       $("#completion").innerHTML =
@@ -276,13 +297,14 @@ ${esc(state.records[key]?.draft ?? task.starter)}</textarea
     }
   });
   $("#reset").onclick = action(async () => {
-    if (context.session) await callRunner("stop", { id: context.session });
-    context.session = null;
-    context.lastSaved = null;
     $("#code").value = task.starter;
-    $("#terminal").textContent = "";
     await store.saveLesson(key, task.starter);
-    await ensure();
+    if (available) {
+      const result = await callRunner("reset", { lessonId: key });
+      context.session = result.id;
+      context.lastSaved = result.id ? task.starter : null;
+    }
+    log("Answer reset. Other container files and state are unchanged.\n");
   });
   $("#hint").onclick = () =>
     ($("#help-content").innerHTML =

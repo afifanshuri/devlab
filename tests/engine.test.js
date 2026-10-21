@@ -172,3 +172,33 @@ test("runner API enforces origin, host, authentication and file boundaries", asy
     await new Promise((r) => server.close(r));
   }
 });
+
+test("runner registry restores containers and idle timestamps after restart", async () => {
+  const { LabSessions } = await import("../runner/sessions.js");
+  const { mkdtemp, readFile, rm } = await import("node:fs/promises");
+  const { tmpdir } = await import("node:os");
+  const path = await import("node:path");
+  const folder = await mkdtemp(path.join(tmpdir(), "devlab-registry-"));
+  const file = path.join(folder, "sessions.json");
+  try {
+    const a = new LabSessions(file);
+    const id = "11111111-1111-4111-8111-111111111111";
+    a.sessions.set(id, {
+      id,
+      name: "devlab-" + id,
+      lesson: allLessons[0],
+      lastUsed: 12345,
+      busy: false,
+    });
+    a.persist();
+    const b = new LabSessions(file);
+    assert.equal(b.sessions.get(id).lesson.id, allLessons[0].id);
+    assert.equal(b.sessions.get(id).lastUsed, 12345);
+    b.sessions.clear();
+    b.persist();
+    assert.deepEqual(JSON.parse(await readFile(file, "utf8")), []);
+  } finally {
+    await rm(file, { force: true });
+    await (await import("node:fs/promises")).rmdir(folder);
+  }
+});

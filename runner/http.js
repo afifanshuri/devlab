@@ -44,6 +44,13 @@ export function runnerApi(sessions) {
         body += chunk;
       }
       const data = JSON.parse(body || "{}");
+      if (req.url === "/api/touch") {
+        const existing = [...sessions.sessions.values()].find(
+          (s) => s.lesson.id === data.lessonId,
+        );
+        if (existing) sessions.get(existing.id);
+        return reply(200, { ok: true });
+      }
       if (req.url === "/api/start") {
         if (starting)
           return reply(409, {
@@ -60,6 +67,10 @@ export function runnerApi(sessions) {
         await sessions.remove(data.id);
         return reply(200, { ok: true });
       }
+      if (req.url === "/api/reset")
+        return reply(200, await sessions.resetAnswer(data.lessonId));
+      if (req.url === "/api/check")
+        return reply(200, await sessions.checkAnswer(data.id));
       const result = await sessions.exclusive(data.id, async (s) => {
         if (req.url === "/api/write") {
           await sessions.write(s, data.filename, data.source);
@@ -77,7 +88,6 @@ export function runnerApi(sessions) {
         }
         if (req.url === "/api/command")
           return sessions.command(s, data.command);
-        if (req.url === "/api/check") return sessions.check(s);
         throw Error("Unknown runner operation.");
       });
       reply(200, result);

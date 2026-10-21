@@ -57,8 +57,9 @@ function settings() {
         <p class="muted">
           The SQL playground still runs SQLite in the browser. Terminal commands
           are noninteractive: use the editor or shell redirection instead of
-          vim, nano or interactive psql. Leaving a lab discards container files;
-          saved editor drafts and progress remain in this browser.
+          vim, nano or interactive psql. Containers persist until a passing
+          answer or one hour of inactivity; saved editor drafts and progress
+          remain in this browser.
         </p>
         <p class="muted">
           Built with

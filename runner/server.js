@@ -50,8 +50,12 @@ export function createApp(sessions = new LabSessions()) {
   });
 }
 export function start() {
-  const sessions = new LabSessions(),
+  const sessions = new LabSessions(path.join(root, ".devlab-sessions.json")),
     app = createApp(sessions);
+  sessions
+    .adoptUntracked()
+    .then(() => sessions.expire())
+    .catch(console.error);
   const cleanup = setInterval(
     () => sessions.expire().catch(console.error),
     60000,
@@ -62,7 +66,7 @@ export function start() {
   );
   const shutdown = async () => {
     clearInterval(cleanup);
-    await sessions.clear();
+    sessions.persist();
     app.close(() => process.exit(0));
   };
   process.on("SIGINT", shutdown);

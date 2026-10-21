@@ -22,8 +22,8 @@ Open **http://127.0.0.1:5173**. Choose a lab and click **Start lab**. Image setu
 - Java: use `javac Main.java`. Task methods are checked with a separate verifier; to run your own executable entry point add `public static void main(String[] args)` and use `java Main`.
 - Linux: enter shell commands or save `notes.sh` and click **Run file**.
 - PostgreSQL: save `solution.sql`; run `psql -U postgres -d lab -f solution.sql` or `psql -U postgres -d lab -c 'SELECT * FROM employees;'`.
-- Click **Check task** to validate real output, Java assertions, SQL results, or filesystem state. It does not automatically solve Linux tasks.
-- **Reload file** pulls terminal edits back into the editor. Save your editor draft before navigating. **Reset lab** discards the container and its files, restores the starter, and reconnects.
+- Click **Check answer** to validate real output, Java assertions, SQL results, or filesystem state. It does not automatically solve Linux tasks.
+- **Reload file** pulls terminal edits back into the editor. Save your editor draft before navigating. **Reset lab** restores the starter answer in the editor and existing container without recreating the container.
 
 The terminal runs noninteractive commands one at a time, with a ten-second limit. It is not a full PTY: vim/nano, interactive prompts and interactive psql are not supported. Use the file editor, heredocs, or command flags. `cd` persists between commands within a session.
 
@@ -41,7 +41,7 @@ The Node runner binds to 127.0.0.1. Its API requires a per-process token obtaine
 
 Docker is invoked using Node argument arrays, never a host shell. Shell text executes only in a disposable container. Standard Java/Linux/PostgreSQL containers have no host bind mounts, no network, dropped capabilities, no-new-privileges, CPU/memory/PID limits and a read-only root filesystem with bounded writable tmpfs directories. The Java verifier is written outside the learner-writable workspace. Containers do not receive host environment variables or Git credentials.
 
-One lab may be active at a time. A new lab removes the previous one. Idle containers expire after 30 minutes. Use Ctrl+C in the runner terminal to shut down and remove its active container. Docker is isolation for personal practice, not a hardened multi-tenant hostile-code platform. Keep Docker and its VM updated.
+Each exercise reuses its own container across checks and navigation. A passing answer deletes its container. Otherwise containers expire after one hour without runner activity. Resetting an answer preserves other files and database state. Ctrl+C stops the runner without deleting active containers. A local registry reconnects them after restart. Idle cleanup runs once per minute while the runner is running and resumes on restart. Docker is isolation for personal practice, not a hardened multi-tenant hostile-code platform. Keep Docker and its VM updated.
 
 ## Oracle (optional)
 
@@ -60,7 +60,7 @@ npm test
 npm run test:docker
 ```
 
-The unit suite checks task data, storage/backup behavior, rendered screen paths and API access boundaries. The Docker suite executes every standard starter and reference solution: starters must fail, reference solutions must pass. It also checks isolation settings, verifier write protection and filesystem reset. `npm run test:docker` requires Docker and setup images. GitHub CI builds these images and runs both suites.
+The unit suite checks task data, storage/backup behavior, rendered screen paths and API access boundaries. The Docker suite executes every standard starter and reference solution: starters must fail, reference solutions must pass. It also checks isolation settings, verifier write protection and answer reset and idle cleanup. `npm run test:docker` requires Docker and setup images. GitHub CI builds these images and runs both suites.
 
 ## Modules
 
