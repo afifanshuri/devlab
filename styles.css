@@ -1358,3 +1358,9 @@ dialog h2 {
   font-size: 12px;
   font-weight: 600;
 }
+
+.mission-goal {
+  font-weight: 600;
+  color: #e9ebed;
+  line-height: 1.7;
+}

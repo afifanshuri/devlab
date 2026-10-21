@@ -94,7 +94,13 @@ test("all screens and practical tasks render without missing references", async 
     for (const l of allLessons) {
       lesson(l.course, l.index);
       assert.ok(nodes.get("#app").innerHTML.includes(l.title));
-      assert.ok(!nodes.get("#app").innerHTML.includes("data-choice"));
+      const markup = nodes.get("#app").innerHTML;
+      assert.ok(!markup.includes("data-choice"));
+      assert.ok(markup.indexOf("Your mission") < markup.indexOf("Your goal"));
+      assert.ok(
+        markup.indexOf("Your goal") < markup.indexOf("Acceptance criteria"),
+      );
+      assert.ok(markup.includes((await import("../src/ui.js")).esc(l.goal)));
     }
   } finally {
     delete globalThis.document;
@@ -453,6 +459,7 @@ test("roadmap sections are covered and missions keep story separate from require
   );
   for (const l of allLessons) {
     assert.ok(l.mission?.length > 50, "Missing meaningful mission: " + l.id);
+    assert.ok(l.goal?.length > 35, "Missing actionable goal: " + l.id);
     assert.ok(l.requirements.length > 0);
     assert.equal(l.requirements.join(" "), l.task);
     assert.ok(

@@ -92,7 +92,7 @@ The Design patterns in production stage adds nine exercises: Singleton, Strategy
 
 ### Scenario missions and Java roadmap
 
-Missions introduce a concrete problem, followed by separate acceptance criteria. Concept notes are optional, examples are shown where useful, and direct shell drills stay concise. Existing IDs and saved answers are preserved.
+Missions introduce a concrete problem, then an explicit Your goal statement names the code, query or shell result to deliver. Separate acceptance criteria define the exact rules. Concept notes are optional, examples are shown where useful, and direct shell drills stay concise. Existing IDs and saved answers are preserved.
 
 The Java path now begins with 20 exercises covering the Basics of OOP, More about OOP and Collections sections of [the Java roadmap](https://roadmap.sh/java) ([topic diagram](https://roadmap.sh/pdfs/roadmaps/java.pdf)).
 

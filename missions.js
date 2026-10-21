@@ -191,6 +191,114 @@ export function applyMissions(courses) {
     for (const [index, lesson] of course.lessons.entries()) {
       const story = stories[course.id]?.[index];
       if (story) [lesson.mission, lesson.example] = story;
+      lesson.goal = goals[course.id]?.[index];
       lesson.requirements = lesson.task.split(/(?<=[.!?])\s+(?=[A-Z])/);
     }
 }
+const goals = {
+  "hands-java-oop-basics": [
+    "Implement Customer so each customer object can store, return and safely change its own name.",
+    "Implement Wallet so money can only change through validated deposit and spend operations.",
+    "Implement JobTicket with one shared ticket sequence and an unchangeable ID for each ticket.",
+    "Implement Booking and its static nested Contact class so bookings can hold validated contact details.",
+    "Implement the workshop package: expose ticket formatting through TicketLabel while keeping LabelRules internal.",
+  ],
+  "hands-java-oop-more": [
+    "Implement Repair, PhoneRepair, LaptopRepair and PriceDesk so the till can price different repair types through one shared abstraction.",
+    "Implement Dispatch and BikeCourier so dispatch can send parcels through any Courier implementation.",
+    "Implement the Formatter overloads, FancyFormatter override and BindingDemo to demonstrate which method Java selects.",
+    "Implement Estimate with chainable setters that update one object and produce a validated total.",
+    "Implement JobStatus.canMoveTo so only the next valid repair status is allowed.",
+    "Implement Handover as a record that validates its ID and freezes an independent copy of the completed checks.",
+    "Implement Workstation initializer blocks and the lifecycle demo to show class setup once and object setup for every construction.",
+    "Implement Address and AddressDemo to demonstrate the difference between mutating an object and reassigning a copied reference.",
+  ],
+  "hands-java-collections": [
+    "Implement DayPlan.append to create a growable, independent appointment list with the walk-in added at the end.",
+    "Implement Reminders.unique to return normalized customer IDs once each, in first-seen order.",
+    "Implement RepairIndex.build to map each ticket ID to its description and reject duplicate or malformed rows.",
+    "Implement WaitingLine with FIFO queue behaviour: join, serve the oldest customer, and report the waiting count.",
+    "Implement NoteHistory with a deque so the latest note can be undone while the oldest remaining note can be inspected.",
+    "Implement ShelfCleanup.removeCancelled using an iterator to remove cancelled jobs safely from the supplied list.",
+    "Implement a generic Tray<T> that stores typed values, removes them in arrival order and returns immutable snapshots.",
+  ],
+  "hands-java-dsa": [
+    "Implement counts to return the frequency of every integer in the input array.",
+    "Implement indexOf to find a target in a sorted array using binary search.",
+  ],
+  "hands-java-solid": [
+    "Implement load by delegating customer lookup to the repository supplied by the caller.",
+    "Implement total as a pure, validated quantity-times-unit-price calculation.",
+  ],
+  "hands-java-patterns": [
+    "Implement checkout by applying the caller’s pricing strategy.",
+    "Implement publish to notify every registered listener once, in order.",
+  ],
+  "hands-java-contracts": [
+    "Implement normalize to give valid external IDs one consistent representation.",
+    "Implement parseRecord to validate an incident line and return its normalized ID and quantity.",
+    "Implement aggregate to total quantities by ID using your earlier parser.",
+    "Implement snapshot to expose incident totals as an independent, immutable map.",
+  ],
+  "hands-java-analysis": [
+    "Implement uniqueIds to normalize and deduplicate IDs while preserving arrival order.",
+    "Implement topIds to rank incident IDs by quantity with deterministic tie-breaking.",
+    "Implement movingTotals to calculate consecutive window sums in linear time.",
+    "Implement summary by composing your earlier aggregation, ranking and snapshot helpers.",
+  ],
+  "hands-java-reliability": [
+    "Implement retry to rerun a failing operation up to a fixed attempt limit.",
+    "Implement executeOnce so repeated request IDs reuse the first successful result.",
+    "Implement claim so concurrent workers cannot both claim the same message.",
+    "Implement parallelCount to finish all submitted jobs and return an accurate shared count.",
+  ],
+  "hands-java-capstone": [
+    "Implement allowed to check a user’s explicit permissions and deny missing access.",
+    "Implement transition to enforce the permitted workflow state changes.",
+    "Implement safeMessage to redact sensitive credentials while preserving diagnostic context.",
+    "Implement handle by combining authorization, idempotency and incident-summary helpers.",
+  ],
+  "hands-java-architecture": [
+    "Implement a lazy, thread-safe ConfigRegistry singleton and make RegistryClient use it.",
+    "Implement interchangeable shipping policies and a checkout that depends on their shared contract.",
+    "Implement ShippingFactory to turn a validated delivery name into the correct shipping policy.",
+    "Implement OrderEvents to manage subscriptions and deliver notifications without one listener disrupting the others.",
+    "Implement LegacyPaymentAdapter to translate integer cents into the gateway’s exact decimal format.",
+    "Implement AuditedPayment to decorate a payment provider with success-only audit messages.",
+    "Implement Stock and ReserveCommand so reservations can be executed and undone safely.",
+    "Implement ReportRequest and its builder to create validated, immutable request snapshots.",
+    "Implement OrderService by composing shipping, payment and event components with safe duplicate-request handling.",
+  ],
+  "hands-linux-basics": [
+    "Create the requested project directory and Java source file, then inspect its contents.",
+    "Extract the requested error lines from the supplied log into the output file.",
+  ],
+  "hands-linux-admin": [
+    "Set the configuration file to owner-only access and save evidence of its permissions.",
+    "Capture process and disk information, then create and verify the configuration backup.",
+  ],
+  "hands-linux-operations": [
+    "Produce an error-count breakdown by service from the supplied log.",
+    "Extract the full request journey for the specified correlation ID.",
+    "Generate the requested incident report safely and make repeated runs produce the same result.",
+    "Create the evidence archive and generate a checksum that verifies its integrity.",
+  ],
+  "hands-sql-queries": [
+    "Create the high_earners view with the required salary filter and columns.",
+    "Create the salary_ranks view to rank employees independently within each department.",
+  ],
+  "hands-sql-postgres": [
+    "Create salary_band to classify a salary using the stated boundaries.",
+    "Create total_payroll using an explicit cursor and return the employee salary total.",
+  ],
+  "hands-sql-integrity": [
+    "Create balance_of to look up an account balance through one reusable function.",
+    "Create move_money so a transfer updates both accounts atomically and rejects invalid requests.",
+    "Create post_payment so repeated request keys cannot cause duplicate transfers.",
+    "Create account_activity to reconcile every account and add the two required payment indexes.",
+  ],
+  "hands-sql-oracle": [
+    "Write a PL/SQL block that prints the correct pass-or-retry result.",
+    "Write a PL/SQL numeric FOR loop that prints the integers 1 through 5.",
+  ],
+};

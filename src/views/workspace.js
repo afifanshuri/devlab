@@ -1,4 +1,4 @@
-import { courses, allLessons } from "../../curriculum.js?v=missions-1";
+import { courses, allLessons } from "../../curriculum.js?v=missions-2";
 import * as store from "../../database.js";
 import { state } from "../state.js";
 import { $, esc, shell, toast } from "../ui.js";
@@ -70,6 +70,8 @@ export function lesson(courseId, idx) {
         <section class="instructions">
           <h2>Your mission</h2>
           <p class="mission-story">${esc(task.mission || task.task)}</p>
+          <h2>Your goal</h2>
+          <p class="mission-goal">${esc(task.goal || task.task)}</p>
           ${task.example
             ? `<div class="mission-example"><strong>For example</strong><pre>${esc(task.example)}</pre></div>`
             : ""}

@@ -1,4 +1,4 @@
-import { allLessons } from "../../curriculum.js?v=missions-1";
+import { allLessons } from "../../curriculum.js?v=missions-2";
 import * as store from "../../database.js";
 import { state } from "../state.js";
 import { $, esc, toast, shell, download } from "../ui.js";
