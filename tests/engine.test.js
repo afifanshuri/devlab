@@ -349,7 +349,8 @@ test("progression prerequisites are valid and acyclic; Java stages retain previo
   };
   for (const l of allLessons) visit(l.id);
   const pipeline = allLessons.filter(
-    (l) => l.track === "java" && l.reuseNote?.includes("Earlier working"),
+    (l) =>
+      l.track === "java" && l.reuseNote?.includes("Only method signatures"),
   );
   assert.equal(pipeline.length, 15);
   for (const l of pipeline) {
@@ -384,4 +385,28 @@ test("multi-file drafts preserve allowed sources and ignore injected filenames",
     readDraft(allLessons[0], "legacy draft")["Main.java"],
     "legacy draft",
   );
+});
+
+test("progressive starters contain contracts instead of earlier reference implementations", () => {
+  for (const task of allLessons.filter((l) =>
+    l.reuseNote?.includes("Only method signatures"),
+  )) {
+    assert.ok(!task.starter.includes("return Map.copyOf"));
+    assert.ok(!task.starter.includes("totals.merge"));
+    assert.ok(task.starter.includes("throw new UnsupportedOperationException"));
+  }
+  for (const task of allLessons.filter(
+    (l) => l.course === "hands-java-architecture",
+  )) {
+    for (const [name, source] of Object.entries({
+      [task.filename]: task.starter,
+      ...task.editableFiles,
+    })) {
+      if (!source.includes("interface "))
+        assert.ok(
+          source.includes("throw new UnsupportedOperationException"),
+          name,
+        );
+    }
+  }
 });

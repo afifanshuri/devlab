@@ -35,7 +35,18 @@ public class Verify {
 }`,
   };
 }
-const fixed = (source) => [source, source];
+const fixed = (source) => {
+  const stubs = {
+    StandardShipping:
+      'public class StandardShipping implements ShippingPolicy {\n  public long cost(int grams) {\n    throw new UnsupportedOperationException("TODO");\n  }\n}\n',
+    ExpressShipping:
+      'public class ExpressShipping implements ShippingPolicy {\n  public long cost(int grams) {\n    throw new UnsupportedOperationException("TODO");\n  }\n}\n',
+    ReportClient:
+      'public class ReportClient {\n  public ReportRequest weekly(String service) {\n    throw new UnsupportedOperationException("TODO");\n  }\n}\n',
+  };
+  const name = source.match(/public class (\w+)/)?.[1];
+  return [stubs[name] || source, source];
+};
 export const patternCourses = [
   make(
     "java-architecture",
@@ -98,7 +109,7 @@ export const patternCourses = [
       ),
       pattern(
         "Factory: select a policy at the boundary",
-        "A factory centralizes construction and keeps configuration parsing away from business logic. This exercise reuses the previous shipping contract as supplied working fixtures. A simple factory differs from the GoF Factory Method, where subclasses override creation.",
+        "A factory centralizes construction and keeps configuration parsing away from business logic. This exercise reuses the previous shipping contract through method stubs; reuse your own earlier implementations. A simple factory differs from the GoF Factory Method, where subclasses override creation.",
         "Implement ShippingFactory.create(String name). Trim whitespace, accept standard or express case-insensitively using Locale.ROOT, return the appropriate ShippingPolicy, and reject null, blank or unknown names with IllegalArgumentException. Do not silently use a cheaper policy for invalid configuration.",
         "Explain Simple Factory, Factory Method and Abstract Factory. When would a provider registry or dependency injection container be preferable?",
         {
@@ -117,7 +128,7 @@ export const patternCourses = [
           ),
         },
         'java.util.Locale old=java.util.Locale.getDefault(); try { java.util.Locale.setDefault(java.util.Locale.forLanguageTag("tr-TR")); expect(ShippingFactory.create(" STANDARD ").cost(1001)==700); expect(ShippingFactory.create("ExPrEsS").cost(1)==1200); } finally { java.util.Locale.setDefault(old); } rejects(()->ShippingFactory.create(null)); rejects(()->ShippingFactory.create("")); rejects(()->ShippingFactory.create("overnight"));',
-        "Reuse the working policy fixtures; keep parsing in the factory.",
+        "Reuse your own shipping policies from the previous exercise; keep parsing in the factory.",
       ),
       pattern(
         "Observer: reliable in-process notifications",
@@ -214,10 +225,19 @@ export const patternCourses = [
 // Compose earlier contracts in a realistic application boundary.
 const lessons = patternCourses[0].lessons;
 const byTitle = (prefix) => lessons.find((l) => l.title.startsWith(prefix));
-const workingFiles = (lesson) => ({
-  [lesson.filename]: lesson.solution,
-  ...lesson.solutionFiles,
-});
+const workingFiles = (lesson) =>
+  Object.fromEntries(
+    Object.entries({
+      [lesson.filename]: lesson.solution,
+      ...lesson.solutionFiles,
+    }).map(([name, solution]) => [
+      name,
+      [
+        name === lesson.filename ? lesson.starter : lesson.editableFiles[name],
+        solution,
+      ],
+    ]),
+  );
 const fixtures = {
   ...workingFiles(byTitle("Observer:")),
   ...workingFiles(byTitle("Adapter:")),
@@ -227,23 +247,21 @@ lessons.push(
   pattern(
     "Architecture capstone: idempotent order checkout",
     "Compose Strategy (shipping), Adapter (legacy payments) and Observer (order notifications) through small contracts. This process-local cache demonstrates idempotency but does not survive restart. Durable cross-service guarantees require database uniqueness, payment-provider idempotency and an outbox.",
-    "Implement OrderService(PaymentPort, ShippingPolicy, OrderEvents) and place(String requestId, long itemCents, int grams). Reject null dependencies; reject null/blank IDs, negative items and negative weights before charging. Normalize IDs with trim and Locale.ROOT uppercase. Use Checkout.total to calculate the charge. On the first successful request, call PaymentPort once, cache its receipt with the original item/weight inputs, publish paid:<NORMALIZED_ID> once, and return the receipt. Repeating the same normalized ID and identical inputs returns the cached receipt without charging or notifying again. Reusing an ID with different inputs throws IllegalArgumentException. A payment failure is propagated and must not be cached or published; retry can succeed. Calls are single-threaded. Earlier working components are supplied in separate editable tabs.",
+    "Implement OrderService(PaymentPort, ShippingPolicy, OrderEvents) and place(String requestId, long itemCents, int grams). Reject null dependencies; reject null/blank IDs, negative items and negative weights before charging. Normalize IDs with trim and Locale.ROOT uppercase. Use Checkout.total to calculate the charge. On the first successful request, call PaymentPort once, cache its receipt with the original item/weight inputs, publish paid:<NORMALIZED_ID> once, and return the receipt. Repeating the same normalized ID and identical inputs returns the cached receipt without charging or notifying again. Reusing an ID with different inputs throws IllegalArgumentException. A payment failure is propagated and must not be cached or published; retry can succeed. Calls are single-threaded. Only signatures and interfaces are supplied in separate tabs; reuse your own earlier implementations.",
     "Identify the responsibilities and dependency directions. Why inject PaymentPort rather than instantiate LegacyPaymentAdapter inside the service? What if payment succeeds and the process crashes before caching? Explain persistent idempotency records, transactional outbox, concurrent duplicate requests and why a Singleton cannot solve distributed consistency.",
     {
       "OrderService.java": [
         'public class OrderService {\n  public OrderService(PaymentPort payment, ShippingPolicy shipping, OrderEvents events) {\n    throw new UnsupportedOperationException("Implement this task");\n  }\n  public String place(String requestId,long itemCents,int grams) {\n    throw new UnsupportedOperationException("Implement this task");\n  }\n}\n',
         'public class OrderService {\n  private final PaymentPort payment;\n  private final ShippingPolicy shipping;\n  private final OrderEvents events;\n  private record Result(long items,int grams,String receipt) {\n  }\n  private final java.util.Map<String,Result> completed=new java.util.HashMap<>();\n  public OrderService(PaymentPort payment,ShippingPolicy shipping,OrderEvents events) {\n    if(payment==null || shipping==null || events==null) throw new IllegalArgumentException();\n    this.payment=payment;\n    this.shipping=shipping;\n    this.events=events;\n  }\n  public String place(String requestId,long itemCents,int grams) {\n    if(requestId==null || requestId.isBlank() || itemCents<0 || grams<0) throw new IllegalArgumentException();\n    String id=requestId.trim().toUpperCase(java.util.Locale.ROOT);\n    Result old=completed.get(id);\n    if(old!=null) {\n      if(old.items()!=itemCents || old.grams()!=grams)throw new IllegalArgumentException();\n      return old.receipt();\n    }\n    long total=new Checkout().total(itemCents,grams,shipping);\n    String receipt=payment.pay(total);\n    completed.put(id,new Result(itemCents,grams,receipt));\n    events.publish("paid:"+id);\n    return receipt;\n  }\n}\n',
       ],
-      ...Object.fromEntries(
-        Object.entries(fixtures).map(([name, source]) => [name, fixed(source)]),
-      ),
+      ...fixtures,
     },
     'List<String> amounts=new ArrayList<>(), notifications=new ArrayList<>();OrderEvents bus=new OrderEvents();bus.subscribe(notifications::add);AtomicInteger calls=new AtomicInteger();PaymentPort payment=new LegacyPaymentAdapter(amount->{calls.incrementAndGet();amounts.add(amount);if(amount.equals("9.01") && calls.get()==2)throw new IllegalStateException("temporary");return "R"+calls.get();});OrderService service=new OrderService(payment,new StandardShipping(),bus);expect(service.place(" a ",100,1001).equals("R1"));expect(service.place("A",100,1001).equals("R1"));expect(amounts.equals(List.of("8.00")) && notifications.equals(List.of("paid:A")));rejects(()->service.place("a",101,1001));rejects(()->service.place("a",100,1000));try{service.place("retry",301,1);throw new AssertionError();}catch(IllegalStateException e){}expect(notifications.size()==1);expect(service.place("retry",301,1).equals("R3"));expect(service.place("RETRY",301,1).equals("R3"));expect(calls.get()==3 && notifications.equals(List.of("paid:A","paid:RETRY")));rejects(()->service.place(null,1,1));rejects(()->service.place(" ",1,1));rejects(()->service.place("bad",-1,1));rejects(()->service.place("bad",1,-1));rejects(()->new OrderService(null,new StandardShipping(),bus));expect(calls.get()==3);OrderService injected=new OrderService(c->{expect(c==12);return "injected";},g->2,new OrderEvents());expect(injected.place("x",10,0).equals("injected"));',
     "Validate first, look up the normalized request ID, then charge; cache only after success and publish after caching. Store the original request parameters to detect mismatched retries.",
   ),
 );
 lessons.at(-1).reuseNote =
-  "Working shipping, payment adapter and observer implementations from earlier exercises are supplied in their own tabs. Build the orchestration around those contracts.";
+  "Reuse your own shipping, payment adapter and observer implementations from earlier exercises. The starter tabs contain only their contracts and method stubs.";
 patternCourses[0].stage = 6;
 patternCourses[0].lessons[0].prerequisites = ["hands-java-capstone:3"];
 for (let i = 1; i < patternCourses[0].lessons.length; i++)

@@ -195,6 +195,7 @@ const javaGroups = [
   ],
 ];
 let methods = [],
+  signatures = [],
   regressions = [],
   previous = "hands-java-patterns:1";
 const javaCourses = javaGroups.map(([id, title, description, tags], group) => {
@@ -212,9 +213,15 @@ const javaCourses = javaGroups.map(([id, title, description, tags], group) => {
           type: "workspace",
           filename: "Main.java",
           starter:
-            imports +
+            (/\b(Map|List|Set)\b/.test(signatures.join("") + signature)
+              ? "import java.util.*;\n"
+              : "") +
+            (signatures.join("").includes("Supplier") ||
+            signature.includes("Supplier")
+              ? "import java.util.function.Supplier;\n"
+              : "") +
             "\npublic class Main {\n" +
-            methods.join("\n") +
+            signatures.join("\n") +
             stub +
             "}\n",
           solution:
@@ -228,7 +235,7 @@ const javaCourses = javaGroups.map(([id, title, description, tags], group) => {
           reuseFrom: previous,
           prerequisites: [previous],
           reuseNote: methods.length
-            ? "Earlier working helper methods are included in this starter. Reuse them; internal regression tests verify earlier behavior too."
+            ? "Only method signatures are provided. Bring your own implementations from earlier exercises; cumulative tests still verify their behavior."
             : "This step builds on collection and design-pattern practice. Later steps will reuse this method.",
           verify:
             imports +
@@ -237,6 +244,7 @@ const javaCourses = javaGroups.map(([id, title, description, tags], group) => {
             '\nSystem.out.println("DEVLAB_TESTS_PASSED");\n }\n static void expect(boolean ok) { if(!ok)throw new AssertionError("A current or earlier requirement failed"); }\n}\n',
         };
         methods.push(complete);
+        signatures.push(stub);
         regressions.push(tests);
         previous = `hands-${id}:${offset}`;
         return lesson;
