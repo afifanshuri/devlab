@@ -1323,3 +1323,14 @@ dialog h2 {
   color: #e9ebed;
   line-height: 1.7;
 }
+
+.output-terminal {
+  height: 260px;
+  padding: 12px;
+  overflow: hidden;
+  background: #0f1712;
+  white-space: pre-wrap;
+  font:
+    13px/1.5 Consolas,
+    monospace;
+}

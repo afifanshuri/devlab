@@ -18,6 +18,7 @@ const files = [
   "src/terminal-prompt.js",
   "src/views/linux-workspace.js",
   "src/services/interactive-terminal.js",
+  "src/services/terminal-display.js",
   "vendor/terminal/xterm.js",
   "vendor/terminal/xterm.css",
   "vendor/terminal/addon-fit.js",

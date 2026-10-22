@@ -1,28 +1,5 @@
 import { callRunner } from "./runner.js";
-let libraries;
-function script(src) {
-  return new Promise((resolve, reject) => {
-    const tag = document.createElement("script");
-    tag.src = src;
-    tag.onload = resolve;
-    tag.onerror = () =>
-      reject(Error("Terminal assets failed to load. Reload the app."));
-    document.head.append(tag);
-  });
-}
-function load() {
-  return (libraries ??= (async () => {
-    const css = document.createElement("link");
-    css.rel = "stylesheet";
-    css.href = "vendor/terminal/xterm.css";
-    document.head.append(css);
-    await script("vendor/terminal/xterm.js");
-    await script("vendor/terminal/addon-fit.js");
-  })().catch((error) => {
-    libraries = null;
-    throw error;
-  }));
-}
+import { createTerminalDisplay } from "./terminal-display.js";
 export async function openInteractiveTerminal(
   element,
   id,
@@ -34,26 +11,15 @@ export async function openInteractiveTerminal(
     onState = () => {},
   } = {},
 ) {
-  await load();
-  if (!element.isConnected) throw Error("Exercise navigation changed.");
-  const term = new window.Terminal({
-    cursorBlink: true,
-    scrollback: 1500,
-    fontSize: 13,
-    fontFamily: "Consolas, monospace",
-    screenReaderMode: true,
-    theme: { background: "#0f1712", foreground: "#d1e5c7", cursor: "#c5f578" },
-    allowProposedApi: false,
+  const display = await createTerminalDisplay(element, {
+    observeResize: false,
   });
-  const fit = new window.FitAddon.FitAddon();
-  term.loadAddon(fit);
-  term.open(element);
-  fit.fit();
+  const { term } = display;
   let ticket;
   try {
     ticket = await callRunner("terminal-ticket", { id });
   } catch (error) {
-    term.dispose();
+    display.dispose();
     throw error;
   }
   const url = new URL("/api/terminal", location.href);
@@ -68,11 +34,7 @@ export async function openInteractiveTerminal(
   };
   const resize = () => {
     if (disposed || !element.isConnected) return;
-    fit.fit();
-    term.resize(
-      Math.max(10, Math.min(300, term.cols)),
-      Math.max(4, Math.min(100, term.rows)),
-    );
+    display.resize();
     send({ type: "resize", cols: term.cols, rows: term.rows });
   };
   const observer = new ResizeObserver(resize);
@@ -123,7 +85,7 @@ export async function openInteractiveTerminal(
       observer.disconnect();
       input.dispose();
       socket.close();
-      term.dispose();
+      display.dispose();
     },
   };
 }

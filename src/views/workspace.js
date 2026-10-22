@@ -4,6 +4,7 @@ import { state } from "../state.js";
 import { $, esc, shell, toast } from "../ui.js";
 import { callRunner, localRunner } from "../services/runner.js";
 import { editKey } from "../editor-input.js";
+import { createTerminalDisplay } from "../services/terminal-display.js";
 import { terminalPrompt } from "../terminal-prompt.js";
 import { linuxPane, mountLinux } from "./linux-workspace.js";
 import {
@@ -172,20 +173,19 @@ ${esc(context.files[context.filename])}</textarea
               }
             </div>
           </section>
-          <section class="terminal-pane" aria-label="Shell terminal">
+          <section class="terminal-pane" aria-label="Output terminal">
             <div class="workspace-section-header">
-              <strong>&gt;_ TERMINAL</strong
+              <strong>&gt;_ OUTPUT TERMINAL</strong
               ><span id="runner-state">CONNECTING…</span>
             </div>
             <div
-              class="terminal-log"
+              class="output-terminal"
               id="terminal"
               role="log"
               aria-label="Terminal output"
-              style="min-height:140px;max-height:300px"
             >
-              The workspace connects automatically. Commands run one at a time.
-              Full-screen editors and interactive prompts are not supported.
+              Compile errors, query output and test results appear here.
+              Write and submit your answer in the code editor above.
             </div>
             <form id="terminal-form" class="terminal-form">
               <label for="command" id="terminal-prompt">afif@devlab:~$</label
@@ -306,12 +306,35 @@ ${esc(context.files[context.filename])}</textarea
     if (live())
       $("#check").disabled = !available || context.busy || !hasAnswer();
   };
+  const terminalElement = $("#terminal");
+  let output =
+    "Compile errors, query output and test results appear here.\nWrite your answer in the code editor above.\n\n";
+  // Plain text remains usable if the optional terminal assets cannot load.
+  terminalElement.textContent = output;
   const log = (text) => {
-    if (live()) {
-      $("#terminal").textContent += text;
-      $("#terminal").scrollTop = $("#terminal").scrollHeight;
+    if (!live()) return;
+    if (context.terminal) context.terminal.write(text);
+    else {
+      output = (output + text).slice(-128000);
+      terminalElement.textContent = output;
+      terminalElement.scrollTop = terminalElement.scrollHeight;
     }
   };
+  if (terminalElement.isConnected) {
+    createTerminalDisplay(terminalElement, { readOnly: true })
+      .then((display) => {
+        if (!live()) {
+          display.dispose();
+          return;
+        }
+        context.terminal = display;
+        display.write(output);
+        output = "";
+      })
+      .catch(() => {
+        if (live()) terminalElement.textContent = output;
+      });
+  }
   const ensure = async () => {
     const result = await callRunner("start", { lessonId: key });
     if (!live()) {
@@ -369,6 +392,7 @@ ${esc(context.files[context.filename])}</textarea
       await work();
     } catch (error) {
       if (live()) {
+        log(error.message + "\n");
         $("#output").textContent = error.message;
         $("#output").className = "console error";
       }
