@@ -705,48 +705,6 @@ h1 span {
   border-top: 1px solid var(--line);
   line-height: 1.7;
 }
-.terminal-log {
-  padding: 20px;
-  min-height: 290px;
-  max-height: 430px;
-  overflow: auto;
-  flex: 1;
-  font:
-    12px/1.9 Consolas,
-    SFMono-Regular,
-    monospace;
-  white-space: pre-wrap;
-  color: #b2c5ad;
-}
-.terminal-form {
-  display: flex;
-  padding: 13px 20px;
-  border-top: 1px solid var(--line);
-  font-family: monospace;
-  color: #b7dc95;
-  align-items: center;
-  gap: 10px;
-}
-.terminal-form input,
-.terminal-form textarea {
-  background: transparent;
-  border: 0;
-  color: #d5e7cb;
-  min-width: 0;
-  flex: 1;
-  font: 12px monospace;
-}
-.terminal-form input:focus,
-.terminal-form textarea:focus {
-  outline: 0;
-}
-.terminal-form textarea {
-  resize: vertical;
-  min-height: 32px;
-  max-height: 180px;
-  line-height: 1.6;
-  tab-size: 2;
-}
 .terminal-help {
   font-size: 11px;
   padding: 0 20px 10px;
@@ -1120,36 +1078,7 @@ dialog h2 {
   color: #b8d5ae;
   border-bottom: 1px solid #304034;
 }
-.terminal-pane .terminal-log {
-  background: #090d0c;
-  color: #a4b7a0;
-  padding: 17px;
-  font-size: 11px;
-}
-.terminal-pane .terminal-form {
-  background: #0f1712;
-  border-color: #304034;
-  padding: 12px 16px;
-}
-.terminal-pane .terminal-form label {
-  color: #c5f578;
-  font-weight: 700;
-  max-width: 50%;
-  overflow-wrap: anywhere;
-  line-height: 1.5;
-}
-.terminal-pane .terminal-form input,
-.terminal-pane .terminal-form textarea {
-  color: #d1e5c7;
-}
 @media (max-width: 760px) {
-  .terminal-form {
-    flex-wrap: wrap;
-  }
-  .terminal-pane .terminal-form label {
-    flex-basis: 100%;
-    max-width: 100%;
-  }
   .exercise-workspace {
     padding: 10px;
     gap: 14px;

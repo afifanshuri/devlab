@@ -5,7 +5,6 @@ import { $, esc, shell, toast } from "../ui.js";
 import { callRunner, localRunner } from "../services/runner.js";
 import { editKey } from "../editor-input.js";
 import { createTerminalDisplay } from "../services/terminal-display.js";
-import { terminalPrompt } from "../terminal-prompt.js";
 import { linuxPane, mountLinux } from "./linux-workspace.js";
 import {
   starterFiles,
@@ -187,27 +186,6 @@ ${esc(context.files[context.filename])}</textarea
               Compile errors, query output and test results appear here.
               Write and submit your answer in the code editor above.
             </div>
-            <form id="terminal-form" class="terminal-form">
-              <label for="command" id="terminal-prompt">afif@devlab:~$</label
-              ><textarea
-                rows="1"
-                id="command"
-                autocomplete="off"
-                spellcheck="false"
-                aria-label="Terminal command"
-                placeholder="${
-                  task.engine === "java"
-                    ? "javac *.java"
-                    : task.engine === "postgres"
-                      ? "psql -c &quot;SELECT * FROM employees;&quot;"
-                      : "ls -la"
-                }"
-              ></textarea
-              ><button class="secondary" type="submit">Run ↵</button>
-            </form>
-            <p class="muted terminal-help">
-              Enter runs · Shift+Enter adds an indented line · Tab indents
-            </p>
           </section>`}
         </section>
       </div>
@@ -342,12 +320,6 @@ ${esc(context.files[context.filename])}</textarea
     }
     const changed = context.session !== result.id;
     context.session = result.id;
-    context.home = result.workspace || "/workspace";
-    context.cwd = result.cwd || context.home;
-    $("#terminal-prompt").textContent = terminalPrompt(
-      context.cwd,
-      context.home,
-    );
     if (changed) {
       context.lastSaved = starterFiles(task);
       if (result.reused) {
@@ -424,60 +396,6 @@ ${esc(context.files[context.filename])}</textarea
         toast("Draft could not be saved locally. Keep this tab open.");
       }
     }, 350);
-  };
-  const resizeCommand = () => {
-    const command = $("#command");
-    command.style.height = "auto";
-    command.style.height =
-      Math.min(180, Math.max(32, command.scrollHeight || 32)) + "px";
-  };
-  $("#command").oninput = () => {
-    noteActivity();
-    resizeCommand();
-  };
-  const run = async (command) => {
-    await ensure();
-    log(terminalPrompt(context.cwd, context.home) + " " + command + "\n");
-    const r = await callRunner("command", { id: context.session, command });
-    log(r.output + `\n[exit ${r.code}]\n`);
-    if (live()) {
-      context.cwd = r.cwd || context.cwd;
-      $("#terminal-prompt").textContent = terminalPrompt(
-        context.cwd,
-        context.home,
-      );
-    }
-  };
-  let history = [],
-    cursor = 0;
-  $("#terminal-form").onsubmit = action(async () => {
-    const command = $("#command").value.trim();
-    if (!command) return;
-    history.push(command);
-    cursor = history.length;
-    $("#command").value = "";
-    resizeCommand();
-    await run(command);
-  });
-  $("#command").onkeydown = (e) => {
-    if (e.key === "Enter" && !e.shiftKey && !e.isComposing) {
-      e.preventDefault();
-      $("#terminal-form").requestSubmit();
-      return;
-    }
-    editKey(e, () => $("#command").oninput());
-    if (
-      ["ArrowUp", "ArrowDown"].includes(e.key) &&
-      !e.target.value.includes("\n")
-    ) {
-      e.preventDefault();
-      cursor = Math.max(
-        0,
-        Math.min(history.length, cursor + (e.key === "ArrowUp" ? -1 : 1)),
-      );
-      e.target.value = history[cursor] || "";
-      resizeCommand();
-    }
   };
   $("#code").onkeydown = (e) => editKey(e, () => $("#code").oninput());
   $("#check").onclick = action(async () => {
