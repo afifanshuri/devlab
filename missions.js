@@ -193,7 +193,7 @@ export function applyMissions(courses) {
       if (story) [lesson.mission, lesson.example] = story;
       lesson.goal ??= goals[course.id]?.[index];
       lesson.example ??= examples[course.id]?.[index];
-      lesson.requirements = lesson.task.split(/(?<=[.!?])\s+(?=[A-Z])/);
+      lesson.requirements ??= lesson.task.split(/(?<=[.!?])\s+(?=[A-Z])/);
     }
 }
 const goals = {

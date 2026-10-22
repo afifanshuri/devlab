@@ -1,11 +1,11 @@
-import { courses, allLessons } from "../../curriculum.js?v=comment-starters-1";
+import { courses, allLessons } from "../../curriculum.js?v=advanced-pairs-1";
 import { state } from "../state.js";
 import { esc, shell } from "../ui.js";
 import {
   completed,
   count,
   route,
-} from "../catalog-data.js?v=comment-starters-1";
+} from "../catalog-data.js?v=advanced-pairs-1";
 function progressPage() {
   const done = completed();
   shell(

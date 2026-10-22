@@ -1,4 +1,4 @@
-import { courses, allLessons } from "../../curriculum.js?v=comment-starters-1";
+import { courses, allLessons } from "../../curriculum.js?v=advanced-pairs-1";
 import * as store from "../../database.js";
 import { state } from "../state.js";
 import { $, esc, shell, toast } from "../ui.js";
@@ -6,7 +6,7 @@ import { callRunner, localRunner } from "../services/runner.js";
 import { openCodeEditor } from "../services/code-editor.js";
 import { editKey } from "../editor-input.js";
 import { createTerminalDisplay } from "../services/terminal-display.js";
-import { linuxPane, mountLinux } from "./linux-workspace.js?v=save-state-1";
+import { linuxPane, mountLinux } from "./linux-workspace.js?v=advanced-pairs-1";
 import {
   starterFiles,
   readDraft,
@@ -74,6 +74,9 @@ export function lesson(courseId, idx) {
         </div>
         <a class="secondary" href="#labs">← All labs</a>
       </div>
+      ${task.advancedTopic
+        ? `<label class="advanced-topic-picker">Advanced topic <select id="topic-jump" aria-label="Advanced topic">${course.lessons.map((l, i) => (l.challengeNumber === 1 ? `<option value="${i}" ${Math.floor(index / 2) === Math.floor(i / 2) ? "selected" : ""}>${esc(l.advancedTopic)}</option>` : "")).join("")}</select></label>`
+        : ""}
       <div class="lab-grid">
         <section class="instructions">
           <h2>Your mission</h2>
@@ -214,6 +217,10 @@ ${esc(context.files[context.filename])}</textarea
         >
       </div>`,
   );
+  if (task.advancedTopic)
+    $("#topic-jump").onchange = (event) => {
+      location.hash = `#lab/${course.id}/${event.target.value}`;
+    };
   const live = () => active === context;
   const help = () => {
     $("#hint").onclick = () =>

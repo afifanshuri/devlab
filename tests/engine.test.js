@@ -10,9 +10,9 @@ globalThis.indexedDB = indexedDB;
 globalThis.window = { initSqlJs: () => Promise.resolve(SQL) };
 await store.initialize();
 test("every exercise is a coding task, with unique versioned IDs", () => {
-  assert.equal(courses.length, 30);
-  assert.equal(allLessons.length, 142);
-  assert.equal(new Set(allLessons.map((l) => l.id)).size, 142);
+  assert.equal(courses.filter((c) => !c.lessons[0].advancedTopic).length, 30);
+  assert.equal(allLessons.filter((l) => !l.advancedTopic).length, 142);
+  assert.equal(new Set(allLessons.map((l) => l.id)).size, allLessons.length);
   for (const l of allLessons) {
     assert.equal(l.type, "workspace");
     assert.ok(l.task && l.starter && l.solution && l.hint);
@@ -77,10 +77,13 @@ test("all screens and practical tasks render without missing references", async 
   try {
     const { catalog } = await import("../src/views/catalog.js");
     catalog();
-    assert.match(nodes.get("#app").innerHTML, /142 exercises/);
+    assert.match(
+      nodes.get("#app").innerHTML,
+      new RegExp(allLessons.length + " exercises"),
+    );
     assert.equal(
       (nodes.get("#cards").innerHTML.match(/<article/g) || []).length,
-      30,
+      courses.length,
     );
     for (const [file, names] of [
       ["progress", ["progressPage", "paths"]],
@@ -93,7 +96,12 @@ test("all screens and practical tasks render without missing references", async 
     const { lesson } = await import("../src/views/workspace.js");
     for (const l of allLessons) {
       lesson(l.course, l.index);
-      assert.ok(nodes.get("#app").innerHTML.includes(l.title));
+      assert.ok(
+        nodes
+          .get("#app")
+          .innerHTML.includes((await import("../src/ui.js")).esc(l.title)),
+        l.id,
+      );
       const markup = nodes.get("#app").innerHTML;
       assert.ok(!markup.includes("data-choice"));
       if (l.engine === "linux") {
@@ -421,10 +429,7 @@ test("progressive starters contain contracts instead of earlier reference implem
       ...task.editableFiles,
     })) {
       if (!source.includes("interface "))
-        assert.ok(
-          source.includes("/* TODO */"),
-          name,
-        );
+        assert.ok(source.includes("/* TODO */"), name);
     }
   }
 });
@@ -509,10 +514,7 @@ test("SOLID and advanced pattern tasks have distinct contracts and minimal start
       [task.filename]: task.starter,
       ...task.editableFiles,
     })) {
-      assert.ok(
-        source.includes("interface ") ||
-          source.includes("/* TODO */"),
-      );
+      assert.ok(source.includes("interface ") || source.includes("/* TODO */"));
     }
     assert.ok(task.interview.length > 30);
   }
@@ -553,7 +555,7 @@ test("roadmap additions skip SQL syntax drills and use real Spring with bounded 
     );
   }
   const spring = allLessons.filter((l) => l.framework === "spring");
-  assert.equal(spring.length, 9);
+  assert.equal(spring.filter((l) => !l.advancedTopic).length, 9);
   for (const l of spring) {
     assert.equal(l.engine, "java");
     assert.match(l.verify, /org\.springframework\./);

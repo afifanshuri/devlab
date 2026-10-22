@@ -46,3 +46,7 @@ Continue after OOP, collections, SOLID and design patterns. Uses the real librar
 9. Method security; enforce authorization after context changes and for anonymous callers.
 
 Only required public contracts and TODOs are supplied. Application bootstrap is infrastructure, supplied as `LabApplication.java` for persistence tasks and inspectable in the terminal. Reference solutions remain behind the existing explicit action. MockMvc runs HTTP behavior without opening a public server. Persistence tests use local H2; production database behavior remains a separate PostgreSQL topic.
+
+## Advanced concept pairs
+
+The appended Java, PostgreSQL and Linux stages add two questions per named advanced concept group. Original exercises and IDs remain available. Challenge 1 focuses on a production boundary; challenge 2 composes it into a batch, recovery or reporting scenario. Exact signatures, failure policies and input/output contracts are shown in each mission. The advanced topic selector avoids stepping through unrelated pairs.

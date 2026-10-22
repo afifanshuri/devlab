@@ -1,11 +1,7 @@
-import { courses, allLessons } from "../../curriculum.js?v=comment-starters-1";
+import { courses, allLessons } from "../../curriculum.js?v=advanced-pairs-1";
 import * as store from "../../database.js";
 import { $, esc, icon, shell } from "../ui.js";
-import {
-  completed,
-  count,
-  route,
-} from "../catalog-data.js?v=comment-starters-1";
+import { completed, count, route } from "../catalog-data.js?v=advanced-pairs-1";
 let filter = "all",
   query = "";
 function catalog() {
@@ -145,7 +141,12 @@ function drawCards() {
   const list = courses.filter(
     (c) =>
       (filter === "all" || filter === c.track) &&
-      [c.title, c.description, ...c.tags]
+      [
+        c.title,
+        c.description,
+        ...c.tags,
+        ...c.lessons.map((l) => l.advancedTopic || ""),
+      ]
         .join(" ")
         .toLowerCase()
         .includes(query.toLowerCase()),

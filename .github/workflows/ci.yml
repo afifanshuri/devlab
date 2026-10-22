@@ -6,6 +6,10 @@ jobs:
   test:
     runs-on: ubuntu-latest
     timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        suite: [legacy, java-a, java-b, ops]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -15,6 +19,8 @@ jobs:
       - run: npm ci --ignore-scripts
       - run: npm test
       - run: npm run setup:labs
-      - run: npm run test:docker
+      - run: node scripts/test-curriculum.mjs ${{ matrix.suite }}
+      - run: node --test --test-concurrency=1 tests/pools.integration.js tests/http.integration.js tests/terminal.integration.js tests/interactive.integration.js tests/answer-files.integration.js
+        if: matrix.suite == 'legacy'
       - run: npm run test:pages
-        if: github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/main' && matrix.suite == 'legacy'

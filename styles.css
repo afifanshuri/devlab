@@ -1271,3 +1271,20 @@ dialog h2 {
 .code-pane .editor[hidden] {
   display: none;
 }
+
+.advanced-topic-picker {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin: 0 0 20px;
+  color: #a9bfd2;
+}
+.advanced-topic-picker select {
+  max-width: 100%;
+  padding: 10px;
+  background: #1a2530;
+  color: #e1eaf2;
+  border: 1px solid #35424d;
+  border-radius: 6px;
+}
