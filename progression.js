@@ -204,7 +204,7 @@ const javaCourses = javaGroups.map(([id, title, description, tags], group) => {
     .map(
       ([title, concept, task, signature, body, tests, hint, learn], offset) => {
         const complete = `  ${signature} {\n    ${body}\n  }\n`;
-        const stub = `  ${signature} {\n    throw new UnsupportedOperationException("Implement this step");\n  }\n`;
+        const stub = `  ${signature} {\n    /* TODO */\n  }\n`;
         const lesson = {
           title,
           concept,

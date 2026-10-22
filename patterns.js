@@ -5,11 +5,11 @@ import {
 const fixed = (source) => {
   const stubs = {
     StandardShipping:
-      'public class StandardShipping implements ShippingPolicy {\n  public long cost(int grams) {\n    throw new UnsupportedOperationException("TODO");\n  }\n}\n',
+      'public class StandardShipping implements ShippingPolicy {\n  public long cost(int grams) {\n    /* TODO */\n  }\n}\n',
     ExpressShipping:
-      'public class ExpressShipping implements ShippingPolicy {\n  public long cost(int grams) {\n    throw new UnsupportedOperationException("TODO");\n  }\n}\n',
+      'public class ExpressShipping implements ShippingPolicy {\n  public long cost(int grams) {\n    /* TODO */\n  }\n}\n',
     ReportClient:
-      'public class ReportClient {\n  public ReportRequest weekly(String service) {\n    throw new UnsupportedOperationException("TODO");\n  }\n}\n',
+      'public class ReportClient {\n  public ReportRequest weekly(String service) {\n    /* TODO */\n  }\n}\n',
   };
   const name = source.match(/public class (\w+)/)?.[1];
   return [stubs[name] || source, source];
@@ -38,11 +38,11 @@ export const patternCourses = [
         "Explain holder initialization versus double-checked locking (volatile), enum singletons, class loaders, and why singleton state can harm test isolation. Could an injected immutable configuration object be simpler?",
         {
           "ConfigRegistry.java": [
-            'public final class ConfigRegistry {\n  private ConfigRegistry() {\n  }\n  public static ConfigRegistry getInstance() {\n    throw new UnsupportedOperationException("Implement this task");\n  }\n  public String environment() {\n    throw new UnsupportedOperationException("Implement this task");\n  }\n}\n',
+            'public final class ConfigRegistry {\n  private ConfigRegistry() {\n  }\n  public static ConfigRegistry getInstance() {\n    /* TODO */\n  }\n  public String environment() {\n    /* TODO */\n  }\n}\n',
             'public final class ConfigRegistry {\n  private ConfigRegistry() {\n  }\n  private static class Holder {\n    static final ConfigRegistry INSTANCE = new ConfigRegistry();\n  }\n  public static ConfigRegistry getInstance() {\n    return Holder.INSTANCE;\n  }\n  public String environment() {\n    return "production";\n  }\n}\n',
           ],
           "RegistryClient.java": [
-            'public class RegistryClient {\n  public String environment() {\n    throw new UnsupportedOperationException("Implement this task");\n  }\n}\n',
+            'public class RegistryClient {\n  public String environment() {\n    /* TODO */\n  }\n}\n',
             "public class RegistryClient {\n  public String environment() {\n    return ConfigRegistry.getInstance().environment();\n  }\n}\n",
           ],
         },
@@ -56,18 +56,18 @@ export const patternCourses = [
         "Contrast Strategy with a switch and Template Method. How would constructor injection make policies testable, and where should validation live?",
         {
           "Checkout.java": [
-            'public class Checkout {\n  public long total(long items, int grams, ShippingPolicy policy) {\n    throw new UnsupportedOperationException("Implement this task");\n  }\n}\n',
+            'public class Checkout {\n  public long total(long items, int grams, ShippingPolicy policy) {\n    /* TODO */\n  }\n}\n',
             "public class Checkout {\n  public long total(long items, int grams, ShippingPolicy policy) {\n    if(items<0 || policy==null) throw new IllegalArgumentException();\n    return Math.addExact(items,policy.cost(grams));\n  }\n}\n",
           ],
           "ShippingPolicy.java": fixed(
             "public interface ShippingPolicy {\n  long cost(int grams);\n}\n",
           ),
           "StandardShipping.java": [
-            'public class StandardShipping implements ShippingPolicy {\n  public long cost(int grams) {\n    throw new UnsupportedOperationException("Implement this task");\n  }\n}\n',
+            'public class StandardShipping implements ShippingPolicy {\n  public long cost(int grams) {\n    /* TODO */\n  }\n}\n',
             "public class StandardShipping implements ShippingPolicy {\n  public long cost(int grams) {\n    if(grams<0) throw new IllegalArgumentException();\n    return 500+100*((grams+999L)/1000);\n  }\n}\n",
           ],
           "ExpressShipping.java": [
-            'public class ExpressShipping implements ShippingPolicy {\n  public long cost(int grams) {\n    throw new UnsupportedOperationException("Implement this task");\n  }\n}\n',
+            'public class ExpressShipping implements ShippingPolicy {\n  public long cost(int grams) {\n    /* TODO */\n  }\n}\n',
             "public class ExpressShipping implements ShippingPolicy {\n  public long cost(int grams) {\n    return 2*new StandardShipping().cost(grams);\n  }\n}\n",
           ],
         },
@@ -81,7 +81,7 @@ export const patternCourses = [
         "Explain Simple Factory, Factory Method and Abstract Factory. When would a provider registry or dependency injection container be preferable?",
         {
           "ShippingFactory.java": [
-            'public class ShippingFactory {\n  public static ShippingPolicy create(String name) {\n    throw new UnsupportedOperationException("Implement this task");\n  }\n}\n',
+            'public class ShippingFactory {\n  public static ShippingPolicy create(String name) {\n    /* TODO */\n  }\n}\n',
             'public class ShippingFactory {\n  public static ShippingPolicy create(String name) {\n    if(name==null) throw new IllegalArgumentException();\n    return switch(name.trim().toLowerCase(java.util.Locale.ROOT)) {\n      case "standard" -> new StandardShipping();\n      case "express" -> new ExpressShipping();\n      default -> throw new IllegalArgumentException();\n    }\n    ;\n  }\n}\n',
           ],
           "ShippingPolicy.java": fixed(
@@ -104,7 +104,7 @@ export const patternCourses = [
         "Discuss Observer versus pub/sub, memory leaks from forgotten subscriptions, thread safety, backpressure, error reporting and when an outbox plus message broker is needed. This lab swallows subscriber RuntimeExceptions only; production should record them.",
         {
           "OrderEvents.java": [
-            'public class OrderEvents {\n  public void subscribe(OrderListener l) {\n    throw new UnsupportedOperationException("Implement this task");\n  }\n  public void unsubscribe(OrderListener l) {\n    throw new UnsupportedOperationException("Implement this task");\n  }\n  public void publish(String event) {\n    throw new UnsupportedOperationException("Implement this task");\n  }\n}\n',
+            'public class OrderEvents {\n  public void subscribe(OrderListener l) {\n    /* TODO */\n  }\n  public void unsubscribe(OrderListener l) {\n    /* TODO */\n  }\n  public void publish(String event) {\n    /* TODO */\n  }\n}\n',
             "public class OrderEvents {\n  private final java.util.Set<OrderListener> listeners=new java.util.LinkedHashSet<>();\n  public void subscribe(OrderListener l) {\n    if(l==null) throw new IllegalArgumentException();\n    listeners.add(l);\n  }\n  public void unsubscribe(OrderListener l) {\n    listeners.remove(l);\n  }\n  public void publish(String event) {\n    if(event==null || event.isBlank()) throw new IllegalArgumentException();\n    for(OrderListener l:new java.util.ArrayList<>(listeners)) {\n      try {\n        l.onEvent(event);\n      }\n      catch(RuntimeException e) {\n        /* Isolate subscriber failure per exercise contract. */\n      }\n    }\n  }\n}\n",
           ],
           "OrderListener.java": fixed(
@@ -121,7 +121,7 @@ export const patternCourses = [
         "How does Adapter differ from Facade and Decorator? Where should retries, idempotency and currency validation live when adapting a real payment API?",
         {
           "LegacyPaymentAdapter.java": [
-            'public class LegacyPaymentAdapter implements PaymentPort {\n  public LegacyPaymentAdapter(LegacyGateway gateway) {\n    throw new UnsupportedOperationException("Implement this task");\n  }\n  public String pay(long cents) {\n    throw new UnsupportedOperationException("Implement this task");\n  }\n}\n',
+            'public class LegacyPaymentAdapter implements PaymentPort {\n  public LegacyPaymentAdapter(LegacyGateway gateway) {\n    /* TODO */\n  }\n  public String pay(long cents) {\n    /* TODO */\n  }\n}\n',
             "public class LegacyPaymentAdapter implements PaymentPort {\n  private final LegacyGateway gateway;\n  public LegacyPaymentAdapter(LegacyGateway gateway) {\n    if(gateway==null) throw new IllegalArgumentException();\n    this.gateway=gateway;\n  }\n  public String pay(long cents) {\n    if(cents<0) throw new IllegalArgumentException();\n    return gateway.charge(java.math.BigDecimal.valueOf(cents,2).toPlainString());\n  }\n}\n",
           ],
           "PaymentPort.java": fixed(
@@ -141,7 +141,7 @@ export const patternCourses = [
         "Compare Decorator with inheritance, proxies and interceptors. What happens if audit storage fails after an external charge? Why is a retry unsafe without idempotency?",
         {
           "AuditedPayment.java": [
-            'public class AuditedPayment implements PaymentPort {\n  public AuditedPayment(PaymentPort delegate, java.util.function.Consumer<String> audit) {\n    throw new UnsupportedOperationException("Implement this task");\n  }\n  public String pay(long cents) {\n    throw new UnsupportedOperationException("Implement this task");\n  }\n}\n',
+            'public class AuditedPayment implements PaymentPort {\n  public AuditedPayment(PaymentPort delegate, java.util.function.Consumer<String> audit) {\n    /* TODO */\n  }\n  public String pay(long cents) {\n    /* TODO */\n  }\n}\n',
             'public class AuditedPayment implements PaymentPort {\n  private final PaymentPort delegate;\n  private final java.util.function.Consumer<String> audit;\n  public AuditedPayment(PaymentPort delegate, java.util.function.Consumer<String> audit) {\n    if(delegate==null || audit==null) throw new IllegalArgumentException();\n    this.delegate=delegate;\n    this.audit=audit;\n  }\n  public String pay(long cents) {\n    String receipt=delegate.pay(cents);\n    audit.accept("paid:"+receipt);\n    return receipt;\n  }\n}\n',
           ],
           "PaymentPort.java": fixed(
@@ -158,11 +158,11 @@ export const patternCourses = [
         "Contrast undo with compensating transactions and event sourcing. Why does restoring a snapshot risk overwriting concurrent changes? How would you persist command identity and make retries safe?",
         {
           "ReserveCommand.java": [
-            'public class ReserveCommand {\n  public ReserveCommand(Stock stock,int quantity) {\n    throw new UnsupportedOperationException("Implement this task");\n  }\n  public void execute() {\n    throw new UnsupportedOperationException("Implement this task");\n  }\n  public void undo() {\n    throw new UnsupportedOperationException("Implement this task");\n  }\n}\n',
+            'public class ReserveCommand {\n  public ReserveCommand(Stock stock,int quantity) {\n    /* TODO */\n  }\n  public void execute() {\n    /* TODO */\n  }\n  public void undo() {\n    /* TODO */\n  }\n}\n',
             "public class ReserveCommand {\n  private final Stock stock;\n  private final int quantity;\n  private boolean active;\n  public ReserveCommand(Stock stock,int quantity) {\n    if(stock==null || quantity<=0) throw new IllegalArgumentException();\n    this.stock=stock;\n    this.quantity=quantity;\n  }\n  public void execute() {\n    if(active) throw new IllegalStateException();\n    stock.reserve(quantity);\n    active=true;\n  }\n  public void undo() {\n    if(!active) throw new IllegalStateException();\n    stock.release(quantity);\n    active=false;\n  }\n}\n",
           ],
           "Stock.java": [
-            'public class Stock {\n  public Stock(int initial) {\n    throw new UnsupportedOperationException("Implement this task");\n  }\n  public int available() {\n    throw new UnsupportedOperationException("Implement this task");\n  }\n  public void reserve(int quantity) {\n    throw new UnsupportedOperationException("Implement this task");\n  }\n  public void release(int quantity) {\n    throw new UnsupportedOperationException("Implement this task");\n  }\n}\n',
+            'public class Stock {\n  public Stock(int initial) {\n    /* TODO */\n  }\n  public int available() {\n    /* TODO */\n  }\n  public void reserve(int quantity) {\n    /* TODO */\n  }\n  public void release(int quantity) {\n    /* TODO */\n  }\n}\n',
             "public class Stock {\n  private int available;\n  public Stock(int initial) {\n    if(initial<0) throw new IllegalArgumentException();\n    available=initial;\n  }\n  public int available() {\n    return available;\n  }\n  public void reserve(int quantity) {\n    if(quantity<=0) throw new IllegalArgumentException();\n    if(quantity>available) throw new IllegalStateException();\n    available-=quantity;\n  }\n  public void release(int quantity) {\n    if(quantity<=0) throw new IllegalArgumentException();\n    available=Math.addExact(available,quantity);\n  }\n}\n",
           ],
         },
@@ -176,7 +176,7 @@ export const patternCourses = [
         "Compare Builder with telescoping constructors, records, named factories and staged builders. Which invariants belong at construction, and when does a builder add unnecessary complexity?",
         {
           "ReportRequest.java": [
-            'public final class ReportRequest {\n  public static Builder builder() {\n    return new Builder();\n  }\n  public String service() {\n    throw new UnsupportedOperationException("Implement this task");\n  }\n  public int days() {\n    throw new UnsupportedOperationException("Implement this task");\n  }\n  public java.util.List<String> tags() {\n    throw new UnsupportedOperationException("Implement this task");\n  }\n  public static class Builder {\n    public Builder service(String value) {\n      throw new UnsupportedOperationException("Implement this task");\n    }\n    public Builder days(int value) {\n      throw new UnsupportedOperationException("Implement this task");\n    }\n    public Builder tag(String value) {\n      throw new UnsupportedOperationException("Implement this task");\n    }\n    public ReportRequest build() {\n      throw new UnsupportedOperationException("Implement this task");\n    }\n  }\n}\n',
+            'public final class ReportRequest {\n  public static Builder builder() {\n    return new Builder();\n  }\n  public String service() {\n    /* TODO */\n  }\n  public int days() {\n    /* TODO */\n  }\n  public java.util.List<String> tags() {\n    /* TODO */\n  }\n  public static class Builder {\n    public Builder service(String value) {\n      /* TODO */\n    }\n    public Builder days(int value) {\n      /* TODO */\n    }\n    public Builder tag(String value) {\n      /* TODO */\n    }\n    public ReportRequest build() {\n      /* TODO */\n    }\n  }\n}\n',
             "public final class ReportRequest {\n  private final String service;\n  private final int days;\n  private final java.util.List<String> tags;\n  private ReportRequest(Builder b) {\n    service=b.service;\n    days=b.days;\n    tags=java.util.List.copyOf(b.tags);\n  }\n  public static Builder builder() {\n    return new Builder();\n  }\n  public String service() {\n    return service;\n  }\n  public int days() {\n    return days;\n  }\n  public java.util.List<String> tags() {\n    return tags;\n  }\n  public static class Builder {\n    private String service;\n    private int days=7;\n    private final java.util.Set<String> tags=new java.util.LinkedHashSet<>();\n    private String valid(String value) {\n      if(value==null || value.isBlank())throw new IllegalArgumentException();\n      return value.trim();\n    }\n    public Builder service(String value) {\n      service=valid(value);\n      return this;\n    }\n    public Builder days(int value) {\n      if(value<1 || value>30)throw new IllegalArgumentException();\n      days=value;\n      return this;\n    }\n    public Builder tag(String value) {\n      tags.add(valid(value));\n      return this;\n    }\n    public ReportRequest build() {\n      if(service==null)throw new IllegalArgumentException();\n      return new ReportRequest(this);\n    }\n  }\n}\n",
           ],
           "ReportClient.java": fixed(
@@ -218,7 +218,7 @@ lessons.push(
     "Identify the responsibilities and dependency directions. Why inject PaymentPort rather than instantiate LegacyPaymentAdapter inside the service? What if payment succeeds and the process crashes before caching? Explain persistent idempotency records, transactional outbox, concurrent duplicate requests and why a Singleton cannot solve distributed consistency.",
     {
       "OrderService.java": [
-        'public class OrderService {\n  public OrderService(PaymentPort payment, ShippingPolicy shipping, OrderEvents events) {\n    throw new UnsupportedOperationException("Implement this task");\n  }\n  public String place(String requestId,long itemCents,int grams) {\n    throw new UnsupportedOperationException("Implement this task");\n  }\n}\n',
+        'public class OrderService {\n  public OrderService(PaymentPort payment, ShippingPolicy shipping, OrderEvents events) {\n    /* TODO */\n  }\n  public String place(String requestId,long itemCents,int grams) {\n    /* TODO */\n  }\n}\n',
         'public class OrderService {\n  private final PaymentPort payment;\n  private final ShippingPolicy shipping;\n  private final OrderEvents events;\n  private record Result(long items,int grams,String receipt) {\n  }\n  private final java.util.Map<String,Result> completed=new java.util.HashMap<>();\n  public OrderService(PaymentPort payment,ShippingPolicy shipping,OrderEvents events) {\n    if(payment==null || shipping==null || events==null) throw new IllegalArgumentException();\n    this.payment=payment;\n    this.shipping=shipping;\n    this.events=events;\n  }\n  public String place(String requestId,long itemCents,int grams) {\n    if(requestId==null || requestId.isBlank() || itemCents<0 || grams<0) throw new IllegalArgumentException();\n    String id=requestId.trim().toUpperCase(java.util.Locale.ROOT);\n    Result old=completed.get(id);\n    if(old!=null) {\n      if(old.items()!=itemCents || old.grams()!=grams)throw new IllegalArgumentException();\n      return old.receipt();\n    }\n    long total=new Checkout().total(itemCents,grams,shipping);\n    String receipt=payment.pay(total);\n    completed.put(id,new Result(itemCents,grams,receipt));\n    events.publish("paid:"+id);\n    return receipt;\n  }\n}\n',
       ],
       ...fixtures,

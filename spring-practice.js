@@ -1,5 +1,5 @@
 import { javaProject, make } from "./exercise-factories.js";
-const todo = 'throw new UnsupportedOperationException("Implement this task");';
+const todo = '/* TODO */';
 function spring(
   title,
   topic,

@@ -5,7 +5,7 @@ const java = (title, concept, task, signature, body, tests, hint) => ({
   engine: "java",
   type: "workspace",
   filename: "Main.java",
-  starter: `import java.util.*;\nimport java.util.function.*;\n\npublic class Main {\n  ${signature} {\n    throw new UnsupportedOperationException("Implement this task");\n  }\n}\n`,
+  starter: `import java.util.*;\nimport java.util.function.*;\n\npublic class Main {\n  ${signature} {\n    /* TODO */\n  }\n}\n`,
   solution: `import java.util.*;\nimport java.util.function.*;\n\npublic class Main {\n  ${signature} {\n    ${body}\n  }\n}\n`,
   verify: `import java.util.*;\nimport java.util.function.*;\npublic class Verify {\n public static void main(String[] args) {\n ${tests}\n System.out.println("DEVLAB_TESTS_PASSED");\n }\n static void expect(boolean ok) { if(!ok) throw new AssertionError("A task requirement failed"); }\n}\n`,
   hint,

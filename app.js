@@ -1,11 +1,11 @@
 import * as store from "./database.js";
 import { state } from "./src/state.js";
 import { $, esc } from "./src/ui.js";
-import { catalog } from "./src/views/catalog.js?v=output-only-1";
-import { lesson, flushDraft } from "./src/views/workspace.js?v=output-only-1";
-import { progressPage, paths } from "./src/views/progress.js?v=output-only-1";
-import { settings } from "./src/views/settings.js?v=output-only-1";
-import { playground } from "./src/views/playground.js?v=output-only-1";
+import { catalog } from "./src/views/catalog.js?v=comment-starters-1";
+import { lesson, flushDraft } from "./src/views/workspace.js?v=comment-starters-1";
+import { progressPage, paths } from "./src/views/progress.js?v=comment-starters-1";
+import { settings } from "./src/views/settings.js?v=comment-starters-1";
+import { playground } from "./src/views/playground.js?v=comment-starters-1";
 async function render() {
   await flushDraft();
   const [page, id, index] = location.hash.slice(1).split("/");

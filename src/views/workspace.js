@@ -1,4 +1,4 @@
-import { courses, allLessons } from "../../curriculum.js?v=interactive-linux-1";
+import { courses, allLessons } from "../../curriculum.js?v=comment-starters-1";
 import * as store from "../../database.js";
 import { state } from "../state.js";
 import { $, esc, shell, toast } from "../ui.js";

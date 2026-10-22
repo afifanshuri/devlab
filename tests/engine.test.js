@@ -411,7 +411,7 @@ test("progressive starters contain contracts instead of earlier reference implem
   )) {
     assert.ok(!task.starter.includes("return Map.copyOf"));
     assert.ok(!task.starter.includes("totals.merge"));
-    assert.ok(task.starter.includes("throw new UnsupportedOperationException"));
+    assert.ok(task.starter.includes("/* TODO */"));
   }
   for (const task of allLessons.filter(
     (l) => l.course === "hands-java-architecture",
@@ -422,7 +422,7 @@ test("progressive starters contain contracts instead of earlier reference implem
     })) {
       if (!source.includes("interface "))
         assert.ok(
-          source.includes("throw new UnsupportedOperationException"),
+          source.includes("/* TODO */"),
           name,
         );
     }
@@ -511,7 +511,7 @@ test("SOLID and advanced pattern tasks have distinct contracts and minimal start
     })) {
       assert.ok(
         source.includes("interface ") ||
-          source.includes("throw new UnsupportedOperationException"),
+          source.includes("/* TODO */"),
       );
     }
     assert.ok(task.interview.length > 30);

@@ -1,7 +1,7 @@
 import { make, javaProject } from "./exercise-factories.js?v=interactive-linux-1";
 const contract = (source) => [source, source];
 const type = (header, methods, fields = "") => [
-  `${header} {\n${methods.map(([signature]) => `  ${signature} {\n    throw new UnsupportedOperationException("TODO");\n  }`).join("\n")}\n}\n`,
+  `${header} {\n${methods.map(([signature]) => `  ${signature} {\n    /* TODO */\n  }`).join("\n")}\n}\n`,
   `${header} {\n${fields}\n${methods.map(([signature, body]) => `  ${signature} {\n    ${body}\n  }`).join("\n")}\n}\n`,
 ];
 function task(
@@ -237,7 +237,7 @@ const patterns = [
     "ImportJob is abstract. public final String run(String raw) rejects null/blank input, trims it, calls protected abstract String transform(String value) once, and returns imported:<result>. UpperImport transforms using Locale.ROOT uppercase; LowerImport uses Locale.ROOT lowercase. Subclasses extend ImportJob. Invalid input must not reach transform.",
     {
       "ImportJob.java": [
-        `public abstract class ImportJob {\n  public final String run(String raw) { throw new UnsupportedOperationException("TODO"); }\n  protected abstract String transform(String value);\n}\n`,
+        `public abstract class ImportJob {\n  public final String run(String raw) { /* TODO */ }\n  protected abstract String transform(String value);\n}\n`,
         'public abstract class ImportJob { public final String run(String raw){if(raw==null||raw.isBlank())throw new IllegalArgumentException();return "imported:"+transform(raw.trim());}protected abstract String transform(String value); }\n',
       ],
       "UpperImport.java": type("public class UpperImport extends ImportJob", [
@@ -449,7 +449,7 @@ const patterns = [
         "  private java.util.List<String> notes=new java.util.ArrayList<>();",
       ),
       "Snapshot.java": [
-        'public record Snapshot(java.util.List<String> notes) {\n  public Snapshot { throw new UnsupportedOperationException("TODO"); }\n}\n',
+        'public record Snapshot(java.util.List<String> notes) {\n  public Snapshot { /* TODO */ }\n}\n',
         "public record Snapshot(java.util.List<String> notes) { public Snapshot { if(notes==null)throw new IllegalArgumentException();notes=java.util.List.copyOf(notes); } }\n",
       ],
     },
