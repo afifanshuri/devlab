@@ -21,7 +21,15 @@ test("advanced concepts have exactly two executable challenges and keep legacy I
         /throw new UnsupportedOperationException/,
       );
   }
-  assert.equal(allLessons.filter((l) => !l.advancedTopic).length, 142);
+  assert.equal(
+    allLessons.filter(
+      (l) =>
+        l.type === "workspace" &&
+        !l.advancedTopic &&
+        l.course !== "hands-linux-interview",
+    ).length,
+    142,
+  );
   assert.equal(groups.size, 98);
   for (const [topic, pair] of groups) {
     assert.deepEqual(

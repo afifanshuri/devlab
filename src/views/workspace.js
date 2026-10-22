@@ -1,4 +1,4 @@
-import { courses, allLessons } from "../../curriculum.js?v=advanced-pairs-1";
+import { courses, allLessons } from "../../curriculum.js?v=linux-interview-1";
 import * as store from "../../database.js";
 import { state } from "../state.js";
 import { $, esc, shell, toast } from "../ui.js";
@@ -6,7 +6,11 @@ import { callRunner, localRunner } from "../services/runner.js";
 import { openCodeEditor } from "../services/code-editor.js";
 import { editKey } from "../editor-input.js";
 import { createTerminalDisplay } from "../services/terminal-display.js";
-import { linuxPane, mountLinux } from "./linux-workspace.js?v=advanced-pairs-1";
+import {
+  linuxPane,
+  mountLinux,
+} from "./linux-workspace.js?v=linux-interview-1";
+import { mountWritten } from "./written-workspace.js";
 import {
   starterFiles,
   readDraft,
@@ -49,6 +53,10 @@ export function lesson(courseId, idx) {
       busy: false,
     };
   active = context;
+  if (task.type === "written") {
+    store.setting("lastLab", course.id).catch(() => {});
+    return mountWritten(context, course, index, () => active === context);
+  }
   context.initialSource = writeDraft(task, context.files);
   store.setting("lastLab", course.id).catch(() => {});
   const available = localRunner();

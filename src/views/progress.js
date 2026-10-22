@@ -1,11 +1,11 @@
-import { courses, allLessons } from "../../curriculum.js?v=advanced-pairs-1";
+import { courses, allLessons } from "../../curriculum.js?v=linux-interview-1";
 import { state } from "../state.js";
 import { esc, shell } from "../ui.js";
 import {
   completed,
   count,
   route,
-} from "../catalog-data.js?v=advanced-pairs-1";
+} from "../catalog-data.js?v=linux-interview-1";
 function progressPage() {
   const done = completed();
   shell(
@@ -43,7 +43,9 @@ function progressPage() {
             (l) =>
               /* HTML */ `<div class="progress-item row">
                 <a href="#lab/${l.course}/${l.index}">✓ ${esc(l.title)}</a
-                ><span class="muted"
+                >${l.type === "written"
+                  ? ' <span class="muted">Self-reviewed</span>'
+                  : ""}<span class="muted"
                   >${esc(
                     new Date(state.records[l.id].updated).toLocaleDateString(),
                   )}</span
@@ -77,7 +79,7 @@ function paths() {
   shell(`<div class="eyebrow">LEARN IT. REUSE IT. BUILD ON IT.</div>
     <h1>Your progressive learning paths<span>.</span></h1>
     <p class="sub">Follow the recommended order. Each step introduces a focused idea, then later tasks reuse it in a larger problem. You can revisit or skip ahead at any time.</p>
-    <div class="panel learning-plan-intro"><h2>From implementing a feature to owning its behavior</h2><p class="muted">Practise defensive contracts, failure-path testing, concurrency, idempotency, database integrity, and repeatable operational diagnosis. Passing requires actual runtime checks. The Java service sequence also reruns earlier tests as the code grows.</p></div>
+    <div class="panel learning-plan-intro"><h2>From implementing a feature to owning its behavior</h2><p class="muted">Practise defensive contracts, failure-path testing, concurrency, idempotency, database integrity, and repeatable operational diagnosis. Coding labs use runtime checks; written Linux interview questions use reference answers and self-review. The Java service sequence also reruns earlier tests as the code grows.</p></div>
     ${tracks
       .map(([track, title, description]) => {
         const stages = courses

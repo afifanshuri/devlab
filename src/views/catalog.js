@@ -1,7 +1,11 @@
-import { courses, allLessons } from "../../curriculum.js?v=advanced-pairs-1";
+import { courses, allLessons } from "../../curriculum.js?v=linux-interview-1";
 import * as store from "../../database.js";
 import { $, esc, icon, shell } from "../ui.js";
-import { completed, count, route } from "../catalog-data.js?v=advanced-pairs-1";
+import {
+  completed,
+  count,
+  route,
+} from "../catalog-data.js?v=linux-interview-1";
 let filter = "all",
   query = "";
 function catalog() {
@@ -145,7 +149,10 @@ function drawCards() {
         c.title,
         c.description,
         ...c.tags,
-        ...c.lessons.map((l) => l.advancedTopic || ""),
+        ...c.lessons.flatMap((l) => [
+          l.advancedTopic || l.topic || "",
+          l.title,
+        ]),
       ]
         .join(" ")
         .toLowerCase()

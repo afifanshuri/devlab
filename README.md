@@ -57,7 +57,7 @@ The standard image setup does **not** download Oracle. If your Docker VM has at 
 docker pull container-registry.oracle.com/database/free:latest
 ```
 
-Then start an Oracle lab in DevLab. Initial database setup can take several minutes. The runner uses SQL*Plus and FREEPDB1. Oracle needs a writable container filesystem and a higher memory limit than the standard labs. It still has no network or host-folder mounts. Registry authentication or license acceptance, if requested by Oracle, must be completed directly by you. This optional environment has not been validated on this computer; Java/Linux/PostgreSQL have dedicated integration tests.
+Then start an Oracle lab in DevLab. Initial database setup can take several minutes. The runner uses SQL\*Plus and FREEPDB1. Oracle needs a writable container filesystem and a higher memory limit than the standard labs. It still has no network or host-folder mounts. Registry authentication or license acceptance, if requested by Oracle, must be completed directly by you. This optional environment has not been validated on this computer; Java/Linux/PostgreSQL have dedicated integration tests.
 
 ## Checks
 
@@ -108,11 +108,11 @@ Missions introduce a concrete problem, then an explicit Your goal statement name
 
 The Java path now begins with 20 exercises covering the Basics of OOP, More about OOP and Collections sections of [the Java roadmap](https://roadmap.sh/java) ([topic diagram](https://roadmap.sh/pdfs/roadmaps/java.pdf)).
 
-| Chapter | Exercises | Coverage |
-| --- | --- | --- |
-| Open the repair shop | 5 | Classes, objects, attributes, methods, access, static, final, nested classes, packages |
-| Grow the workshop | 8 | Inheritance, abstraction, interfaces, overloading, overriding, binding, chaining, enums, records, object lifecycle, initializer blocks, encapsulation, pass-by-value |
-| Run the busy counter | 7 | Array vs ArrayList, Set, Map, Queue, Deque/Stack, Iterator, generic collections |
+| Chapter              | Exercises | Coverage                                                                                                                                                             |
+| -------------------- | --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Open the repair shop | 5         | Classes, objects, attributes, methods, access, static, final, nested classes, packages                                                                               |
+| Grow the workshop    | 8         | Inheritance, abstraction, interfaces, overloading, overriding, binding, chaining, enums, records, object lifecycle, initializer blocks, encapsulation, pass-by-value |
+| Run the busy counter | 7         | Array vs ArrayList, Set, Map, Queue, Deque/Stack, Iterator, generic collections                                                                                      |
 
 All new tasks use minimal signatures/TODOs and real JDK verification. Runtime checks verify observable behavior and selected reflection-visible structure. Instructions also request implementation techniques such as Iterator.remove; behavioral tests alone do not prove every internal technique. The package exercise uses flat source files with package declarations; javac -d creates the package directories in the disposable compilation output.
 
@@ -147,3 +147,27 @@ The original 142 exercises keep their IDs, answers and completion records. Three
 Java pairs cover object ownership and encapsulation, static/final/nested/package boundaries, inheritance, interfaces and binding, fluent APIs, enums/records/lifecycle/references, all five SOLID principles, fifteen individual design-pattern groups, collections/generics, binary-search/frequency/window algorithms, parsing, normalization, retry/idempotency/atomic claims, diagnostic redaction, and all nine existing Spring topics. SQL pairs cover joins through recursive/window analytics, safe dynamic SQL, procedural branching/cursors, atomic mutations, metadata, constraints, grants, indexes and retention. Linux pairs cover reliable shell/text/file tools and administrative diagnosis using the existing Docker configuration labs. The final SQL pair uses the optional Oracle image for stored PL/SQL functions, application exceptions and cursor aggregation; it is separate from the 40 PostgreSQL challenges.
 
 Run `node scripts/test-curriculum.mjs java-a`, `java-b`, or `ops` for the new Docker exercise suites; `legacy` runs the original cases. CI uses these four independent suites to keep the expanded curriculum within bounded job times. Every executable exercise is checked by rejecting its starter and accepting its reference solution. Behavioral tests do not prove all implementation techniques or asymptotic complexity; these remain explicit acceptance/interview requirements.
+
+## Linux interview practice
+
+The **Linux administration · interview practice** course adds 32 challenges
+across 16 topics. Thirteen are terminal tasks with executable checks; nineteen
+are written questions about concepts, evidence and troubleshooting decisions.
+Existing coding exercises retain their IDs and behavior.
+
+Written questions work on GitHub Pages without Docker. Type an answer, submit
+to reveal reference key points, and compare your explanation using the checklist.
+Completion is explicitly **self-reviewed**, not automatically graded. Answers
+and review state save in the browser and are included in progress backups.
+Editing an answer clears its current checklist; resetting clears the answer and
+retains previously recorded completion, consistent with coding labs.
+
+The terminal tasks require the local runner and Docker. They cover filesystem
+layout, redirection, permissions, links, service and security configuration,
+shell scope, safe copying, atomic backups and locking. Administrative
+configuration tasks use workspace fixtures rather than changing the host.
+
+Reference documentation: [Linux filesystem hierarchy](https://man7.org/linux/man-pages/man7/file-hierarchy.7.html),
+[Bash manual](https://www.gnu.org/software/bash/manual/bash.html),
+[systemd manuals](https://www.freedesktop.org/software/systemd/man/latest/),
+and [OpenSSH server configuration](https://www.openssh.com/manual.html).

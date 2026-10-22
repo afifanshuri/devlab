@@ -1288,3 +1288,38 @@ dialog h2 {
   border: 1px solid #35424d;
   border-radius: 6px;
 }
+.written-workspace {
+  padding: 24px;
+  align-self: start;
+}
+.written-answer {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 300px;
+  margin-top: 12px;
+  padding: 16px;
+  resize: vertical;
+  background: var(--bg, #101719);
+  color: inherit;
+  border: 1px solid #40504b;
+  border-radius: 8px;
+  font: inherit;
+  line-height: 1.7;
+}
+.written-answer:focus-visible {
+  outline: 2px solid #c5f578;
+  outline-offset: 2px;
+}
+.review-point {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  margin: 18px 0;
+  line-height: 1.7;
+}
+.review-point input {
+  flex: 0 0 auto;
+  margin-top: 7px;
+  accent-color: #c5f578;
+}

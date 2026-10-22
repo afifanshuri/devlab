@@ -9,11 +9,28 @@ const SQL = await initSqlJs();
 globalThis.indexedDB = indexedDB;
 globalThis.window = { initSqlJs: () => Promise.resolve(SQL) };
 await store.initialize();
-test("every exercise is a coding task, with unique versioned IDs", () => {
-  assert.equal(courses.filter((c) => !c.lessons[0].advancedTopic).length, 30);
-  assert.equal(allLessons.filter((l) => !l.advancedTopic).length, 142);
+test("existing coding tasks retain unique versioned IDs alongside written practice", () => {
+  assert.equal(
+    courses.filter(
+      (c) =>
+        c.lessons[0].type === "workspace" &&
+        !c.lessons[0].advancedTopic &&
+        c.id !== "hands-linux-interview",
+    ).length,
+    30,
+  );
+  assert.equal(
+    allLessons.filter(
+      (l) =>
+        l.type === "workspace" &&
+        !l.advancedTopic &&
+        l.course !== "hands-linux-interview",
+    ).length,
+    142,
+  );
   assert.equal(new Set(allLessons.map((l) => l.id)).size, allLessons.length);
   for (const l of allLessons) {
+    if (l.type === "written") continue;
     assert.equal(l.type, "workspace");
     assert.ok(l.task && l.starter && l.solution && l.hint);
     assert.equal(l.choices, undefined);
@@ -104,6 +121,13 @@ test("all screens and practical tasks render without missing references", async 
       );
       const markup = nodes.get("#app").innerHTML;
       assert.ok(!markup.includes("data-choice"));
+      if (l.type === "written") {
+        assert.ok(markup.includes('id="written-answer"'));
+        assert.ok(!markup.includes('id="interactive-terminal"'));
+        assert.ok(!markup.includes('id="code"'));
+        assert.ok(markup.includes("not automatic grading"));
+        continue;
+      }
       if (l.engine === "linux") {
         assert.ok(markup.includes('id="interactive-terminal"'));
         assert.ok(!markup.includes('id="code"'));
@@ -474,6 +498,7 @@ test("roadmap sections are covered and missions keep story separate from require
   for (const l of allLessons) {
     assert.ok(l.mission?.length > 50, "Missing meaningful mission: " + l.id);
     assert.ok(l.goal?.length > 35, "Missing actionable goal: " + l.id);
+    if (l.type === "written") continue;
     assert.ok(l.example?.length > 15, "Missing concrete example: " + l.id);
     assert.ok(l.requirements.length > 0);
     assert.equal(l.requirements.join(" "), l.task);

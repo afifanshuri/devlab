@@ -5,7 +5,9 @@ import { LabSessions } from "../runner/sessions.js";
 import { must } from "../runner/docker.js";
 const sharedLabs = new LabSessions();
 after(() => sharedLabs.clear());
-for (const lesson of allLessons.filter((l) => l.engine !== "oracle")) {
+for (const lesson of allLessons.filter(
+  (l) => l.type === "workspace" && l.engine !== "oracle",
+)) {
   test(
     "real container rejects starter and accepts reference: " + lesson.id,
     { timeout: 60000 },
