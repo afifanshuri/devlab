@@ -3,6 +3,7 @@ import * as store from "../../database.js";
 import { state } from "../state.js";
 import { $, esc, shell, toast } from "../ui.js";
 import { callRunner, localRunner } from "../services/runner.js";
+import { openCodeEditor } from "../services/code-editor.js";
 import { editKey } from "../editor-input.js";
 import { createTerminalDisplay } from "../services/terminal-display.js";
 import { linuxPane, mountLinux } from "./linux-workspace.js";
@@ -20,6 +21,7 @@ export async function flushDraft() {
   if (!old) return;
   clearTimeout(old.saveTimer);
   old.terminal?.dispose();
+  old.editor?.dispose();
   if ($("#code")) {
     old.files[old.filename] = $("#code").value;
     await store.saveLesson(old.key, writeDraft(old.task, old.files));
@@ -244,6 +246,7 @@ ${esc(context.files[context.filename])}</textarea
           `<button type="button" role="tab" aria-controls="source-panel" tabindex="${name === context.filename ? 0 : -1}" aria-selected="${name === context.filename}" data-file="${esc(name)}">${esc(name)}</button>`,
       )
       .join("");
+    context.editor?.showFile(context.filename, context.files[context.filename]);
     $("#active-filename").textContent = context.filename;
     $("#code").setAttribute?.("aria-label", "Code editor: " + context.filename);
   };
@@ -333,6 +336,7 @@ ${esc(context.files[context.filename])}</textarea
         if (state.records[key]?.draft == null && unchanged) {
           context.files = remote;
           $("#code").value = remote[context.filename];
+          context.editor?.showFile(context.filename, remote[context.filename]);
         }
         context.lastSaved = { ...remote };
       }
@@ -358,6 +362,7 @@ ${esc(context.files[context.filename])}</textarea
     context.busy = true;
     clearTimeout(context.saveTimer);
     $("#code").readOnly = true;
+    context.editor?.setReadOnly(true);
     const buttons = [...document.querySelectorAll(".workspace button")];
     buttons.forEach((b) => (b.disabled = true));
     try {
@@ -372,6 +377,7 @@ ${esc(context.files[context.filename])}</textarea
       context.busy = false;
       if (live()) {
         $("#code").readOnly = false;
+        context.editor?.setReadOnly(false);
         buttons.forEach((b) => (b.disabled = false));
         updateCheckState();
       }
@@ -424,6 +430,7 @@ ${esc(context.files[context.filename])}</textarea
   $("#reset").onclick = action(async () => {
     context.files = starterFiles(task);
     $("#code").value = context.files[context.filename];
+    context.editor?.showFile(context.filename, context.files[context.filename]);
     await store.saveLesson(key, draft());
     if (available) {
       const result = await callRunner("reset", { lessonId: key });
@@ -442,6 +449,29 @@ ${esc(context.files[context.filename])}</textarea
           .map(([name, body]) => `// ${name}\n${body}`)
           .join("\n\n"),
       )}</pre></div>`);
+  const source = $("#code");
+  if (source.isConnected) {
+    openCodeEditor(
+      source,
+      context.filename,
+      task.engine === "java" ? "java" : "sql",
+    )
+      .then((editor) => {
+        if (!live()) {
+          editor.dispose();
+          return;
+        }
+        context.editor = editor;
+        editor.showFile(context.filename, context.files[context.filename]);
+        editor.setReadOnly(context.busy);
+      })
+      .catch(() => {
+        if (live())
+          toast(
+            "Enhanced editor could not load. The plain editor is still available.",
+          );
+      });
+  }
   if (available) {
     return action(async () => {
       await ensure();

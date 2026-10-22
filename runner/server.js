@@ -11,6 +11,7 @@ const types = {
   ".js": "text/javascript; charset=utf-8",
   ".css": "text/css; charset=utf-8",
   ".wasm": "application/wasm",
+  ".ttf": "font/ttf",
 };
 export function createApp(
   sessions = new LabSessions(),

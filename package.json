@@ -11,16 +11,22 @@
     "vendor:terminal": "node scripts/vendor-terminal.mjs",
     "format": "prettier --write app.js content.js curriculum.js exercise-factories.js progression.js patterns.js roadmap.js missions.js design-practice.js ops-practice.js sql-roadmap.js linux-roadmap.js spring-practice.js database.js server.mjs sql-worker.js runner src scripts tests index.html styles.css",
     "setup:labs": "node runner/setup.mjs",
-    "test:docker": "node --test --test-concurrency=1 tests/docker.integration.js tests/pools.integration.js tests/http.integration.js tests/terminal.integration.js tests/interactive.integration.js"
+    "test:docker": "node --test --test-concurrency=1 tests/docker.integration.js tests/pools.integration.js tests/http.integration.js tests/terminal.integration.js tests/interactive.integration.js",
+    "vendor:editor": "node scripts/vendor-editor.mjs"
   },
   "devDependencies": {
     "@xterm/addon-fit": "0.11.0",
     "@xterm/xterm": "6.0.0",
+    "esbuild": "0.28.2",
     "fake-indexeddb": "6.2.4",
+    "monaco-editor": "0.57.0",
     "prettier": "3.8.1",
     "sql.js": "1.14.1"
   },
   "dependencies": {
     "ws": "8.22.0"
+  },
+  "overrides": {
+    "dompurify": "3.4.17"
   }
 }

@@ -125,3 +125,9 @@ Twelve Linux labs add paths with spaces, hard/symbolic links, CSV pipelines, env
 Each exercise includes a concrete example result as well as its scenario, goal and exact acceptance criteria. Fresh Linux fixtures are prepared once per new container; reconnecting does not rerun preparation. Privileges remain limited to the disposable container. SQL DDL checks use per-task answer cleanup inside a transaction that rolls back, including failed validation; Reset lab still resets only the answer.
 
 The pool registry is versioned and written with owner-only permissions where supported by the host filesystem; Windows access follows its directory ACLs. PostgreSQL administrator credentials are never returned by the API or passed to learner commands. Protected in-container manifests support reconnection if the registry is lost. Existing dedicated workspaces from older releases are kept until they pass or expire, preserving unfinished work. A runner restart waits for recovery before accepting API operations.
+
+### Browser code editor
+
+Java, Spring and SQL exercises use Microsoft's MIT-licensed Monaco Editor with Java/SQL highlighting, two-space indentation, bracket matching, folding, find/replace and multiple cursors. File models retain their undo history while switching tabs. Draft persistence and Docker verification use the existing workflow; Linux keeps its interactive terminal. A plain textarea remains available if editor assets cannot load. Java semantic completion and inline compiler diagnostics require a separate language server and are not included.
+
+The editor loads on demand from committed, self-hosted assets. Regenerate them with `npm run vendor:editor`; the build includes only the editor features and languages used here. Monaco's vendored DOMPurify is replaced at bundle time with the pinned patched npm dependency; licenses ship with the assets.

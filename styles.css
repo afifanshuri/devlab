@@ -1263,3 +1263,11 @@ dialog h2 {
     13px/1.5 Consolas,
     monospace;
 }
+
+.monaco-code-editor {
+  height: 360px;
+  min-width: 0;
+}
+.code-pane .editor[hidden] {
+  display: none;
+}
