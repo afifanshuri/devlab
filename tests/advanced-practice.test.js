@@ -8,7 +8,11 @@ test("advanced concepts have exactly two executable challenges and keep legacy I
     if (!groups.has(key)) groups.set(key, []);
     groups.get(key).push(lesson);
     assert.ok(lesson.goal && lesson.mission && lesson.example);
-    assert.ok(lesson.engine === "java" ? lesson.verify : lesson.check);
+    assert.ok(
+      lesson.engine === "java"
+        ? lesson.verify
+        : lesson.check || lesson.oracleCheck,
+    );
     assert.ok(lesson.prerequisites.length);
     assert.notEqual(lesson.starter, lesson.solution);
     if (lesson.engine === "java")
@@ -18,7 +22,7 @@ test("advanced concepts have exactly two executable challenges and keep legacy I
       );
   }
   assert.equal(allLessons.filter((l) => !l.advancedTopic).length, 142);
-  assert.equal(groups.size, 97);
+  assert.equal(groups.size, 98);
   for (const [topic, pair] of groups) {
     assert.deepEqual(
       pair.map((l) => l.challengeNumber),

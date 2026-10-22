@@ -477,7 +477,9 @@ export class LabSessions {
         ["exec", "-i", s.name, "sqlplus", "-s", "/", "as", "sysdba"],
         {
           input:
-            "WHENEVER SQLERROR EXIT FAILURE\nSET FEEDBACK OFF\nSET HEADING OFF\nSET PAGESIZE 0\nALTER SESSION SET CONTAINER=FREEPDB1;\n@/workspace/solution.sql\nEXIT\n",
+            "WHENEVER SQLERROR EXIT FAILURE\nSET FEEDBACK OFF\nSET HEADING OFF\nSET PAGESIZE 0\nALTER SESSION SET CONTAINER=FREEPDB1;\n@/workspace/solution.sql\n" +
+            (s.lesson.oracleCheck || "") +
+            "\nEXIT\n",
           timeout: 15000,
         },
       );

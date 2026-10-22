@@ -1,6 +1,6 @@
 # Advanced practice pairs
 
-194 new exercises; two questions per named concept group. Original exercises retain their IDs and saved answers.
+196 new exercises across 98 concept groups; two questions each. The final Oracle pair requires the optional Oracle image and has not been runtime verified locally. Original exercises retain their IDs and saved answers.
 
 ## Advanced Java · two challenges per concept
 
@@ -89,6 +89,7 @@
 | Indexes and query access paths | [Index a paid customer timeline](https://afifanshuri.github.io/devlab/#lab/hands-sql-advanced/34) | [Make normalized name lookup indexable](https://afifanshuri.github.io/devlab/#lab/hands-sql-advanced/35) |
 | Bounded retention and maintenance | [Delete the oldest eligible rows in a bounded batch](https://afifanshuri.github.io/devlab/#lab/hands-sql-advanced/36) | [Preview retention before deleting anything](https://afifanshuri.github.io/devlab/#lab/hands-sql-advanced/37) |
 | Grants and least-privilege reporting | [Expose a safe reporting view](https://afifanshuri.github.io/devlab/#lab/hands-sql-advanced/38) | [Grant read access to selected columns only](https://afifanshuri.github.io/devlab/#lab/hands-sql-advanced/39) |
+| Oracle PL/SQL functions, exceptions and cursors | [Calculate an exact progressive service fee](https://afifanshuri.github.io/devlab/#lab/hands-sql-advanced/40) | [Aggregate a cursor-driven billing file](https://afifanshuri.github.io/devlab/#lab/hands-sql-advanced/41) |
 
 ## Advanced Linux · two challenges per concept
 

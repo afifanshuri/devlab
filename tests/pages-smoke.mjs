@@ -14,6 +14,7 @@ const files = [
   "advanced-java.js",
   "advanced-linux.js",
   "advanced-sql.js",
+  "advanced-oracle.js",
   "sql-roadmap.js",
   "linux-roadmap.js",
   "spring-practice.js",

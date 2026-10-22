@@ -277,8 +277,10 @@ for (const track of ["java", "linux", "sql"]) {
     .filter((c) => c.track === track)
     .sort(
       (a, b) =>
+        Number(!!a.lessons[0].advancedTopic) -
+          Number(!!b.lessons[0].advancedTopic) ||
         Number(a.lessons[0].engine === "oracle") -
-        Number(b.lessons[0].engine === "oracle"),
+          Number(b.lessons[0].engine === "oracle"),
     );
   for (const course of ordered)
     for (const [index, lesson] of course.lessons.entries()) {

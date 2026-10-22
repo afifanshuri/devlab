@@ -1,3 +1,4 @@
+import { oracleTopic } from "./advanced-oracle.js";
 import { pg } from "./exercise-factories.js";
 const seed = `CREATE TABLE customers(id int PRIMARY KEY,name text,city text);
 CREATE TABLE orders(id int PRIMARY KEY,customer_id int,amount int,status text,placed_on date);
@@ -445,3 +446,5 @@ for (const topic of sqlTopics)
     if (question.title === "Install a validated amount constraint")
       question.check += `
 DO $bounds$ BEGIN BEGIN INSERT INTO orders(id,amount)VALUES(991,-1);RAISE EXCEPTION 'Negative amount accepted';EXCEPTION WHEN check_violation THEN NULL;END;BEGIN INSERT INTO orders(id,amount)VALUES(992,NULL);RAISE EXCEPTION 'Null amount accepted';EXCEPTION WHEN check_violation THEN NULL;END;END $bounds$;`;
+
+sqlTopics.push(oracleTopic);
