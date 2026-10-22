@@ -1296,7 +1296,7 @@ dialog h2 {
   display: block;
   box-sizing: border-box;
   width: 100%;
-  min-height: 300px;
+  min-height: 120px;
   margin-top: 12px;
   padding: 16px;
   resize: vertical;
@@ -1310,16 +1310,4 @@ dialog h2 {
 .written-answer:focus-visible {
   outline: 2px solid #c5f578;
   outline-offset: 2px;
-}
-.review-point {
-  display: flex;
-  gap: 12px;
-  align-items: flex-start;
-  margin: 18px 0;
-  line-height: 1.7;
-}
-.review-point input {
-  flex: 0 0 auto;
-  margin-top: 7px;
-  accent-color: #c5f578;
 }

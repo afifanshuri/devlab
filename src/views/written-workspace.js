@@ -4,24 +4,28 @@ import { $, esc, shell, toast } from "../ui.js";
 import {
   readWrittenAnswer,
   editWrittenAnswer,
-  canCompleteReview,
+  checkWrittenAnswer,
 } from "../written-answer.js";
 
 export function mountWritten(context, course, index, live) {
   const { task, key } = context;
-  let draft = readWrittenAnswer(state.records[key]?.draft, task.rubric.length);
-  let saving = Promise.resolve();
-  const save = (completed = false) => {
-    const snapshot = JSON.stringify(draft);
+  let draft = readWrittenAnswer(state.records[key]?.draft);
+  if (draft.submittedAnswer !== null)
+    draft.passed = checkWrittenAnswer(task, draft.answer);
+  let saving = Promise.resolve(),
+    busy = false;
+  const save = () => {
+    const snapshot = JSON.stringify(draft),
+      passed = draft.passed;
     saving = saving
       .catch(() => {})
       .then(async () => {
-        await store.saveLesson(key, snapshot, completed);
+        await store.saveLesson(key, snapshot, passed);
         state.records = store.progress();
       });
     return saving;
   };
-  context.saveState = () => save();
+  context.saveState = save;
   const scheduleSave = () => {
     clearTimeout(context.saveTimer);
     context.saveTimer = setTimeout(
@@ -35,83 +39,78 @@ export function mountWritten(context, course, index, live) {
       350,
     );
   };
-  shell(`<div class="lab-heading"><div><div class="eyebrow">LINUX / WRITTEN INTERVIEW PRACTICE</div>
-    <h1>${esc(task.title)}</h1><p class="sub">Question ${index + 1} of ${course.lessons.length} · Self-reviewed · No Docker required</p></div>
+  shell(`<div class="lab-heading"><div><div class="eyebrow">LINUX / INTERVIEW PRACTICE</div>
+    <h1>${esc(task.title)}</h1><p class="sub">Question ${index + 1} of ${course.lessons.length} · Automatically checked · No Docker required</p></div>
     <a class="secondary" href="#labs">← All labs</a></div>
     <div class="lab-grid"><section class="instructions">
       <h2>The scenario</h2><p class="mission-story">${esc(task.mission)}</p>
       <h2>Your question</h2><p class="mission-goal">${esc(task.goal)}</p>
-      <p>Explain your reasoning in your own words. Include commands if they help, but no commands are executed here.</p>
+      <p>Enter only the requested answer. Commands are compared against accepted forms; they are not executed.</p>
       <button class="secondary" id="written-hint">Get a hint</button><p id="written-hint-text"></p>
-      <div class="hint">Submit your answer to reveal reference key points. Compare your reasoning and mark the points you covered. This is self-review, not automatic grading.</div>
-      <div id="written-completion">${state.records[key]?.completed ? '<div class="complete-banner">✓ Previously self-reviewed</div>' : ""}</div>
-    </section><section class="workspace written-workspace" aria-label="Written answer workspace">
+      <div id="written-completion"></div>
+    </section><section class="workspace written-workspace" aria-label="Answer workspace">
       <label for="written-answer"><strong>Your answer</strong></label>
-      <textarea id="written-answer" class="written-answer" rows="16" maxlength="16000" placeholder="Explain what happens, what you would investigate, and why…">${esc(draft.answer)}</textarea>
-      <p class="muted">Answers autosave in this browser. Maximum 16,000 characters.</p>
-      <div class="workspace-actions"><button class="secondary" id="written-save">Save answer</button><button class="secondary" id="written-reset">Reset answer</button><button class="primary" id="written-submit">Submit for self-review →</button></div>
+      <textarea id="written-answer" class="written-answer" rows="4" maxlength="512" spellcheck="false" placeholder="Enter the requested command, path or value">${esc(draft.answer)}</textarea>
+      <p class="muted">Answers autosave in this browser. Follow the question's format; maximum 512 characters.</p>
+      <div class="workspace-actions"><button class="secondary" id="written-save">Save answer</button><button class="secondary" id="written-reset">Reset answer</button><button class="primary" id="written-submit">Check answer →</button></div>
       <p id="written-status" role="status" aria-live="polite"></p>
-      <section id="written-review" aria-label="Reference answer and self-review"></section>
+      <section id="written-review" aria-label="Answer feedback"></section>
     </section></div>
     <nav class="task-nav" aria-label="Interview questions"><a class="secondary" href="${index ? `#lab/${course.id}/${index - 1}` : "#labs"}">← Previous</a>
     <a class="secondary" href="${index + 1 < course.lessons.length ? `#lab/${course.id}/${index + 1}` : "#progress"}">${index + 1 < course.lessons.length ? "Next question →" : "View progress →"}</a></nav>`);
   const status = (message) => {
     if (live()) $("#written-status").textContent = message;
   };
-  const renderReview = () => {
-    $("#written-submit").disabled = !draft.answer.trim();
-    $("#written-review").innerHTML = draft.reviewing
-      ? `<h2>Reference answer · key points</h2>
-      <p>Equivalent correct explanations are welcome. Tick each point only if your answer covers it; revise your answer if something is missing.</p>
-      ${task.rubric.map((point, i) => `<label class="review-point"><input type="checkbox" data-point="${i}" ${draft.checked[i] ? "checked" : ""}><span>${esc(point)}</span></label>`).join("")}
-      <button class="primary" id="written-complete" ${canCompleteReview(draft) ? "" : "disabled"}>Mark self-reviewed</button>`
+  const renderResult = () => {
+    $("#written-answer").readOnly = busy;
+    $("#written-reset").disabled = busy;
+    $("#written-save").disabled = busy;
+    $("#written-submit").disabled =
+      busy || !draft.answer.trim() || draft.answer.length > 512;
+    $("#written-completion").innerHTML = draft.passed
+      ? '<div class="complete-banner">✓ Correct answer</div>'
       : "";
-    if (draft.reviewing)
-      $("#written-complete").onclick = async () => {
-        if (!canCompleteReview(draft)) return;
-        $("#written-complete").disabled = true;
-        try {
-          await save(true);
-          if (live()) {
-            $("#written-completion").innerHTML =
-              '<div class="complete-banner">✓ Self-reviewed · Progress saved</div>';
-            status(
-              "Your self-review is saved. This answer was not automatically graded.",
-            );
-          }
-        } catch {
-          status("Review could not be saved. Please try again.");
-        } finally {
-          if (live())
-            $("#written-complete").disabled = !canCompleteReview(draft);
-        }
+    $("#written-review").innerHTML =
+      draft.submittedAnswer === null
+        ? ""
+        : `
+      <p class="console ${draft.passed ? "success" : "error"}">${draft.passed ? "✓ Correct." : "Incorrect. Check the requested format and try again."}</p>
+      ${draft.passed || draft.revealed ? `<h2>Reference answer</h2><pre>${esc(task.answers[0])}</pre><p>${esc(task.explanation)}</p>` : '<button class="secondary" id="written-reference">Show answer</button>'}`;
+    if (!draft.passed && draft.submittedAnswer !== null && !draft.revealed)
+      $("#written-reference").onclick = () => {
+        draft.revealed = true;
+        renderResult();
+        scheduleSave();
       };
   };
   $("#written-answer").oninput = (event) => {
     draft = editWrittenAnswer(draft, event.target.value);
-    renderReview();
-    status("Draft changed. Submit again when you are ready to review.");
+    renderResult();
+    status("Draft changed. Check your answer when ready.");
     scheduleSave();
   };
-  $("#written-submit").onclick = () => {
-    if (!draft.answer.trim()) return;
-    draft.reviewing = true;
-    renderReview();
-    status("Compare your answer with the key points below.");
-    scheduleSave();
-  };
-  $("#written-review").onchange = (event) => {
-    const i = Number(event.target.dataset.point);
-    if (
-      !draft.reviewing ||
-      !Number.isInteger(i) ||
-      i < 0 ||
-      i >= task.rubric.length
-    )
-      return;
-    draft.checked[i] = event.target.checked;
-    $("#written-complete").disabled = !canCompleteReview(draft);
-    scheduleSave();
+  $("#written-submit").onclick = async () => {
+    if (busy || !draft.answer.trim() || draft.answer.length > 512) return;
+    busy = true;
+    draft.submittedAnswer = draft.answer;
+    draft.passed = checkWrittenAnswer(task, draft.answer);
+    clearTimeout(context.saveTimer);
+    renderResult();
+    try {
+      await save();
+      status(
+        draft.passed
+          ? "Correct answer and progress saved."
+          : "Answer saved. Try again or show the reference answer.",
+      );
+    } catch {
+      status(
+        "Answer checked, but saving failed. Please use Save answer to retry.",
+      );
+    } finally {
+      busy = false;
+      if (live()) renderResult();
+    }
   };
   $("#written-save").onclick = async () => {
     try {
@@ -124,12 +123,12 @@ export function mountWritten(context, course, index, live) {
   $("#written-reset").onclick = () => {
     draft = editWrittenAnswer(draft, "");
     $("#written-answer").value = "";
-    renderReview();
-    status("Answer cleared. Previously recorded completion is retained.");
+    renderResult();
+    status("Answer and current result cleared.");
     scheduleSave();
   };
   $("#written-hint").onclick = () => {
     $("#written-hint-text").textContent = task.hint;
   };
-  renderReview();
+  renderResult();
 }

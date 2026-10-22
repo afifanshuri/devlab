@@ -1,3 +1,4 @@
+import { savedCompletion } from "./src/written-answer.js";
 let db, SQL, storage;
 export let durable = true;
 export async function initialize() {
@@ -36,7 +37,7 @@ export function progress() {
   return Object.fromEntries(
     (results[0]?.values || []).map(([id, completed, draft, updated]) => [
       id,
-      { completed: !!completed, draft, updated },
+      { completed: savedCompletion(completed, draft), draft, updated },
     ]),
   );
 }

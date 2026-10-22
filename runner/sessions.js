@@ -146,7 +146,7 @@ export class LabSessions {
     if (!lesson) throw Error("Unknown exercise.");
     if (lesson.type === "written")
       throw Error(
-        "Written questions use browser self-review, not a container.",
+        "Short-answer questions are checked in the browser, not a container.",
       );
     const existing = [...this.sessions.values()].find(
       (s) => s.lesson.id === lessonId,

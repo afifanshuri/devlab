@@ -1,17 +1,21 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { allLessons } from "../curriculum.js";
+import { allLessons, courses } from "../curriculum.js";
 import { LabSessions } from "../runner/sessions.js";
 import {
   readWrittenAnswer,
   editWrittenAnswer,
-  canCompleteReview,
+  checkWrittenAnswer,
+  savedCompletion,
 } from "../src/written-answer.js";
 
-test("Linux interview adds two mixed challenges per topic without replacing coding labs", async () => {
-  const questions = allLessons.filter(
-    (l) => l.course === "hands-linux-interview",
-  );
+const questions = allLessons.filter(
+  (l) => l.course === "hands-linux-interview",
+);
+const shortAnswers = questions.filter((l) => l.type === "written");
+const byIndex = (i) => questions.find((q) => q.index === i);
+
+test("Linux interview keeps 13 terminal tasks and gives 19 questions definite answers", async () => {
   assert.equal(questions.length, 32);
   assert.equal(
     allLessons.filter(
@@ -19,38 +23,124 @@ test("Linux interview adds two mixed challenges per topic without replacing codi
     ).length,
     338,
   );
+  assert.equal(shortAnswers.length, 19);
+  assert.equal(questions.filter((q) => q.engine === "linux").length, 13);
   const topics = new Map();
   for (const q of questions) {
     assert.equal(q.track, "linux");
     assert.equal(q.engine, q.type === "written" ? "written" : "linux");
-    assert.ok(q.mission && q.goal && q.rubric.length >= 3);
+    assert.ok(q.mission && q.goal);
     assert.equal(q.choices, undefined);
+    assert.equal(q.rubric, undefined);
     const pair = topics.get(q.topic) || [];
     pair.push(q.questionNumber);
     topics.set(q.topic, pair);
   }
   assert.equal(topics.size, 16);
-  assert.equal(questions.filter((q) => q.type === "written").length, 19);
-  assert.equal(questions.filter((q) => q.engine === "linux").length, 13);
   for (const pair of topics.values()) assert.deepEqual(pair, [1, 2]);
-  // Reject before any Docker interaction, including requests sent outside the UI.
   await assert.rejects(
-    new LabSessions().create(questions.find((q) => q.type === "written").id),
-    /self-review/,
+    new LabSessions().create(shortAnswers[0].id),
+    /checked in the browser/,
   );
 });
 
-test("written submission, review, save/reopen and reset work without a runner", async () => {
+for (const task of shortAnswers) {
+  test("definite answer: " + task.id, () => {
+    assert.ok(task.answers.length && task.explanation);
+    for (const answer of task.answers) {
+      assert.equal(checkWrittenAnswer(task, answer), true, answer);
+      assert.equal(checkWrittenAnswer(task, "  " + answer + "  "), true);
+      assert.equal(checkWrittenAnswer(task, answer + " extra"), false);
+    }
+    for (const answer of [
+      "",
+      "   ",
+      "I would investigate",
+      "anything",
+      "x".repeat(513),
+    ])
+      assert.equal(checkWrittenAnswer(task, answer), false);
+  });
+}
+
+test("commands accept specified equivalents but reject wrong flags, targets, and shell syntax", () => {
+  const graceful = byIndex(2);
+  for (const input of [
+    "kill -9 4312",
+    "kill -TERM 4313",
+    "kill -term 4312",
+    "kill -TERM 4312; echo done",
+    "kill -TERM 4312\necho done",
+    "kill -TERM $(echo 4312)",
+    "sudo kill -TERM 4312",
+    "kill '-TERM'4312",
+  ])
+    assert.equal(checkWrittenAnswer(graceful, input), false, input);
+  assert.equal(checkWrittenAnswer(graceful, ' kill\t-TERM   "4312" '), true);
+  const sockets = byIndex(16);
+  for (const input of ["ss -lntp", "ss -tnlp", "ss -t -n -p -l", "ss -ln -tp"])
+    assert.equal(checkWrittenAnswer(sockets, input), true, input);
+  for (const input of [
+    "ss -lnt",
+    "ss -lnup",
+    "ss -lnTP",
+    "ss -lntpp",
+    "ss -lntp 8080",
+    "ss -lntp | grep 8080",
+  ])
+    assert.equal(checkWrittenAnswer(sockets, input), false, input);
+  assert.equal(checkWrittenAnswer(byIndex(1), "/proc/4312/status"), false);
+  assert.equal(checkWrittenAnswer(byIndex(11), "MemFree"), false);
+  assert.equal(checkWrittenAnswer(byIndex(12), "5"), false);
+  assert.equal(checkWrittenAnswer(byIndex(17), "yes"), false);
+  assert.equal(checkWrittenAnswer(byIndex(7), "chmod 2770 team"), false);
+  assert.equal(
+    checkWrittenAnswer(byIndex(27), "Firmware, Bootloader, Kernel, Systemd"),
+    true,
+  );
+  assert.equal(
+    checkWrittenAnswer(byIndex(27), "firmware,kernel,bootloader,systemd"),
+    false,
+  );
+});
+
+test("legacy answers survive but self-review cannot count as a graded pass", () => {
+  const old = JSON.stringify({
+    kind: "written-answer",
+    answer: "old explanation",
+    reviewing: true,
+    checked: [true, true, true],
+  });
+  const draft = readWrittenAnswer(old);
+  assert.equal(draft.answer, "old explanation");
+  assert.equal(draft.submittedAnswer, null);
+  assert.equal(draft.passed, false);
+  assert.equal(savedCompletion(true, old), false);
+  assert.equal(savedCompletion(true, "public class Main {}"), true);
+  const passed = {
+    ...draft,
+    answer: "kill 4312",
+    submittedAnswer: "kill 4312",
+    passed: true,
+  };
+  assert.equal(savedCompletion(true, JSON.stringify(passed)), true);
+  const changed = editWrittenAnswer(passed, "kill -9 4312");
+  assert.equal(changed.passed, false);
+  assert.equal(changed.submittedAnswer, null);
+  assert.equal(savedCompletion(true, JSON.stringify(changed)), false);
+  assert.equal(readWrittenAnswer("broken JSON").answer, "");
+});
+
+test("automatic checking, reference reveal, persistence and reset work without a runner", async () => {
   const { default: initSqlJs } = await import("sql.js");
   const { indexedDB } = await import("fake-indexeddb");
   const store = await import("../database.js");
   const { state } = await import("../src/state.js");
   const { mountWritten } = await import("../src/views/written-workspace.js");
-  const { courses } = await import("../curriculum.js");
   const SQL = await initSqlJs();
   globalThis.indexedDB = indexedDB;
   globalThis.window = { initSqlJs: () => Promise.resolve(SQL) };
-  globalThis.location = { hash: "#lab/hands-linux-interview/1" };
+  globalThis.location = { hash: "#lab/hands-linux-interview/2" };
   const nodes = new Map();
   globalThis.document = {
     querySelector: (selector) => {
@@ -66,42 +156,49 @@ test("written submission, review, save/reopen and reset work without a runner", 
   };
   const node = (selector) => document.querySelector(selector);
   const course = courses.find((c) => c.id === "hands-linux-interview");
-  const context = { key: course.id + ":1", task: course.lessons[1] };
+  const context = { key: course.id + ":2", task: course.lessons[2] };
   try {
     await store.initialize();
-    state.records = {};
-    mountWritten(context, course, 1, () => true);
-    assert.equal(node("#written-submit").disabled, true);
+    // A previously completed self-review does not transfer to the new check.
+    await store.saveLesson(
+      context.key,
+      JSON.stringify({
+        kind: "written-answer",
+        answer: "old explanation",
+        reviewing: true,
+      }),
+      true,
+    );
+    state.records = store.progress();
+    assert.equal(state.records[context.key].completed, false);
+    mountWritten(context, course, 2, () => true);
     assert.equal(node("#written-review").innerHTML, "");
-    node("#written-answer").oninput({
-      target: { value: "My explanation <script>unsafe</script>" },
-    });
-    assert.equal(node("#written-submit").disabled, false);
-    node("#written-submit").onclick();
-    assert.match(node("#written-review").innerHTML, /Reference answer/);
-    // The completion handler still guards against an incomplete checklist.
-    await node("#written-complete").onclick();
-    assert.equal(store.progress()[context.key]?.completed, undefined);
-    for (let i = 0; i < 3; i++)
-      node("#written-review").onchange({
-        target: { dataset: { point: String(i) }, checked: true },
-      });
-    assert.equal(node("#written-complete").disabled, false);
-    await node("#written-complete").onclick();
+    node("#written-answer").oninput({ target: { value: "kill -9 4312" } });
+    await node("#written-submit").onclick();
+    assert.match(node("#written-review").innerHTML, /Incorrect/);
+    assert.doesNotMatch(node("#written-review").innerHTML, /kill -TERM/);
+    assert.equal(store.progress()[context.key].completed, false);
+    node("#written-reference").onclick();
+    assert.match(node("#written-review").innerHTML, /kill -TERM 4312/);
+    assert.equal(store.progress()[context.key].completed, false);
+    node("#written-answer").oninput({ target: { value: "kill -15 4312" } });
+    assert.equal(node("#written-review").innerHTML, "");
+    await node("#written-submit").onclick();
+    assert.match(node("#written-review").innerHTML, /✓ Correct/);
     assert.equal(store.progress()[context.key].completed, true);
     await context.saveState();
     clearTimeout(context.saveTimer);
-    mountWritten(context, course, 1, () => true);
-    assert.match(
-      node("#app").innerHTML,
-      /My explanation &lt;script&gt;unsafe&lt;\/script&gt;/,
-    );
-    assert.match(node("#app").innerHTML, /Previously self-reviewed/);
-    assert.match(node("#written-review").innerHTML, /Reference answer/);
+    mountWritten(context, course, 2, () => true);
+    assert.match(node("#app").innerHTML, /kill -15 4312/);
+    assert.match(node("#written-completion").innerHTML, /Correct answer/);
     node("#written-answer").oninput({
-      target: { value: "Changed explanation" },
+      target: { value: '<script>alert("x")</script>' },
     });
-    assert.equal(node("#written-review").innerHTML, "");
+    await context.saveState();
+    clearTimeout(context.saveTimer);
+    mountWritten(context, course, 2, () => true);
+    assert.match(node("#app").innerHTML, /&lt;script&gt;/);
+    assert.equal(store.progress()[context.key].completed, false);
     node("#written-reset").onclick();
     assert.equal(node("#written-submit").disabled, true);
     await context.saveState();
@@ -113,28 +210,4 @@ test("written submission, review, save/reopen and reset work without a runner", 
     delete globalThis.window;
     delete globalThis.indexedDB;
   }
-});
-
-test("written drafts restore safely and editing invalidates the previous review", () => {
-  let draft = readWrittenAnswer(null, 3);
-  assert.equal(canCompleteReview(draft), false);
-  draft = editWrittenAnswer(draft, "Reasoning with evidence");
-  draft.reviewing = true;
-  draft.checked = [true, false, true];
-  assert.equal(canCompleteReview(draft), false);
-  draft.checked[1] = true;
-  assert.equal(canCompleteReview(draft), true);
-  assert.deepEqual(readWrittenAnswer(JSON.stringify(draft), 3), draft);
-  const edited = editWrittenAnswer(draft, "Revised answer");
-  assert.equal(canCompleteReview(edited), false);
-  assert.deepEqual(edited.checked, [false, false, false]);
-  assert.equal(canCompleteReview(editWrittenAnswer(draft, "  \n")), false);
-  assert.equal(readWrittenAnswer("broken JSON", 3).answer, "");
-  assert.equal(
-    readWrittenAnswer(
-      JSON.stringify({ ...draft, answer: "x".repeat(17000) }),
-      3,
-    ).answer.length,
-    16000,
-  );
 });

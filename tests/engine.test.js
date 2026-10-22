@@ -125,7 +125,7 @@ test("all screens and practical tasks render without missing references", async 
         assert.ok(markup.includes('id="written-answer"'));
         assert.ok(!markup.includes('id="interactive-terminal"'));
         assert.ok(!markup.includes('id="code"'));
-        assert.ok(markup.includes("not automatic grading"));
+        assert.ok(markup.includes("Automatically checked"));
         continue;
       }
       if (l.engine === "linux") {

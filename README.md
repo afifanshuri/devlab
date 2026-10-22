@@ -152,15 +152,21 @@ Run `node scripts/test-curriculum.mjs java-a`, `java-b`, or `ops` for the new Do
 
 The **Linux administration · interview practice** course adds 32 challenges
 across 16 topics. Thirteen are terminal tasks with executable checks; nineteen
-are written questions about concepts, evidence and troubleshooting decisions.
+are automatically checked short-answer questions about Linux commands and concepts.
 Existing coding exercises retain their IDs and behavior.
 
-Written questions work on GitHub Pages without Docker. Type an answer, submit
-to reveal reference key points, and compare your explanation using the checklist.
-Completion is explicitly **self-reviewed**, not automatically graded. Answers
-and review state save in the browser and are included in progress backups.
-Editing an answer clears its current checklist; resetting clears the answer and
-retains previously recorded completion, consistent with coding labs.
+Short-answer questions work on GitHub Pages without Docker. Each scenario asks
+for one specific command, path, value or ordered sequence. **Check answer**
+automatically accepts the defined correct forms and rejects incorrect answers.
+Commands are compared as tokens and are never executed. Questions explicitly
+state required tools/options; accepted signal aliases and independent ss flag
+orders are supported. This is bounded answer matching, not a general shell
+semantic evaluator.
+
+Answers and results save in the browser and are included in progress backups.
+Editing or resetting a short answer clears its current result. Previous
+self-reviewed answer text remains available, but old self-reviews do not count
+as automatically checked passes. Terminal lab completion behaves as before.
 
 The terminal tasks require the local runner and Docker. They cover filesystem
 layout, redirection, permissions, links, service and security configuration,
