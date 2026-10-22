@@ -9,8 +9,8 @@ export const linuxPane = (
 ) => `<section class="terminal-pane linux-terminal" aria-label="Interactive Linux terminal">
   <div class="workspace-section-header"><strong>&gt;_ LINUX TERMINAL</strong><span id="runner-state">${available ? "CONNECTING…" : "LOCAL RUNNER REQUIRED"}</span></div>
   <div id="interactive-terminal" class="interactive-terminal" aria-label="Linux shell">${available ? "Connecting to your exercise…" : "Start Docker Desktop and the local runner to use Bash and vim."}</div>
-  <p class="terminal-help muted">Type commands directly. Edit files with vim &lt;filename&gt; · i starts editing · Esc leaves insert mode · :wq saves and closes · :q! discards changes. Save and close the editor before checking.</p>
-  <div class="workspace-actions"><button class="secondary" id="reconnect">Reconnect</button><button class="secondary" id="reset">Reset notes.sh</button><button class="primary" id="check" disabled>Check answer →</button></div>
+  <p class="terminal-help muted">Type commands directly. Edit files with vim &lt;filename&gt; · i starts editing · Esc leaves insert mode · :wq saves and closes · :q! discards changes. Save with :w or :wq first. Answer files autosave after commands finish; unsaved Vim buffers are not included.</p>
+  <div class="workspace-actions"><button class="secondary" id="save-state">Save state</button><button class="secondary" id="reconnect">Reconnect</button><button class="secondary" id="reset">Reset notes.sh</button><button class="primary" id="check" disabled>Check answer →</button></div>
   <p class="terminal-help muted">Check answer verifies the files and state you create. Scripting missions also test your saved script with different inputs. Reset restores only notes.sh and keeps your other files and container.</p>
   <div id="output" class="console" role="status" aria-live="polite">${available ? "Starting your exercise environment…" : "Open http://127.0.0.1:5173 after running npm start."}</div>
 </section>`;
@@ -26,8 +26,56 @@ export async function mountLinux(context, available, live) {
     if (live()) {
       $("#check").disabled =
         !connected || !changed || !atPrompt || context.busy;
+      $("#save-state").disabled = !connected || !atPrompt || context.busy;
       $("#reset").disabled = !connected || !atPrompt || context.busy;
       $("#reconnect").disabled = !available || context.busy;
+    }
+  };
+  let saving;
+  const saveState = () => {
+    if (!connected || !atPrompt || !context.session || context.completed)
+      return Promise.resolve();
+    return (saving ??= (async () => {
+      const result = await callRunner("answer-files", { id: context.session });
+      await store.saveLesson(
+        context.key,
+        JSON.stringify({
+          kind: "linux-answer-files",
+          edited: changed,
+          ...result.snapshot,
+        }),
+      );
+      state.records = store.progress();
+    })().finally(() => {
+      saving = null;
+    }));
+  };
+  context.saveState = saveState;
+  const scheduleSave = () => {
+    clearTimeout(context.stateTimer);
+    context.stateTimer = setTimeout(() => {
+      if (live() && !context.busy)
+        saveState().catch((error) =>
+          output("Autosave failed: " + error.message),
+        );
+    }, 700);
+  };
+  $("#save-state").onclick = async () => {
+    if (context.busy || !connected || !atPrompt) return;
+    context.busy = true;
+    context.terminal?.setReadOnly(true);
+    update();
+    try {
+      await saveState();
+      output(
+        "Answer files saved in this browser. They will restore in a fresh exercise container.",
+      );
+    } catch (error) {
+      output("Save failed: " + error.message);
+    } finally {
+      context.busy = false;
+      context.terminal?.setReadOnly(!connected);
+      update();
     }
   };
   const connect = async () => {
@@ -39,7 +87,19 @@ export async function mountLinux(context, available, live) {
       const info = await callRunner("start", { lessonId: context.key });
       if (!live()) return;
       context.session = info.id;
-      const previousDraft = context.files[context.task.filename];
+      let snapshot;
+      try {
+        const draft = JSON.parse(state.records[context.key]?.draft || "null");
+        if (draft?.kind === "linux-answer-files" && draft.version === 1)
+          snapshot = draft;
+      } catch {
+        /* Legacy script drafts remain readable. */
+      }
+      if (snapshot && !info.reused)
+        await callRunner("answer-files", { id: info.id, snapshot });
+      const previousDraft = snapshot
+        ? null
+        : context.files[context.task.filename];
       if (previousDraft && previousDraft !== context.task.starter) {
         const remote = await callRunner("read", {
           id: info.id,
@@ -67,13 +127,14 @@ export async function mountLinux(context, available, live) {
           onReady: (edited, prompt) => {
             if (!live()) return;
             connected = true;
-            changed = edited;
+            changed = edited || snapshot?.edited === true;
             atPrompt = prompt;
             $("#runner-state").textContent = "CONNECTED · BASH";
             output(
               "Use the terminal to complete the mission, then select Check answer.",
             );
             update();
+            scheduleSave();
           },
           onActivity: () => {
             changed = true;
@@ -82,6 +143,7 @@ export async function mountLinux(context, available, live) {
           onState: (prompt) => {
             atPrompt = prompt;
             update();
+            if (prompt) scheduleSave();
           },
           onError: output,
           onExit: () => {
@@ -116,6 +178,11 @@ export async function mountLinux(context, available, live) {
     update();
     try {
       output("Checking your exercise files and state…");
+      try {
+        await saveState();
+      } catch (error) {
+        toast("Answer files could not be saved: " + error.message);
+      }
       const result = await callRunner("check", { id: context.session });
       if (result.passed) {
         await store.saveLesson(
@@ -161,8 +228,7 @@ export async function mountLinux(context, available, live) {
     try {
       await callRunner("reset", { lessonId: context.key });
       context.files[context.task.filename] = context.task.starter;
-      await store.saveLesson(context.key, context.task.starter);
-      state.records = store.progress();
+      await saveState();
       output("notes.sh restored. Other files and the container are unchanged.");
     } catch (error) {
       output(error.message);

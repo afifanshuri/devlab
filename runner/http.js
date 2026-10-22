@@ -1,3 +1,4 @@
+import { readAnswerFiles, restoreAnswerFiles } from "./answer-files.js";
 import { randomBytes, timingSafeEqual } from "node:crypto";
 export function runnerApi(sessions, terminals) {
   const token = randomBytes(32).toString("hex");
@@ -40,7 +41,8 @@ export function runnerApi(sessions, terminals) {
     try {
       for await (const chunk of req) {
         bytes += chunk.length;
-        if (bytes > 80000) throw Error("Request is too large.");
+        if (bytes > (req.url === "/api/answer-files" ? 1000000 : 80000))
+          throw Error("Request is too large.");
         body += chunk;
       }
       const data = JSON.parse(body || "{}");
@@ -75,7 +77,17 @@ export function runnerApi(sessions, terminals) {
         terminals?.assertReady(data.id);
         return reply(200, await sessions.checkAnswer(data.id));
       }
+      if (req.url === "/api/answer-files") terminals?.assertReady(data.id);
       const result = await sessions.exclusive(data.id, async (s) => {
+        if (req.url === "/api/answer-files") {
+          if (s.lesson.engine !== "linux")
+            throw Error("Answer file snapshots are for Linux exercises.");
+          if (data.snapshot !== undefined) {
+            await restoreAnswerFiles(s, data.snapshot);
+            return { restored: true };
+          }
+          return { snapshot: await readAnswerFiles(s) };
+        }
         if (req.url === "/api/write") {
           await sessions.write(s, data.filename, data.source);
           return { output: `Saved ${data.filename}\n` };

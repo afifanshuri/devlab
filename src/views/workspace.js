@@ -6,7 +6,7 @@ import { callRunner, localRunner } from "../services/runner.js";
 import { openCodeEditor } from "../services/code-editor.js";
 import { editKey } from "../editor-input.js";
 import { createTerminalDisplay } from "../services/terminal-display.js";
-import { linuxPane, mountLinux } from "./linux-workspace.js?v=vim-linux-1";
+import { linuxPane, mountLinux } from "./linux-workspace.js?v=save-state-1";
 import {
   starterFiles,
   readDraft,
@@ -20,6 +20,8 @@ export async function flushDraft() {
   active = null;
   if (!old) return;
   clearTimeout(old.saveTimer);
+  clearTimeout(old.stateTimer);
+  await old.saveState?.().catch(() => {});
   old.terminal?.dispose();
   old.editor?.dispose();
   if ($("#code")) {
@@ -161,6 +163,7 @@ ${esc(context.files[context.filename])}</textarea
               >
             </div>
             <div class="workspace-actions">
+              <button class="secondary" id="save-state">Save state</button>
               <button class="secondary" id="reset">Reset lab</button
               ><button class="primary" id="check" disabled>
                 Check answer →
@@ -402,6 +405,15 @@ ${esc(context.files[context.filename])}</textarea
         toast("Draft could not be saved locally. Keep this tab open.");
       }
     }, 350);
+  };
+  $("#save-state").onclick = async () => {
+    try {
+      await store.saveLesson(key, draft());
+      state.records = store.progress();
+      toast("Answer files saved in this browser.");
+    } catch {
+      toast("Save failed. Keep this tab open and try again.");
+    }
   };
   $("#code").onkeydown = (e) => editKey(e, () => $("#code").oninput());
   $("#check").onclick = action(async () => {

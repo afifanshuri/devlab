@@ -133,3 +133,9 @@ Java, Spring and SQL exercises use Microsoft's MIT-licensed Monaco Editor with J
 The editor loads on demand from committed, self-hosted assets. Regenerate them with `npm run vendor:editor`; the build includes only the editor features and languages used here. Monaco's vendored DOMPurify is replaced at bundle time with the pinned patched npm dependency; licenses ship with the assets.
 
 After updating to Vim, run `npm run setup:labs` to rebuild the local image. Existing exercise containers and answers are preserved; containers created with the older image may lack Vim and are not replaced automatically. New containers use Vim once the updated image is built.
+
+### Saving exercise answers
+
+Every exercise has a **Save state** button. Java and SQL source files also autosave while typing and restore when reopened. Linux answer files autosave after commands finish and before checking; save and leave Vim first. Reused containers keep their current files; a fresh container restores the saved Linux files from this browser. **Reset notes.sh** updates that saved file without erasing other saved Linux files.
+
+Linux saves cover files and directories under `/workspace`, including permissions and links that stay within that workspace. The limits are 200 entries, 64 KB per file and 512 KB total; failures leave the previous saved answer intact and show an error. Runner metadata is excluded. Running processes, shell sessions, unsaved editor buffers, file ownership and database changes are not saved. Answers belong to the current browser origin and are included in the existing progress backup; clearing browser storage removes them unless backed up. Containers still expire after one idle hour.

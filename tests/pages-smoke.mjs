@@ -53,7 +53,10 @@ for (const file of files) {
       ])
         assert.ok(body.includes(module), "Missing curriculum module " + module);
     if (file === "src/views/workspace.js")
-      assert.ok(body.includes("editKey"), "Editor update not deployed");
+      assert.ok(
+        body.includes('id="save-state"'),
+        "Save state control not deployed",
+      );
   }
   console.log("PASS", file);
 }
