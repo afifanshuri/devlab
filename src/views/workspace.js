@@ -6,7 +6,7 @@ import { callRunner, localRunner } from "../services/runner.js";
 import { openCodeEditor } from "../services/code-editor.js";
 import { editKey } from "../editor-input.js";
 import { createTerminalDisplay } from "../services/terminal-display.js";
-import { linuxPane, mountLinux } from "./linux-workspace.js";
+import { linuxPane, mountLinux } from "./linux-workspace.js?v=vim-linux-1";
 import {
   starterFiles,
   readDraft,
@@ -108,7 +108,7 @@ export function lesson(courseId, idx) {
           </div>
           <p>
             ${interactive
-              ? "The lab connects automatically. Complete the mission in Bash; use nano to edit scripts or configuration files. Run any required scripts yourself, then select Check answer to verify the resulting files and state."
+              ? "The lab connects automatically. Complete the mission in Bash; use vim to edit scripts or configuration files. Run any required scripts yourself, then select Check answer to verify the resulting files and state."
               : "The lab connects automatically. Write your answer, then select Check answer to compile, run, and validate it against internal test cases."}
           </p>
           <button class="secondary" id="hint">Get a hint</button>
@@ -122,7 +122,7 @@ export function lesson(courseId, idx) {
           <div class="hint">
             ${available
               ? interactive
-                ? "Interactive Linux container · nano included · no host folders mounted · network disabled · expires after one idle hour."
+                ? "Interactive Linux container · vim included · no host folders mounted · network disabled · expires after one idle hour."
                 : "Local exercise runtime · no host folders mounted · network disabled · commands have a 10-second limit (Spring checks: 45 seconds)."
               : "To execute this lab: start Docker Desktop, run npm run setup:labs and npm start in the project folder, then open http://127.0.0.1:5173. GitHub Pages hosts the catalog; it cannot execute processes."}
           </div>

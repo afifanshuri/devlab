@@ -32,7 +32,7 @@ export class InteractiveTerminals {
     const shell = this.shells.get(id);
     if (shell && !shell.atPrompt)
       throw Error(
-        "Finish the command, or save and close nano, before checking your answer.",
+        "Finish the command, or save and close vim, before checking your answer.",
       );
   }
   bind(server) {

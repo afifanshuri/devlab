@@ -28,7 +28,7 @@ async function denied(url, origin) {
   });
 }
 test(
-  "real authenticated PTY supports nano, reconnect, resize and state-only submission",
+  "real authenticated PTY supports Vim, reconnect, resize and state-only submission",
   { timeout: 90000 },
   async () => {
     const labs = new LabSessions(),
@@ -114,43 +114,49 @@ test(
         shell,
         "Reconnect created a second shell",
       );
-      send("nano -I Main.java\r");
-      await until(
-        () =>
-          messages.some(
-            (m) => m.type === "output" && m.data.includes("GNU nano"),
-          ),
-        "nano did not open in the PTY",
-      );
+      send("vim -u NONE -i NONE Main.java\r");
+      await until(() => !shell.atPrompt, "Vim did not open in the PTY");
       assert.equal(
         (await call("check", { id: started.id })).status,
         400,
         "Checking while editing must be blocked",
       );
-      send("class Main {}");
-      send("\x0f");
+      send("iclass Main {}");
       await until(
         () =>
           messages.some(
-            (m) => m.type === "output" && m.data.includes("File Name to Write"),
+            (m) => m.type === "output" && m.data.includes("class Main"),
           ),
-        "nano save prompt missing",
+        "Vim did not accept text",
       );
-      send("\r");
+      socket.close();
+      await new Promise((r) => socket.once("close", r));
+      messages.length = 0;
+      socket = await connect(started.id);
       await until(
-        () =>
-          messages.some(
-            (m) => m.type === "output" && /Wrote \d+ line/.test(m.data),
-          ),
-        "nano did not save",
+        () => messages.some((m) => m.type === "ready"),
+        "Reconnect while editing failed",
       );
-      send("\x18");
-      await until(() => shell.atPrompt, "nano did not close");
+      assert.equal(app.terminals.shells.get(started.id), shell);
+      assert.equal(
+        shell.atPrompt,
+        false,
+        "Reconnect must preserve the open editor",
+      );
+      await shell.resize(120, 36);
+      send(
+        "\x1b:call writefile([string(&columns), string(&lines)], '/workspace/vim-size')\r:wq\r",
+      );
+      await until(() => shell.atPrompt, "Vim did not save and close");
       assert.equal(
         (
           await labs.command(s, "cat /workspace/projects/Main.java")
         ).output.trim(),
         "class Main {}",
+      );
+      assert.equal(
+        (await labs.command(s, "cat /workspace/vim-size")).output.trim(),
+        "120\n36",
       );
       // If Check answer replays notes.sh, this would fail and corrupt the answer.
       await labs.write(

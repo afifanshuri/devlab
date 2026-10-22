@@ -8,8 +8,8 @@ export const linuxPane = (
   available,
 ) => `<section class="terminal-pane linux-terminal" aria-label="Interactive Linux terminal">
   <div class="workspace-section-header"><strong>&gt;_ LINUX TERMINAL</strong><span id="runner-state">${available ? "CONNECTING…" : "LOCAL RUNNER REQUIRED"}</span></div>
-  <div id="interactive-terminal" class="interactive-terminal" aria-label="Linux shell">${available ? "Connecting to your exercise…" : "Start Docker Desktop and the local runner to use Bash and nano."}</div>
-  <p class="terminal-help muted">Type commands directly. Edit files with nano &lt;filename&gt; · Ctrl+O (or F3), Enter saves · Ctrl+X (or F2) closes · Ctrl+C stops a command. Save and close the editor before checking.</p>
+  <div id="interactive-terminal" class="interactive-terminal" aria-label="Linux shell">${available ? "Connecting to your exercise…" : "Start Docker Desktop and the local runner to use Bash and vim."}</div>
+  <p class="terminal-help muted">Type commands directly. Edit files with vim &lt;filename&gt; · i starts editing · Esc leaves insert mode · :wq saves and closes · :q! discards changes. Save and close the editor before checking.</p>
   <div class="workspace-actions"><button class="secondary" id="reconnect">Reconnect</button><button class="secondary" id="reset">Reset notes.sh</button><button class="primary" id="check" disabled>Check answer →</button></div>
   <p class="terminal-help muted">Check answer verifies the files and state you create. Scripting missions also test your saved script with different inputs. Reset restores only notes.sh and keeps your other files and container.</p>
   <div id="output" class="console" role="status" aria-live="polite">${available ? "Starting your exercise environment…" : "Open http://127.0.0.1:5173 after running npm start."}</div>

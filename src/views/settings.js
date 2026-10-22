@@ -56,7 +56,7 @@ function settings() {
         </p>
         <p class="muted">
           The SQL playground still runs SQLite in the browser. Linux has a real
-          interactive Bash terminal with nano. Save and close nano before
+          interactive Bash terminal with vim. Save and close vim before
           selecting Check answer; it verifies the files and state without
           replaying notes.sh. Java and database terminals run noninteractive
           commands. Java shares one runtime; PostgreSQL shares one runtime with

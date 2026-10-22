@@ -33,7 +33,7 @@ test("terminal tickets are bounded, expire, and accept only Linux workspaces", (
     for (let i = 1; i < 64; i++) terminals.ticket("linux");
     assert.throws(() => terminals.ticket("linux"), /Too many/);
     terminals.shells.set("linux", { atPrompt: false });
-    assert.throws(() => terminals.assertReady("linux"), /save and close nano/);
+    assert.throws(() => terminals.assertReady("linux"), /save and close vim/);
     terminals.shells.get("linux").atPrompt = true;
     terminals.assertReady("linux");
     terminals.shells.clear();

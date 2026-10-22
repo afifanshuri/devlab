@@ -108,8 +108,8 @@ export HISTFILE=${root}/.bash_history
 export PS1='afif@devlab:\\w$ '
 PS0=$'\\e]133;C\\a'
 PROMPT_COMMAND='pwd > ${root}/.cwd; history -a; printf "\\033]133;A\\007"'
-if ! command -v nano >/dev/null; then
-  printf '\\nThis older container has no nano. Your files are preserved; newly started labs use the updated image.\\n'
+if ! command -v vim >/dev/null; then
+  printf '\\nThis older container has no vim. Your files are preserved. Vim requires a fresh container using the rebuilt image; existing containers are not replaced automatically.\\n'
 fi
 `;
     await must(
