@@ -1345,3 +1345,13 @@ dialog h2 {
   border: 1px solid var(--line);
   border-radius: 6px;
 }
+.theory-code {
+  overflow-x: auto;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  line-height: 1.65;
+  font-size: 13px;
+}

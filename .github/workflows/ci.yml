@@ -14,11 +14,13 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: "22"
           cache: npm
       - run: npm ci --ignore-scripts
       - run: npm test
       - run: npm run setup:labs
+      - run: npm run test:java-theory
+        if: matrix.suite == 'legacy'
       - run: node scripts/test-curriculum.mjs ${{ matrix.suite }}
       - run: node --test --test-concurrency=1 tests/pools.integration.js tests/http.integration.js tests/terminal.integration.js tests/interactive.integration.js tests/answer-files.integration.js
         if: matrix.suite == 'legacy'

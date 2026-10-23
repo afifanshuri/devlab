@@ -44,19 +44,20 @@ export function mountWritten(context, course, index, live) {
       350,
     );
   };
-  shell(`<div class="lab-heading"><div><div class="eyebrow">LINUX / INTERVIEW PRACTICE</div>
+  shell(`<div class="lab-heading"><div><div class="eyebrow">${esc(course.track.toUpperCase())} / INTERVIEW PRACTICE</div>
     <h1>${esc(task.title)}</h1><p class="sub">Short answer · Automatically checked · No Docker required</p></div>
     <a class="secondary" href="#labs">← All groups</a></div>
     ${groupPicker(key)}
     <div class="lab-grid"><section class="instructions">
       <h2>The scenario</h2><p class="mission-story">${esc(task.mission)}</p>
+      ${task.code ? `<pre class="theory-code"><code>${esc(task.code)}</code></pre>` : ""}
       <h2>Your question</h2><p class="mission-goal">${esc(task.goal)}</p>
-      <p>Enter only the requested answer. Commands are compared against accepted forms; they are not executed.</p>
+      <p>${task.engine === "written" && course.track === "java" ? "Assume Java 21 without preview features unless the question says otherwise. Enter only the requested output, name or value." : "Enter only the requested answer. Commands are compared against accepted forms; they are not executed."}</p>
       <button class="secondary" id="written-hint">Get a hint</button><p id="written-hint-text"></p>
       <div id="written-completion"></div>
     </section><section class="workspace written-workspace" aria-label="Answer workspace">
       <label for="written-answer"><strong>Your answer</strong></label>
-      <textarea id="written-answer" class="written-answer" rows="4" maxlength="512" spellcheck="false" placeholder="Enter the requested command, path or value">${esc(draft.answer)}</textarea>
+      <textarea id="written-answer" class="written-answer" rows="4" maxlength="512" spellcheck="false" placeholder="Enter only the requested answer">${esc(draft.answer)}</textarea>
       <p class="muted">Answers autosave in this browser. Follow the question's format; maximum 512 characters.</p>
       <div class="workspace-actions"><button class="secondary" id="written-save">Save answer</button><button class="secondary" id="written-reset">Reset answer</button><button class="primary" id="written-submit">Check answer →</button></div>
       <p id="written-status" role="status" aria-live="polite"></p>

@@ -1,4 +1,4 @@
-import { courses, allLessons } from "../curriculum.js?v=grouped-lessons-1";
+import { courses, allLessons } from "../curriculum.js?v=java-theory-1";
 
 const definitions = [
   [
@@ -257,7 +257,9 @@ function groupId(lesson) {
   if (assigned.has(lesson.id)) return assigned.get(lesson.id);
   const source = lesson.course.replace(/^hands-/, "");
   let id =
-    courseGroups[source] || byTopic.get(lesson.advancedTopic || lesson.topic);
+    lesson.learningGroup ||
+    courseGroups[source] ||
+    byTopic.get(lesson.advancedTopic || lesson.topic);
   if (splitCourses[source])
     id = lesson.track + "-" + splitCourses[source][lesson.index];
   if (lesson.topic === "Packages and scheduled jobs")
@@ -338,6 +340,7 @@ const sectionOverrides = {
 function sectionLabel(lesson) {
   const topic =
     sectionOverrides[lesson.id] ||
+    lesson.section ||
     lesson.advancedTopic ||
     lesson.topic ||
     primaryTopics.get(lesson.id) ||

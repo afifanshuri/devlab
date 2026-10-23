@@ -1,5 +1,5 @@
 import { state } from "./state.js";
-import { allLessons } from "../curriculum.js?v=grouped-lessons-1";
+import { allLessons } from "../curriculum.js?v=java-theory-1";
 const completed = () =>
   allLessons.filter((lesson) => state.records[lesson.id]?.completed).length;
 const count = (c) =>

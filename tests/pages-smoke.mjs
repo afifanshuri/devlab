@@ -16,6 +16,7 @@ const files = [
   "advanced-sql.js",
   "advanced-oracle.js",
   "linux-interview.js",
+  "java-interview.js",
   "linux-interview-answers.js",
   "linux-interview-labs.js",
   "src/written-answer.js",

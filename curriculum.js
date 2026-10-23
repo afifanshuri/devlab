@@ -1,5 +1,6 @@
 import { advancedCourses as pairedAdvancedCourses } from "./advanced-practice.js";
 import { linuxInterview } from "./linux-interview.js";
+import { javaInterview } from "./java-interview.js";
 import {
   java,
   linux,
@@ -263,7 +264,7 @@ courses.splice(
   linuxAdminPractice,
 );
 courses.push(...pairedAdvancedCourses(courses));
-courses.push(linuxInterview);
+courses.push(linuxInterview, javaInterview);
 for (const track of ["java", "linux", "sql"])
   courses
     .filter((c) => c.track === track && c.lessons[0].engine !== "oracle")

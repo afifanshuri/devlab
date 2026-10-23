@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { allLessons } from "../curriculum.js?v=grouped-lessons-1";
+import { allLessons } from "../curriculum.js?v=java-theory-1";
 import {
   learningGroups,
   groupForLesson,
@@ -57,7 +57,7 @@ test("related initial, advanced and interview work share topic sections", () => 
   const singleton = patterns.sections.find(
     (section) => section.title === "Singleton",
   );
-  assert.equal(singleton.lessons.length, 3);
+  assert.equal(singleton.lessons.length, 5);
   assert.equal(singleton.lessons[0].id, "hands-java-architecture:0");
   assert.equal(
     learningGroups.find((group) => group.id === "java-solid").sections.length,

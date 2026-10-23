@@ -180,7 +180,7 @@ and [OpenSSH server configuration](https://www.openssh.com/manual.html).
 
 ## Topic groups
 
-The library organizes all 370 exercises into 17 groups: six Java, six Linux
+The library organizes all 450 exercises into 17 groups: six Java, six Linux
 and five SQL. Each group combines related initial practice, advanced challenge
 pairs and relevant Linux short-answer questions. SOLID has one section per
 principle; patterns have sections such as Singleton, Strategy and Observer.
@@ -193,3 +193,16 @@ Grouping is a presentation layer. Original exercise IDs, URLs, runner contracts,
 saved drafts and completion records remain unchanged. Oracle stays in an
 explicitly optional group. Group membership and shared topic labels are defined
 in `src/learning-groups.js`.
+
+## Java interview theory
+
+80 short-answer questions add two questions for each of 40 concepts across the
+six Java groups: language and OOP, collections, SOLID, patterns, concurrency and
+Spring. Each question has explicit accepted answers and automatic right/wrong
+feedback. Output questions include their code; no Java runtime is needed to
+submit an answer. Names and defined aliases are accepted; printed output remains
+case-sensitive. Existing coding exercises are unchanged.
+
+Run `npm run test:java-theory` to independently compile and execute the 20 output
+examples using the local Java 21 Docker image. Unit tests cover every accepted
+answer, rejection of incorrect input, grouping and stable earlier IDs.

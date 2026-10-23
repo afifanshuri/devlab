@@ -2,14 +2,14 @@ import {
   learningGroups as courses,
   groupForLesson,
 } from "../learning-groups.js";
-import { allLessons } from "../../curriculum.js?v=grouped-lessons-1";
+import { allLessons } from "../../curriculum.js?v=java-theory-1";
 import * as store from "../../database.js";
 import { $, esc, icon, shell } from "../ui.js";
 import {
   completed,
   count,
   route,
-} from "../catalog-data.js?v=grouped-lessons-1";
+} from "../catalog-data.js?v=java-theory-1";
 let filter = "all",
   query = "";
 function catalog() {

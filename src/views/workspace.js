@@ -3,7 +3,7 @@ import {
   groupNavigation,
   bindGroupPicker,
 } from "./group-navigation.js";
-import { courses, allLessons } from "../../curriculum.js?v=grouped-lessons-1";
+import { courses, allLessons } from "../../curriculum.js?v=java-theory-1";
 import * as store from "../../database.js";
 import { state } from "../state.js";
 import { $, esc, shell, toast } from "../ui.js";
@@ -14,7 +14,7 @@ import { createTerminalDisplay } from "../services/terminal-display.js";
 import {
   linuxPane,
   mountLinux,
-} from "./linux-workspace.js?v=grouped-lessons-1";
+} from "./linux-workspace.js?v=java-theory-1";
 import { mountWritten } from "./written-workspace.js";
 import {
   starterFiles,
