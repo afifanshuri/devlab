@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { javaStrings } from "../java-strings.js";
-import { allLessons } from "../curriculum.js?v=java-strings-1";
+import { allLessons } from "../curriculum.js?v=health-output-1";
 import { groupForLesson } from "../src/learning-groups.js";
 
 test("24 string coding exercises form 12 progressive pairs without replacing earlier work", () => {
@@ -10,8 +10,9 @@ test("24 string coding exercises form 12 progressive pairs without replacing ear
   );
   assert.equal(lessons.length, 24);
   assert.equal(
-    allLessons.filter((lesson) => lesson.course !== "hands-java-strings")
-      .length,
+    allLessons.filter(
+      (lesson) => lesson.course !== "hands-java-strings" && !lesson.healthCheck,
+    ).length,
     450,
   );
   const pairs = new Map();

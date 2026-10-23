@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { allLessons } from "../curriculum.js?v=java-strings-1";
+import { allLessons } from "../curriculum.js?v=health-output-1";
 import {
   learningGroups,
   groupForLesson,
@@ -74,7 +74,10 @@ test("related initial, advanced and interview work share topic sections", () => 
   assert.ok(
     learningGroups
       .find((group) => group.id === "sql-oracle")
-      .lessons.every((lesson) => lesson.engine === "oracle"),
+      .lessons.every(
+        (lesson) =>
+          lesson.engine === "oracle" || lesson.diagnosticSystem === "oracle",
+      ),
   );
 });
 

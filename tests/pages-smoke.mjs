@@ -18,6 +18,7 @@ const files = [
   "linux-interview.js",
   "java-interview.js",
   "java-strings.js",
+  "health-checks.js",
   "linux-interview-answers.js",
   "linux-interview-labs.js",
   "src/written-answer.js",

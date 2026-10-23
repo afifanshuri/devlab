@@ -180,7 +180,7 @@ and [OpenSSH server configuration](https://www.openssh.com/manual.html).
 
 ## Topic groups
 
-The library organizes all 474 exercises into 17 groups: six Java, six Linux
+The library organizes all 516 exercises into 17 groups: six Java, six Linux
 and five SQL. Each group combines related initial practice, advanced challenge
 pairs and relevant Linux short-answer questions. SOLID has one section per
 principle; patterns have sections such as Singleton, Strategy and Observer.
@@ -221,3 +221,21 @@ tests verify behavior rather than proving which equivalent APIs were used.
 
 Run `node --test --test-name-pattern=hands-java-strings: tests/docker.integration.js`
 to check that each starter fails and each reference solution passes.
+
+## Reading server and database health reports
+
+42 automatically checked output questions add 20 Linux checks and 22 SQL checks
+(12 PostgreSQL and 10 Oracle). Each shows clearly labelled illustrative command
+or query output with definite questions about rows, units, thresholds or simple
+calculations. No live machine, Docker or database access is required.
+
+Linux topics cover df, du, top, free, uptime, vmstat, iostat, inodes, sockets and
+service state. PostgreSQL covers tablespace/relation sizes, connections, blocking,
+vacuum statistics and replication positions. Oracle covers tablespace usage,
+autoextend, temporary space, undo and blocking sessions.
+
+Questions are integrated into the relevant topic groups. Numeric answers accept
+equivalent decimal forms; percentage questions also accept an optional % suffix.
+Other units must follow the prompt. Existing answer formats and exercises remain
+unchanged. These snapshots teach interpretation; they do not inspect the host or
+claim a single metric proves a particular fault.

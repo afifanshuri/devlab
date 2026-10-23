@@ -1355,3 +1355,20 @@ dialog h2 {
   line-height: 1.65;
   font-size: 13px;
 }
+.diagnostic-output {
+  max-width: 100%;
+  overflow-x: auto;
+  white-space: pre;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  font: 12px/1.7 monospace;
+}
+.health-workspace {
+  grid-template-columns: minmax(0, 1fr);
+}
+.health-workspace .instructions {
+  min-width: 0;
+  border-right: 0;
+  border-bottom: 1px solid var(--line);
+}

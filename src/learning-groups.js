@@ -1,4 +1,4 @@
-import { courses, allLessons } from "../curriculum.js?v=java-strings-1";
+import { courses, allLessons } from "../curriculum.js?v=health-output-1";
 
 const definitions = [
   [
@@ -100,8 +100,8 @@ const definitions = [
   [
     "sql-oracle",
     "sql",
-    "Oracle PL/SQL",
-    "Oracle blocks, functions, exceptions and cursor-based processing. Optional Oracle runtime required.",
+    "Oracle PL/SQL & administration",
+    "Oracle coding labs and tablespace, undo and session health reports. Coding requires the optional Oracle runtime; output questions work without it.",
   ],
 ];
 

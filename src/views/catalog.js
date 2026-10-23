@@ -2,14 +2,10 @@ import {
   learningGroups as courses,
   groupForLesson,
 } from "../learning-groups.js";
-import { allLessons } from "../../curriculum.js?v=java-strings-1";
+import { allLessons } from "../../curriculum.js?v=health-output-1";
 import * as store from "../../database.js";
 import { $, esc, icon, shell } from "../ui.js";
-import {
-  completed,
-  count,
-  route,
-} from "../catalog-data.js?v=java-strings-1";
+import { completed, count, route } from "../catalog-data.js?v=health-output-1";
 let filter = "all",
   query = "";
 function catalog() {
@@ -159,6 +155,8 @@ function drawCards() {
         ...c.lessons.flatMap((l) => [
           l.advancedTopic || l.topic || "",
           l.title,
+          l.section || "",
+          l.diagnosticSystem || "",
         ]),
       ]
         .join(" ")

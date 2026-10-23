@@ -17,6 +17,13 @@ function commandTokens(value) {
 }
 function normalizeAnswer(task, answer) {
   const value = answer.trim();
+  if (task.answerFormat === "number") {
+    const numeric =
+      task.answerUnit === "percent" ? value.replace(/\s*%$/, "").trim() : value;
+    if (!/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)$/.test(numeric)) return null;
+    const number = Number(numeric);
+    return Number.isFinite(number) ? "number:" + number : null;
+  }
   if (task.answerFormat === "command") {
     const tokens = commandTokens(value);
     if (!tokens) return null;
