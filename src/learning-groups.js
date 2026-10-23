@@ -1,11 +1,11 @@
-import { courses, allLessons } from "../curriculum.js?v=java-theory-1";
+import { courses, allLessons } from "../curriculum.js?v=java-strings-1";
 
 const definitions = [
   [
     "java-oop",
     "java",
     "OOP & Java language",
-    "Objects, inheritance, interfaces, encapsulation, validation and Java language contracts.",
+    "Objects, strings, inheritance, interfaces, encapsulation, validation and Java language contracts.",
   ],
   [
     "java-collections",

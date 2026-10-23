@@ -180,7 +180,7 @@ and [OpenSSH server configuration](https://www.openssh.com/manual.html).
 
 ## Topic groups
 
-The library organizes all 450 exercises into 17 groups: six Java, six Linux
+The library organizes all 474 exercises into 17 groups: six Java, six Linux
 and five SQL. Each group combines related initial practice, advanced challenge
 pairs and relevant Linux short-answer questions. SOLID has one section per
 principle; patterns have sections such as Singleton, Strategy and Observer.
@@ -206,3 +206,18 @@ case-sensitive. Existing coding exercises are unchanged.
 Run `npm run test:java-theory` to independently compile and execute the 20 output
 examples using the local Java 21 Docker image. Unit tests cover every accepted
 answer, rejection of incorrect input, grouping and stable earlier IDs.
+
+## String coding exercises
+
+24 Java coding exercises form 12 pairs inside **OOP & Java language → Strings &
+text processing**. Topics cover whitespace and case, indexes, slicing, literal
+and regex replacements, split/join, StringBuilder edits, formatting, comparison,
+Unicode boundaries, lines/repeat and combined text-processing missions.
+
+Each task contains minimal starter code, explicit requirements and Java 21
+runtime checks. The final pair combines earlier techniques for canonical tags
+and query-value redaction. Method usage is requested in the contract; runtime
+tests verify behavior rather than proving which equivalent APIs were used.
+
+Run `node --test --test-name-pattern=hands-java-strings: tests/docker.integration.js`
+to check that each starter fails and each reference solution passes.

@@ -1,15 +1,18 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { javaInterview } from "../java-interview.js";
-import { allLessons } from "../curriculum.js?v=java-theory-1";
+import { allLessons } from "../curriculum.js?v=java-strings-1";
 import { groupForLesson } from "../src/learning-groups.js";
 import { checkWrittenAnswer } from "../src/written-answer.js";
 
 test("80 Java theory questions form 40 checked pairs and preserve earlier exercises", () => {
   assert.equal(javaInterview.lessons.length, 80);
   assert.equal(
-    allLessons.filter((lesson) => lesson.course !== "hands-java-interview")
-      .length,
+    allLessons.filter(
+      (lesson) =>
+        lesson.course !== "hands-java-interview" &&
+        lesson.course !== "hands-java-strings",
+    ).length,
     370,
   );
   const questions = allLessons.filter(

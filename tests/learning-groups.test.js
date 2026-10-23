@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { allLessons } from "../curriculum.js?v=java-theory-1";
+import { allLessons } from "../curriculum.js?v=java-strings-1";
 import {
   learningGroups,
   groupForLesson,

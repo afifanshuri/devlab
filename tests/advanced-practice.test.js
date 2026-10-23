@@ -26,7 +26,8 @@ test("advanced concepts have exactly two executable challenges and keep legacy I
       (l) =>
         l.type === "workspace" &&
         !l.advancedTopic &&
-        l.course !== "hands-linux-interview",
+        l.course !== "hands-linux-interview" &&
+        l.course !== "hands-java-strings",
     ).length,
     142,
   );

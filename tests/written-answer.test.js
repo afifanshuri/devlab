@@ -19,7 +19,10 @@ test("Linux interview keeps 13 terminal tasks and gives 19 questions definite an
   assert.equal(questions.length, 32);
   assert.equal(
     allLessons.filter(
-      (l) => l.type === "workspace" && l.course !== "hands-linux-interview",
+      (l) =>
+        l.type === "workspace" &&
+        l.course !== "hands-linux-interview" &&
+        l.course !== "hands-java-strings",
     ).length,
     338,
   );
