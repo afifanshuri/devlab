@@ -1,4 +1,9 @@
-import { courses, allLessons } from "../../curriculum.js?v=linux-answers-2";
+import {
+  groupPicker,
+  groupNavigation,
+  bindGroupPicker,
+} from "./group-navigation.js";
+import { courses, allLessons } from "../../curriculum.js?v=grouped-lessons-1";
 import * as store from "../../database.js";
 import { state } from "../state.js";
 import { $, esc, shell, toast } from "../ui.js";
@@ -6,7 +11,10 @@ import { callRunner, localRunner } from "../services/runner.js";
 import { openCodeEditor } from "../services/code-editor.js";
 import { editKey } from "../editor-input.js";
 import { createTerminalDisplay } from "../services/terminal-display.js";
-import { linuxPane, mountLinux } from "./linux-workspace.js?v=linux-answers-2";
+import {
+  linuxPane,
+  mountLinux,
+} from "./linux-workspace.js?v=grouped-lessons-1";
 import { mountWritten } from "./written-workspace.js";
 import {
   starterFiles,
@@ -50,6 +58,7 @@ export function lesson(courseId, idx) {
       busy: false,
     };
   active = context;
+  store.setting("lastExercise", key).catch(() => {});
   if (task.type === "written") {
     store.setting("lastLab", course.id).catch(() => {});
     return mountWritten(context, course, index, () => active === context);
@@ -61,27 +70,18 @@ export function lesson(courseId, idx) {
   const prerequisites = (task.prerequisites || [])
     .map((id) => allLessons.find((l) => l.id === id))
     .filter(Boolean);
-  const nextStep = allLessons.find(
-    (l) =>
-      l.prerequisites?.includes(key) &&
-      l.track === course.track &&
-      l.engine !== "oracle",
-  );
   shell(
     /* HTML */ `<div class="lab-heading">
         <div>
           <div class="eyebrow">${esc(course.track)} / REAL PRACTICE</div>
           <h1>${esc(task.title)}</h1>
           <p class="sub">
-            Exercise ${index + 1} of ${course.lessons.length} ·
-            ${esc(task.engine.toUpperCase())}
+            Code or terminal exercise · ${esc(task.engine.toUpperCase())}
           </p>
         </div>
-        <a class="secondary" href="#labs">← All labs</a>
+        <a class="secondary" href="#labs">← All groups</a>
       </div>
-      ${task.advancedTopic
-        ? `<label class="advanced-topic-picker">Advanced topic <select id="topic-jump" aria-label="Advanced topic">${course.lessons.map((l, i) => (l.challengeNumber === 1 ? `<option value="${i}" ${Math.floor(index / 2) === Math.floor(i / 2) ? "selected" : ""}>${esc(l.advancedTopic)}</option>` : "")).join("")}</select></label>`
-        : ""}
+      ${groupPicker(key)}
       <div class="lab-grid">
         <section class="instructions">
           <h2>Your mission</h2>
@@ -202,30 +202,9 @@ ${esc(context.files[context.filename])}</textarea
           </section>`}
         </section>
       </div>
-      <div class="task-nav">
-        <a
-          class="secondary"
-          href="${index ? `#lab/${course.id}/${index - 1}` : "#labs"}"
-          >← Previous</a
-        ><a
-          class="secondary"
-          href="${index + 1 < course.lessons.length
-            ? `#lab/${course.id}/${index + 1}`
-            : nextStep
-              ? `#lab/${nextStep.course}/${nextStep.index}`
-              : "#progress"}"
-          >${index + 1 < course.lessons.length
-            ? "Next exercise →"
-            : nextStep
-              ? "Next stage →"
-              : "View progress →"}</a
-        >
-      </div>`,
+      ${groupNavigation(key)}`,
   );
-  if (task.advancedTopic)
-    $("#topic-jump").onchange = (event) => {
-      location.hash = `#lab/${course.id}/${event.target.value}`;
-    };
+  bindGroupPicker();
   const live = () => active === context;
   const help = () => {
     $("#hint").onclick = () =>

@@ -1,3 +1,8 @@
+import {
+  groupPicker,
+  groupNavigation,
+  bindGroupPicker,
+} from "./group-navigation.js";
 import * as store from "../../database.js";
 import { state } from "../state.js";
 import { $, esc, shell, toast } from "../ui.js";
@@ -40,8 +45,9 @@ export function mountWritten(context, course, index, live) {
     );
   };
   shell(`<div class="lab-heading"><div><div class="eyebrow">LINUX / INTERVIEW PRACTICE</div>
-    <h1>${esc(task.title)}</h1><p class="sub">Question ${index + 1} of ${course.lessons.length} · Automatically checked · No Docker required</p></div>
-    <a class="secondary" href="#labs">← All labs</a></div>
+    <h1>${esc(task.title)}</h1><p class="sub">Short answer · Automatically checked · No Docker required</p></div>
+    <a class="secondary" href="#labs">← All groups</a></div>
+    ${groupPicker(key)}
     <div class="lab-grid"><section class="instructions">
       <h2>The scenario</h2><p class="mission-story">${esc(task.mission)}</p>
       <h2>Your question</h2><p class="mission-goal">${esc(task.goal)}</p>
@@ -56,8 +62,8 @@ export function mountWritten(context, course, index, live) {
       <p id="written-status" role="status" aria-live="polite"></p>
       <section id="written-review" aria-label="Answer feedback"></section>
     </section></div>
-    <nav class="task-nav" aria-label="Interview questions"><a class="secondary" href="${index ? `#lab/${course.id}/${index - 1}` : "#labs"}">← Previous</a>
-    <a class="secondary" href="${index + 1 < course.lessons.length ? `#lab/${course.id}/${index + 1}` : "#progress"}">${index + 1 < course.lessons.length ? "Next question →" : "View progress →"}</a></nav>`);
+    ${groupNavigation(key)}`);
+  bindGroupPicker();
   const status = (message) => {
     if (live()) $("#written-status").textContent = message;
   };

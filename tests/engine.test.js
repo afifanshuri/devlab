@@ -100,7 +100,7 @@ test("all screens and practical tasks render without missing references", async 
     );
     assert.equal(
       (nodes.get("#cards").innerHTML.match(/<article/g) || []).length,
-      courses.length,
+      (await import("../src/learning-groups.js")).learningGroups.length,
     );
     for (const [file, names] of [
       ["progress", ["progressPage", "paths"]],
@@ -109,6 +109,22 @@ test("all screens and practical tasks render without missing references", async 
     ]) {
       const m = await import("../src/views/" + file + ".js");
       for (const n of names) m[n]();
+    }
+    const { learningGroup } = await import("../src/views/learning-group.js");
+    for (const group of (await import("../src/learning-groups.js"))
+      .learningGroups) {
+      learningGroup(group.id);
+      assert.ok(
+        nodes
+          .get("#app")
+          .innerHTML.includes((await import("../src/ui.js")).esc(group.title)),
+      );
+      for (const exercise of group.lessons)
+        assert.ok(
+          nodes
+            .get("#app")
+            .innerHTML.includes(`#lab/${exercise.course}/${exercise.index}`),
+        );
     }
     const { lesson } = await import("../src/views/workspace.js");
     for (const l of allLessons) {

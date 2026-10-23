@@ -1,12 +1,23 @@
-import { courses, allLessons } from "../../curriculum.js?v=linux-answers-2";
+import {
+  learningGroups as courses,
+  groupForLesson,
+} from "../learning-groups.js";
+import { allLessons } from "../../curriculum.js?v=grouped-lessons-1";
 import * as store from "../../database.js";
 import { $, esc, icon, shell } from "../ui.js";
-import { completed, count, route } from "../catalog-data.js?v=linux-answers-2";
+import {
+  completed,
+  count,
+  route,
+} from "../catalog-data.js?v=grouped-lessons-1";
 let filter = "all",
   query = "";
 function catalog() {
-  const last = store.setting("lastLab");
-  const c = courses.find((x) => x.id === last) || courses[0];
+  const last = store.setting("lastExercise");
+  const legacy = allLessons.find(
+    (lesson) => lesson.course === store.setting("lastLab"),
+  );
+  const c = groupForLesson.get(last || legacy?.id) || courses[0];
   const done = completed();
   shell(
     /* HTML */ `<section class="hero">
@@ -35,11 +46,11 @@ function catalog() {
           </div>
         </div>
         <div class="stat">
-          <div class="stat-label">LABS MASTERED ${icon("grid")}</div>
+          <div class="stat-label">GROUPS COMPLETED ${icon("grid")}</div>
           <div class="stat-value">
             ${String(
               courses.filter((c) => count(c) === c.lessons.length).length,
-            ).padStart(2, "0")}<small>/ ${courses.length} labs</small>
+            ).padStart(2, "0")}<small>/ ${courses.length} groups</small>
           </div>
         </div>
         <div class="stat">
@@ -64,17 +75,17 @@ function catalog() {
           <h3>${esc(c.title)}</h3>
           <p>
             ${c.lessons.length} exercises
-            <span style="padding:0 8px">·</span>${c.minutes} min
+            <span style="padding:0 8px">·</span>${c.sections.length} sections
             <span style="padding:0 8px">·</span> ${count(c)} completed
           </p>
         </div>
         <a class="primary" href="${route(c)}"
-          >${last ? "Continue learning" : "Start your first lab"}
+          >${last ? "Continue learning" : "Start your first group"}
           ${icon("arrow")}</a
         >
       </div>
       <div class="section-title">
-        <h2>Explore the lab library</h2>
+        <h2>Explore topic groups</h2>
         <span
           ><a class="text-link" href="#paths"
             >Follow a progressive path →</a
@@ -84,7 +95,7 @@ function catalog() {
       <div class="filters">
         <div class="tabs" role="group" aria-label="Filter labs">
           ${[
-            ["all", "All labs"],
+            ["all", "All groups"],
             ["java", "Java"],
             ["linux", "Linux"],
             ["sql", "SQL"],
@@ -110,8 +121,8 @@ function catalog() {
           ><input
             type="search"
             id="search"
-            aria-label="Search labs"
-            placeholder="Search a skill, topic, or lab…"
+            aria-label="Search groups"
+            placeholder="Search a skill, topic, or exercise…"
             value="${esc(query)}"
         /></label>
       </div>
@@ -158,54 +169,58 @@ function drawCards() {
     ? list
         .map((c, i) => {
           const d = count(c);
-          return /* HTML */ `<article class="card ${c.track}">
-            <a
-              href="${route(c)}"
-              class="card-visual ${c.track}"
-              aria-label="Open ${esc(c.title)}"
-              ><span class="visual-tag"
-                >${c.track.toUpperCase()} / LEARNING LAB</span
-              ><span class="track-symbol">${esc(c.symbol)}</span
-              ><span class="visual-number"
-                >LAB ${String(courses.indexOf(c) + 1).padStart(2, "0")}</span
-              ></a
-            >
-            <div class="card-body">
-              <div class="card-heading">
-                <i></i>${c.level.toUpperCase()}
-                <span style="color:#59676f;margin:0 3px">/</span> ${c.track ===
-                  "sql" && c.id !== "sql-queries"
-                  ? "DIALECT PRACTICE"
-                  : c.track.toUpperCase()}
+          return /* HTML */ `${i === 0 || list[i - 1].track !== c.track
+              ? `<h2 class="track-heading">${c.track === "java" ? "Java & Spring" : c.track === "linux" ? "Linux" : "SQL"} <small>${list.filter((group) => group.track === c.track).length} groups</small></h2>`
+              : ""}
+            <article class="card ${c.track}">
+              <a
+                href="#group/${c.id}"
+                class="card-visual ${c.track}"
+                aria-label="Open ${esc(c.title)}"
+                ><span class="visual-tag"
+                  >${c.track.toUpperCase()} / TOPIC GROUP</span
+                ><span class="track-symbol">${esc(c.symbol)}</span
+                ><span class="visual-number"
+                  >GROUP
+                  ${String(courses.indexOf(c) + 1).padStart(2, "0")}</span
+                ></a
+              >
+              <div class="card-body">
+                <div class="card-heading">
+                  <i></i>${c.level.toUpperCase()}
+                  <span style="color:#59676f;margin:0 3px">/</span>
+                  ${c.track === "sql" && c.id !== "sql-queries"
+                    ? "DIALECT PRACTICE"
+                    : c.track.toUpperCase()}
+                </div>
+                <h3><a href="#group/${c.id}">${c.title}</a></h3>
+                <p>${c.description}</p>
+                <div class="chips">
+                  ${c.tags
+                    .map((x) => /* HTML */ `<span class="chip">${x}</span>`)
+                    .join("")}
+                </div>
+                <div class="card-meta">
+                  <span>◷ &nbsp; ${c.sections.length} sections</span
+                  ><span>▤ &nbsp; ${c.lessons.length} exercises</span>
+                </div>
+                <div class="card-footer">
+                  <span
+                    >${d === c.lessons.length
+                      ? "✓ Completed"
+                      : d
+                        ? `${d} of ${c.lessons.length} completed`
+                        : "Ready when you are"}</span
+                  ><a href="#group/${c.id}">View exercises →</a>
+                </div>
+                <div class="progress-line">
+                  <div style="width:${(d / c.lessons.length) * 100}%"></div>
+                </div>
               </div>
-              <h3><a href="${route(c)}">${c.title}</a></h3>
-              <p>${c.description}</p>
-              <div class="chips">
-                ${c.tags
-                  .map((x) => /* HTML */ `<span class="chip">${x}</span>`)
-                  .join("")}
-              </div>
-              <div class="card-meta">
-                <span>◷ &nbsp; ${c.minutes} min</span
-                ><span>▤ &nbsp; ${c.lessons.length} exercises</span>
-              </div>
-              <div class="card-footer">
-                <span
-                  >${d === c.lessons.length
-                    ? "✓ Completed"
-                    : d
-                      ? `${d} of ${c.lessons.length} completed`
-                      : "Ready when you are"}</span
-                ><a href="${route(c)}">${d ? "Continue lab" : "Start lab"} →</a>
-              </div>
-              <div class="progress-line">
-                <div style="width:${(d / c.lessons.length) * 100}%"></div>
-              </div>
-            </div>
-          </article>`;
+            </article>`;
         })
         .join("")
-    : '<div class="empty">No labs match your search. Try a different topic.</div>';
+    : '<div class="empty">No groups match your search. Try a different topic.</div>';
 }
 
 export { catalog };

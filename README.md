@@ -177,3 +177,19 @@ Reference documentation: [Linux filesystem hierarchy](https://man7.org/linux/man
 [Bash manual](https://www.gnu.org/software/bash/manual/bash.html),
 [systemd manuals](https://www.freedesktop.org/software/systemd/man/latest/),
 and [OpenSSH server configuration](https://www.openssh.com/manual.html).
+
+## Topic groups
+
+The library organizes all 370 exercises into 17 groups: six Java, six Linux
+and five SQL. Each group combines related initial practice, advanced challenge
+pairs and relevant Linux short-answer questions. SOLID has one section per
+principle; patterns have sections such as Singleton, Strategy and Observer.
+
+Open a group to browse its sections. The exercise selector and Previous/Next
+buttons follow that group's order, including exercises from different original
+courses. Progress and resume links use the same group structure.
+
+Grouping is a presentation layer. Original exercise IDs, URLs, runner contracts,
+saved drafts and completion records remain unchanged. Oracle stays in an
+explicitly optional group. Group membership and shared topic labels are defined
+in `src/learning-groups.js`.

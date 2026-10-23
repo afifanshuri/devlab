@@ -1,15 +1,23 @@
+import { learningGroup } from "./src/views/learning-group.js?v=grouped-lessons-1";
 import * as store from "./database.js";
 import { state } from "./src/state.js";
 import { $, esc } from "./src/ui.js";
-import { catalog } from "./src/views/catalog.js?v=linux-answers-2";
-import { lesson, flushDraft } from "./src/views/workspace.js?v=linux-answers-2";
-import { progressPage, paths } from "./src/views/progress.js?v=linux-answers-2";
-import { settings } from "./src/views/settings.js?v=linux-answers-2";
-import { playground } from "./src/views/playground.js?v=linux-answers-2";
+import { catalog } from "./src/views/catalog.js?v=grouped-lessons-1";
+import {
+  lesson,
+  flushDraft,
+} from "./src/views/workspace.js?v=grouped-lessons-1";
+import {
+  progressPage,
+  paths,
+} from "./src/views/progress.js?v=grouped-lessons-1";
+import { settings } from "./src/views/settings.js?v=grouped-lessons-1";
+import { playground } from "./src/views/playground.js?v=grouped-lessons-1";
 async function render() {
   await flushDraft();
   const [page, id, index] = location.hash.slice(1).split("/");
   if (page === "lab") lesson(id, index ?? 0);
+  else if (page === "group") learningGroup(id);
   else
     (
       ({ progress: progressPage, paths, settings, playground })[page] || catalog
