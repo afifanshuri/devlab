@@ -165,7 +165,9 @@ test("all screens and practical tasks render without missing references", async 
         assert.ok(!markup.includes('id="code"'));
         assert.ok(!markup.includes('id="terminal-form"'));
       }
-      assert.ok(markup.includes((await import("../src/ui.js")).esc(l.goal)));
+      assert.ok(
+        markup.includes((await import("../src/ui.js")).esc(l.requirements[0])),
+      );
     }
   } finally {
     delete globalThis.document;
@@ -611,7 +613,9 @@ test("roadmap additions skip SQL syntax drills and use real Spring with bounded 
   assert.equal(spring.filter((l) => !l.advancedTopic).length, 9);
   for (const l of spring) {
     assert.equal(l.engine, "java");
-    assert.match(l.verify, /org\.springframework\./);
+    // Advanced injection-only questions can use supplied domain types without
+    // starting a Spring context; the nine foundational labs exercise Spring.
+    if (!l.advancedTopic) assert.match(l.verify, /org\.springframework\./);
     assert.ok(l.goal && l.example && l.mission);
   }
 });

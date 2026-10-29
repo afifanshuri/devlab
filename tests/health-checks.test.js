@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { allLessons, courses } from "../curriculum.js?v=collections-complete-1";
+import { allLessons, courses } from "../curriculum.js?v=focused-missions-1";
 import { checkWrittenAnswer } from "../src/written-answer.js";
 import { groupForLesson } from "../src/learning-groups.js";
 

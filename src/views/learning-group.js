@@ -5,7 +5,7 @@ import {
 } from "../learning-groups.js";
 import { state } from "../state.js";
 import { esc, shell } from "../ui.js";
-import { count, route } from "../catalog-data.js?v=collections-complete-1";
+import { count, route } from "../catalog-data.js?v=focused-missions-1";
 
 export function groupSections(group, next) {
   return group.sections

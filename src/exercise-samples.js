@@ -344,7 +344,7 @@ export const advancedSamples = Object.fromEntries(
 
 export const missionOverrides = {
   "hands-java-advanced:46":
-    "A café sends its orders to the kitchen in batches. Keep the orders in their original sequence and split them into batches no larger than the kitchen’s capacity. Each batch must be an independent, unmodifiable snapshot, so later edits to the original orders cannot change what the kitchen received.",
+    "A café sends its orders to the kitchen in batches. You receive a list of order IDs and a capacity: the maximum number of orders the kitchen can prepare in one batch. For example, orders A, B, C with capacity 2 must become [A, B] and [C]. Keep the original sequence; the last batch may be smaller. Each batch must be a separate saved copy that cannot be edited. Later changes to the original orders must not change what the kitchen received. Capacity is supplied for each call, not fixed at 2.",
   "hands-java-advanced:47":
-    "A café has several order lanes, and one busy lane must not keep the others waiting. Take one order from each nonempty lane in turn until every lane is exhausted. Preserve the order within each lane and leave the original lanes unchanged.",
+    "A café has several order lanes, and one busy lane must not keep the others waiting. You receive a list of order lanes. Take one order from each nonempty lane, visiting lanes in their supplied order, then repeat until every lane is exhausted. For example, lanes [A, B] and [C] must produce [A, C, B]. Preserve the order within each lane and leave the original lanes unchanged.",
 };

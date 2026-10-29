@@ -437,6 +437,27 @@ export class LabSessions {
   async check(s) {
     let command;
     if (s.lesson.engine === "java") {
+      // Existing workspaces can outlive a curriculum update. Refresh trusted
+      // checks without deleting the container or touching the learner's files.
+      if (s.verifySource !== s.lesson.verify) {
+        const target = (s.checks || "/checks") + "/Verify.java";
+        await must(
+          [
+            "exec",
+            "--user",
+            "0",
+            "--workdir",
+            "/",
+            "-i",
+            s.name,
+            "sh",
+            "-c",
+            `chmod u+w ${target} && cat > ${target} && chmod 444 ${target}`,
+          ],
+          { input: s.lesson.verify },
+        );
+        s.verifySource = s.lesson.verify;
+      }
       const files = [
         s.lesson.filename,
         ...Object.keys(s.lesson.editableFiles || {}),

@@ -1,3 +1,4 @@
+import { scenarioFor } from "./advanced-java-scenarios.js";
 const q = (title, signature, body, tests, goal, mission, example) => ({
   title,
   signature,
@@ -48,8 +49,8 @@ export const javaTopics = [
       "public static Map<String,String> environments(List<String> tenants, Function<String,String> load)",
       `if(tenants==null||load==null||tenants.stream().anyMatch(t->t==null||t.isBlank()))throw new IllegalArgumentException();Map<String,String> out=new LinkedHashMap<>();for(String t:tenants){String key=t.trim();if(!out.containsKey(key))out.put(key,Objects.requireNonNull(load.apply(key)));}return Collections.unmodifiableMap(out);`,
       `AtomicInteger n=new AtomicInteger();Map<String,String> a=Challenge.environments(List.of(" a ","b","a"),k->{n.incrementAndGet();return k+"-prod";});expect(n.get()==2&&a.get("a").equals("a-prod"));expect(Challenge.environments(List.of("a"),k->"demo").get("a").equals("demo"));`,
-      "Implement environments: trim nonblank tenant IDs, load once per unique tenant in first-seen order, and return an unmodifiable map. Calls must not share tenant values or mutate the singleton. Reject null lists/loaders/items and blank IDs; null loader results throw NullPointerException.",
-      "The singleton is shared, but tenant configuration is not. Produce independent deployment maps without leaking yesterday's tenant values into a new request.",
+      "Implement environments: trim nonblank tenant IDs, load once per unique tenant in first-seen order, and return an unmodifiable map. Calls must not share tenant values. Reject null lists/loaders/items and blank IDs; null loader results throw NullPointerException.",
+      "A shared service handles several tenants. Produce a separate deployment map for each request, loading each unique tenant once without leaking earlier values into a new request.",
       "[a,b,a] → loader invoked twice; a later call loads afresh",
     ),
   ),
@@ -173,7 +174,7 @@ function add(base, name, a, b) {
       body,
       tests,
       goal,
-      `The workshop is shipping a production change: ${title.toLowerCase()}. Preserve the earlier ${name} contract while making this change safe for retries, invalid input and independent callers.`,
+      scenarioFor(name),
       "Example assertion:\n" +
         tests.slice(0, tests.indexOf(");", tests.indexOf("expect(")) + 2),
     );
@@ -503,7 +504,7 @@ add(
     "public static List<String> exclusive(String[] first,String[] second)",
     `Set<String> a=new Reminders().unique(first),b=new Reminders().unique(second);List<String> out=new ArrayList<>();for(String x:a)if(!b.contains(x))out.add(x);for(String x:b)if(!a.contains(x))out.add(x);return List.copyOf(out);`,
     `expect(Challenge.exclusive(new String[]{"b","a","b"},new String[]{"a","c"}).equals(List.of("B","C")));`,
-    "Implement exclusive: normalized symmetric difference, first-only IDs followed by second-only IDs in their respective encounter orders. Reuse the prerequisite's validation/normalization rules.",
+    "Implement exclusive: normalized symmetric difference, first-only IDs followed by second-only IDs in their respective encounter orders. Normalize with the supplied Reminders.unique: trim IDs, uppercase using Locale.ROOT, reject null/blank IDs and keep first-seen order.",
     "Find audience drift in both directions",
   ],
 );
@@ -738,7 +739,7 @@ add(
     "public static List<Integer> classify(List<CreateController.CreateRequest> requests)",
     `if(requests==null||requests.stream().anyMatch(Objects::isNull))throw new IllegalArgumentException();List<Integer> out=new ArrayList<>();for(var r:requests)out.add(violations(r.name(),r.quantity()));return List.copyOf(out);`,
     `expect(Challenge.classify(List.of(new CreateController.CreateRequest("a",1),new CreateController.CreateRequest("",0))).equals(List.of(0,2)));`,
-    "Implement classify: validate nonnull request objects with violations, preserve ordering and return immutable counts. Keep the API's exception advice behavior from the prerequisite working.",
+    "Implement classify: validate nonnull request objects with violations, preserve ordering and return immutable counts. Use the provided CreateRequest constraints; changing HTTP exception advice is not part of this task.",
     "Preflight a bulk request import consistently",
   ],
 );
@@ -947,14 +948,14 @@ add(
   [
     "public static String createWorkstations(int count)",
     `if(count<0||count>100)throw new IllegalArgumentException();int before=LifecycleLog.events.length();for(int i=0;i<count;i++)new Workstation();return LifecycleLog.events.substring(before);`,
-    `expect(Challenge.createWorkstations(2).equals("ICIC"));expect(Challenge.createWorkstations(0).isEmpty());rejects(()->Challenge.createWorkstations(-1));`,
-    "Implement createWorkstations: after the prerequisite has initialized the class, create count additional objects and return only the newly appended lifecycle events. Never clear the shared log or rerun static initialization. Accept 0..100.",
+    `Class.forName("Workstation");expect(Challenge.createWorkstations(2).equals("ICIC"));expect(Challenge.createWorkstations(0).isEmpty());rejects(()->Challenge.createWorkstations(-1));`,
+    "Implement createWorkstations: after the checker has loaded the provided Workstation class, create count additional objects and return only the newly appended lifecycle events. Never clear the shared log or rerun static initialization. Accept 0..100.",
     "Observe initialization without erasing earlier evidence",
   ],
   [
     "public static List<String> lifecycleBatches(int[] counts)",
     `if(counts==null)throw new IllegalArgumentException();for(int n:counts)if(n<0||n>100)throw new IllegalArgumentException();List<String> out=new ArrayList<>();for(int n:counts)out.add(createWorkstations(n));return List.copyOf(out);`,
-    `int before=LifecycleLog.events.length();rejects(()->Challenge.lifecycleBatches(new int[]{1,-1}));expect(LifecycleLog.events.length()==before);expect(Challenge.lifecycleBatches(new int[]{1,0,2}).equals(List.of("IC","","ICIC")));`,
+    `Class.forName("Workstation");int before=LifecycleLog.events.length();rejects(()->Challenge.lifecycleBatches(new int[]{1,-1}));expect(LifecycleLog.events.length()==before);expect(Challenge.lifecycleBatches(new int[]{1,0,2}).equals(List.of("IC","","ICIC")));`,
     "Implement lifecycleBatches: prevalidate every count before constructing anything, then return one event suffix per batch using createWorkstations. Invalid batches must leave the log unchanged.",
     "Keep constructor side effects out of rejected batches",
   ],
@@ -984,7 +985,7 @@ add(
     "public static String keyed(Map<String,String> cache,String id,Supplier<String> action)",
     `return Main.executeOnce(cache,id,action);`,
     `Map<String,String> advCache=new HashMap<>();AtomicInteger advN=new AtomicInteger();Set<String> advResults=ConcurrentHashMap.newKeySet();java.util.stream.IntStream.range(0,100).parallel().forEach(i->advResults.add(Challenge.keyed(advCache," req ",()->"R"+advN.incrementAndGet())));expect(advResults.equals(Set.of("R1"))&&advN.get()==1);`,
-    "Implement keyed using the prerequisite's atomic idempotency contract. Concurrent normalized duplicate IDs must execute the supplier once and all return the same result; failed suppliers must remain retryable.",
+    "Implement keyed by delegating to the provided Main.executeOnce; IDs are trimmed and uppercased with Locale.ROOT, and null/blank IDs are rejected. Concurrent normalized duplicate IDs must execute the supplier once and all return the same result; failed suppliers must remain retryable.",
     "Publish one result to concurrent duplicate requests",
   ],
   [
@@ -1039,7 +1040,7 @@ add(
     "public static List<String> normalizeAll(List<String> ids)",
     `if(ids==null)throw new IllegalArgumentException();List<String> out=new ArrayList<>();for(String id:ids)out.add(Main.normalize(id));return List.copyOf(out);`,
     `Locale advOld=Locale.getDefault();try{Locale.setDefault(Locale.forLanguageTag("tr-TR"));expect(Challenge.normalizeAll(List.of(" incident ","i")).equals(List.of("INCIDENT","I")));}finally{Locale.setDefault(advOld);}rejects(()->Challenge.normalizeAll(Arrays.asList("a",null)));`,
-    "Implement normalizeAll using the prerequisite's locale-independent identifier contract. Return immutable normalized IDs preserving order and multiplicity; reject null lists/items and blanks.",
+    "Implement normalizeAll by calling the provided Main.normalize: trim outer whitespace and uppercase using Locale.ROOT. Return immutable normalized IDs preserving order and multiplicity; reject null lists/items and blanks.",
     "Normalize imported IDs regardless of host locale",
   ],
   [

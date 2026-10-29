@@ -12,7 +12,7 @@
     "vendor:terminal": "node scripts/vendor-terminal.mjs",
     "format": "prettier --write app.js content.js curriculum.js exercise-factories.js progression.js patterns.js roadmap.js missions.js design-practice.js ops-practice.js sql-roadmap.js linux-roadmap.js spring-practice.js database.js server.mjs sql-worker.js runner src scripts tests index.html styles.css",
     "setup:labs": "node runner/setup.mjs",
-    "test:docker": "node --test --test-concurrency=1 tests/docker.integration.js tests/pools.integration.js tests/http.integration.js tests/terminal.integration.js tests/interactive.integration.js tests/answer-files.integration.js",
+    "test:docker": "node --test --test-concurrency=1 tests/docker.integration.js tests/pools.integration.js tests/http.integration.js tests/terminal.integration.js tests/interactive.integration.js tests/answer-files.integration.js tests/focused-missions.integration.js",
     "vendor:editor": "node scripts/vendor-editor.mjs"
   },
   "devDependencies": {

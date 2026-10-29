@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { javaInterview } from "../java-interview.js";
-import { allLessons } from "../curriculum.js?v=collections-complete-1";
+import { allLessons } from "../curriculum.js?v=focused-missions-1";
 import { groupForLesson } from "../src/learning-groups.js";
 import { checkWrittenAnswer } from "../src/written-answer.js";
 

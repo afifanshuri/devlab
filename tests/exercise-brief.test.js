@@ -60,7 +60,7 @@ test("the shown batching mission combines a cafe scenario with a concrete outcom
   const brief = exerciseBrief(task, task.id);
   assert.match(brief.mission, /café/);
   assert.match(brief.mission, /original sequence/);
-  assert.match(brief.mission, /independent, unmodifiable/);
+  assert.match(brief.mission, /separate saved copy that cannot be edited/);
   assert.match(brief.sample.input, /capacity: 2/);
   assert.match(brief.sample.output, /\[\["a", "b"\], \["c"\]\]/);
   assert.ok(

@@ -1,4 +1,4 @@
-import { courses, allLessons } from "../curriculum.js?v=collections-complete-1";
+import { courses, allLessons } from "../curriculum.js?v=focused-missions-1";
 
 const definitions = [
   [
@@ -264,7 +264,7 @@ function groupId(lesson) {
     id = lesson.track + "-" + splitCourses[source][lesson.index];
   if (lesson.topic === "Packages and scheduled jobs")
     id = lesson.questionNumber === 1 ? "linux-network" : "linux-shell";
-  // Advanced Java challenges explicitly identify the earlier component they
+  // Advanced Java challenges explicitly identify the component they
   // extend. Follow that relation instead of duplicating a second topic map.
   if (!id && source === "java-advanced") {
     const base = byId.get(lesson.prerequisites[0]);

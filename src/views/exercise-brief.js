@@ -1,15 +1,20 @@
 import { esc } from "../ui.js";
-import { advancedSamples, missionOverrides } from "../exercise-samples.js";
+import {
+  advancedSamples,
+  missionOverrides,
+} from "../exercise-samples.js?v=focused-missions-1";
 
 export function exerciseBrief(task, key) {
-  const story = task.mission || "";
+  const story = missionOverrides[key] || task.mission || "";
   const goal = task.goal || task.task;
   const outcome = goal.replace(/^Implement\s+[\w.]+(?:\([^)]*\))?\s*:\s*/, "");
   const mission =
-    missionOverrides[key] ||
-    (story.includes(goal)
+    task.plainMission ||
+    (task.engine === "java" && task.type !== "written"
       ? story
-      : `${story} ${outcome.charAt(0).toUpperCase() + outcome.slice(1)}`.trim());
+      : story.includes(goal)
+        ? story
+        : `${story} ${outcome.charAt(0).toUpperCase() + outcome.slice(1)}`.trim());
   let sample = advancedSamples[key] || task.sample;
   if (!sample && task.type === "written") {
     const format = {
@@ -51,7 +56,7 @@ export function exerciseBrief(task, key) {
           };
   }
   return {
-    mission,
+    mission: [mission, task.workspaceGuide].filter(Boolean).join("\n\n"),
     sample,
     learn: task.learn || [],
     requirements: task.requirements || [goal],
@@ -60,7 +65,7 @@ export function exerciseBrief(task, key) {
 
 export function renderExerciseBrief(task, key) {
   const brief = exerciseBrief(task, key);
-  return `<h2>Mission</h2><p class="mission-story">${esc(brief.mission)}</p>
+  return `<h2>Mission</h2><p class="mission-story">${brief.mission.split("\n\n").map(esc).join('</p><p class="mission-story">')}</p>
     <h2>Sample input and output</h2>
     ${task.outputSource ? `<p class="muted">${esc(task.outputSource)}</p>` : ""}
     <div class="mission-example"><strong>Input</strong><pre ${task.healthCheck ? 'class="diagnostic-output" aria-label="Sample health-check output"' : ""}>${esc(brief.sample.input)}</pre>

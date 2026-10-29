@@ -1,6 +1,7 @@
 import { collectionMethods } from "./collection-methods.js";
+import { applyPlainSqlMissions } from "./plain-sql-missions.js";
 import { algorithmPractice } from "./algorithm-practice.js";
-import { advancedCourses as pairedAdvancedCourses } from "./advanced-practice.js";
+import { advancedCourses as pairedAdvancedCourses } from "./advanced-practice.js?v=focused-missions-1";
 import { linuxInterview } from "./linux-interview.js";
 import { javaInterview } from "./java-interview.js";
 import { javaStrings } from "./java-strings.js";
@@ -278,6 +279,7 @@ for (const track of ["java", "linux", "sql"])
       c.stage = i + 1;
     });
 applyMissions(courses);
+applyPlainSqlMissions(courses);
 
 // Prerequisites guide the learning order without locking users out of practice.
 for (const track of ["java", "linux", "sql"]) {

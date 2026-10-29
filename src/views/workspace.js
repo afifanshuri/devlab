@@ -4,7 +4,7 @@ import {
   groupNavigation,
   bindGroupPicker,
 } from "./group-navigation.js";
-import { courses } from "../../curriculum.js?v=collections-complete-1";
+import { courses } from "../../curriculum.js?v=focused-missions-1";
 import * as store from "../../database.js";
 import { state } from "../state.js";
 import { $, esc, shell, toast } from "../ui.js";
@@ -12,7 +12,7 @@ import { callRunner, localRunner } from "../services/runner.js";
 import { openCodeEditor } from "../services/code-editor.js";
 import { editKey } from "../editor-input.js";
 import { createTerminalDisplay } from "../services/terminal-display.js";
-import { linuxPane, mountLinux } from "./linux-workspace.js?v=collections-complete-1";
+import { linuxPane, mountLinux } from "./linux-workspace.js?v=focused-missions-1";
 import { mountWritten } from "./written-workspace.js";
 import {
   starterFiles,
