@@ -239,3 +239,14 @@ equivalent decimal forms; percentage questions also accept an optional % suffix.
 Other units must follow the prompt. Existing answer formats and exercises remain
 unchanged. These snapshots teach interpretation; they do not inspect the host or
 claim a single metric proves a particular fault.
+
+## Exercise brief
+
+The instructions panel contains four sections only: Mission (scenario and goal
+together), Sample input and output, What I’m learning, and Acceptance criteria.
+Advanced Java examples describe concrete inputs/results rather than displaying
+test assertions. The original runner contracts and progress IDs are unchanged.
+
+Hints, reference solutions, completion and runtime information live beside the
+workspace controls. Short-answer questions show the sample input and required
+output format without revealing the correct answer before checking/reveal.

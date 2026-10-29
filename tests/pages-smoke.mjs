@@ -30,6 +30,8 @@ const files = [
   "linux-roadmap.js",
   "spring-practice.js",
   "src/views/workspace.js",
+  "src/views/exercise-brief.js",
+  "src/exercise-samples.js",
   "src/editor-input.js",
   "src/terminal-prompt.js",
   "src/views/linux-workspace.js",

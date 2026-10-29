@@ -1,9 +1,10 @@
+import { renderExerciseBrief } from "./exercise-brief.js";
 import {
   groupPicker,
   groupNavigation,
   bindGroupPicker,
 } from "./group-navigation.js";
-import { courses, allLessons } from "../../curriculum.js?v=health-output-1";
+import { courses } from "../../curriculum.js?v=mission-brief-1";
 import * as store from "../../database.js";
 import { state } from "../state.js";
 import { $, esc, shell, toast } from "../ui.js";
@@ -11,10 +12,7 @@ import { callRunner, localRunner } from "../services/runner.js";
 import { openCodeEditor } from "../services/code-editor.js";
 import { editKey } from "../editor-input.js";
 import { createTerminalDisplay } from "../services/terminal-display.js";
-import {
-  linuxPane,
-  mountLinux,
-} from "./linux-workspace.js?v=health-output-1";
+import { linuxPane, mountLinux } from "./linux-workspace.js?v=mission-brief-1";
 import { mountWritten } from "./written-workspace.js";
 import {
   starterFiles,
@@ -67,9 +65,6 @@ export function lesson(courseId, idx) {
   store.setting("lastLab", course.id).catch(() => {});
   const available = localRunner();
   const interactive = task.engine === "linux";
-  const prerequisites = (task.prerequisites || [])
-    .map((id) => allLessons.find((l) => l.id === id))
-    .filter(Boolean);
   shell(
     /* HTML */ `<div class="lab-heading">
         <div>
@@ -84,58 +79,7 @@ export function lesson(courseId, idx) {
       ${groupPicker(key)}
       <div class="lab-grid">
         <section class="instructions">
-          <h2>Your mission</h2>
-          <p class="mission-story">${esc(task.mission || task.task)}</p>
-          <h2>Your goal</h2>
-          <p class="mission-goal">${esc(task.goal || task.task)}</p>
-          ${task.example
-            ? `<div class="mission-example"><strong>Example result</strong><pre>${esc(task.example)}</pre></div>`
-            : ""}
-          <h2>Acceptance criteria</h2>
-          <ul class="mission-criteria">
-            ${(task.requirements || [task.task])
-              .map((item) => `<li>${esc(item)}</li>`)
-              .join("")}
-          </ul>
-          ${task.interview
-            ? `<h2>Interview discussion</h2><p>${esc(task.interview)}</p>`
-            : ""}
-          <details class="concept-note">
-            <summary>Explore the concept</summary>
-            <p>${esc(task.concept)}</p>
-          </details>
-          <div class="learning-scaffold">
-            <h3>What you’ll practise</h3>
-            <ul>
-              ${(task.learn || [])
-                .map((item) => `<li>${esc(item)}</li>`)
-                .join("")}
-            </ul>
-            ${prerequisites.length
-              ? `<h3>Builds on</h3>${prerequisites.map((l) => `<a class="text-link" href="#lab/${l.course}/${l.index}">${state.records[l.id]?.completed ? "✓ " : ""}${esc(l.title)}</a>`).join("<br>")}`
-              : "<p>Your starting point in this track.</p>"}
-            ${task.reuseNote ? `<p>${esc(task.reuseNote)}</p>` : ""}
-          </div>
-          <p>
-            ${interactive
-              ? "The lab connects automatically. Complete the mission in Bash; use vim to edit scripts or configuration files. Run any required scripts yourself, then select Check answer to verify the resulting files and state."
-              : "The lab connects automatically. Write your answer, then select Check answer to compile, run, and validate it against internal test cases."}
-          </p>
-          <button class="secondary" id="hint">Get a hint</button>
-          <button class="text-link" id="solution">Reference solution</button>
-          <div id="help-content"></div>
-          <div id="completion">
-            ${state.records[key]?.completed
-              ? '<div class="complete-banner">✓ Completed</div>'
-              : ""}
-          </div>
-          <div class="hint">
-            ${available
-              ? interactive
-                ? "Interactive Linux container · vim included · no host folders mounted · network disabled · expires after one idle hour."
-                : "Local exercise runtime · no host folders mounted · network disabled · commands have a 10-second limit (Spring checks: 45 seconds)."
-              : "To execute this lab: start Docker Desktop, run npm run setup:labs and npm start in the project folder, then open http://127.0.0.1:5173. GitHub Pages hosts the catalog; it cannot execute processes."}
-          </div>
+          ${renderExerciseBrief(task, key)}
         </section>
         <section
           class="workspace exercise-workspace ${interactive
@@ -200,6 +144,23 @@ ${esc(context.files[context.filename])}</textarea
               Write and submit your answer in the code editor above.
             </div>
           </section>`}
+          <div class="workspace-help">
+            <button class="secondary" id="hint">Get a hint</button>
+            <button class="text-link" id="solution">Reference solution</button>
+            <div id="help-content"></div>
+            <div id="completion">
+              ${state.records[key]?.completed
+                ? '<div class="complete-banner">✓ Completed</div>'
+                : ""}
+            </div>
+            <div class="hint">
+              ${available
+                ? interactive
+                  ? "Interactive Linux container · vim included · no host folders mounted · network disabled · expires after one idle hour."
+                  : "Local exercise runtime · no host folders mounted · network disabled · commands have a 10-second limit (Spring checks: 45 seconds)."
+                : "To execute this lab: start Docker Desktop, run npm run setup:labs and npm start in the project folder, then open http://127.0.0.1:5173. GitHub Pages hosts the catalog; it cannot execute processes."}
+            </div>
+          </div>
         </section>
       </div>
       ${groupNavigation(key)}`,

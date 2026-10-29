@@ -139,6 +139,18 @@ test("all screens and practical tasks render without missing references", async 
       );
       const markup = nodes.get("#app").innerHTML;
       assert.ok(!markup.includes("data-choice"));
+      const instructions = markup.match(
+        /<section class="instructions">([\s\S]*?)<\/section>/,
+      )[1];
+      assert.deepEqual(
+        [...instructions.matchAll(/<h2>(.*?)<\/h2>/g)].map((match) => match[1]),
+        [
+          "Mission",
+          "Sample input and output",
+          "What I’m learning",
+          "Acceptance criteria",
+        ],
+      );
       if (l.type === "written") {
         assert.ok(markup.includes('id="written-answer"'));
         assert.ok(!markup.includes('id="interactive-terminal"'));
@@ -151,10 +163,6 @@ test("all screens and practical tasks render without missing references", async 
         assert.ok(!markup.includes('id="code"'));
         assert.ok(!markup.includes('id="terminal-form"'));
       }
-      assert.ok(markup.indexOf("Your mission") < markup.indexOf("Your goal"));
-      assert.ok(
-        markup.indexOf("Your goal") < markup.indexOf("Acceptance criteria"),
-      );
       assert.ok(markup.includes((await import("../src/ui.js")).esc(l.goal)));
     }
   } finally {

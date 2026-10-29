@@ -1089,25 +1089,6 @@ dialog h2 {
   }
 }
 
-.learning-scaffold {
-  border-left: 2px solid #536f7d;
-  padding: 1px 0 1px 14px;
-  margin: 22px 0;
-}
-.learning-scaffold h3 {
-  font-size: 11px;
-  color: #c4d6e0;
-  font-weight: 600;
-  margin: 12px 0 8px;
-}
-.learning-scaffold ul {
-  padding-left: 17px;
-  margin: 0 0 15px;
-}
-.learning-scaffold li,
-.learning-scaffold p {
-  font-size: 11px;
-}
 .learning-plan-intro {
   border-color: #43533c;
 }
@@ -1236,23 +1217,6 @@ dialog h2 {
   margin: 0 0 9px;
   overflow-wrap: anywhere;
 }
-.concept-note {
-  margin: 20px 0;
-  border-top: 1px solid var(--line);
-  padding-top: 12px;
-}
-.concept-note summary {
-  cursor: pointer;
-  font-size: 12px;
-  font-weight: 600;
-}
-
-.mission-goal {
-  font-weight: 600;
-  color: #e9ebed;
-  line-height: 1.7;
-}
-
 .output-terminal {
   height: 260px;
   padding: 12px;
@@ -1345,16 +1309,6 @@ dialog h2 {
   border: 1px solid var(--line);
   border-radius: 6px;
 }
-.theory-code {
-  overflow-x: auto;
-  white-space: pre-wrap;
-  overflow-wrap: anywhere;
-  padding: 16px;
-  border: 1px solid var(--line);
-  border-radius: 6px;
-  line-height: 1.65;
-  font-size: 13px;
-}
 .diagnostic-output {
   max-width: 100%;
   overflow-x: auto;
@@ -1371,4 +1325,24 @@ dialog h2 {
   min-width: 0;
   border-right: 0;
   border-bottom: 1px solid var(--line);
+}
+
+.workspace-help {
+  padding: 16px;
+  border-top: 1px solid var(--line);
+}
+.workspace-help > button {
+  margin-right: 12px;
+}
+.workspace-help pre {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.mission-example strong {
+  display: block;
+  margin-top: 10px;
+}
+.mission-example pre.diagnostic-output {
+  white-space: pre;
+  overflow-wrap: normal;
 }
