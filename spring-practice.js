@@ -1,5 +1,5 @@
 import { javaProject, make } from "./exercise-factories.js";
-const todo = '/* TODO */';
+const todo = "/* TODO */";
 function spring(
   title,
   topic,
@@ -53,7 +53,7 @@ export const springCourses = [
       spring(
         "Wire the checkout, not the implementation",
         "IoC and constructor injection",
-        "A repair shop has two payment providers. Checkout must accept whichever provider is configured, while tests can replace it with a fake. Let Spring assemble the objects instead of hiding a new provider inside checkout.",
+        "A repair shop can use different payment providers. Build checkout so it uses the provider selected in the shop's configuration. Switching providers must not require changing checkout. Tests must also be able to supply a fake provider, so they can check payment behavior without making a real charge. Refuse amounts of zero or less; otherwise return the provider's receipt unchanged.",
         "Implement Checkout with constructor injection of PaymentGateway and pay(int cents). Reject nonpositive amounts with IllegalArgumentException and otherwise return gateway.charge(cents). Implement ShopConfig as a Spring @Configuration with gateway() and checkout(PaymentGateway) @Bean methods; the default gateway returns paid:<cents>.",
         "pay(250) → paid:250; a test gateway returning fake:250 must be used unchanged; pay(0) is rejected.",
         {
@@ -75,7 +75,7 @@ export const springCourses = [
       spring(
         "Separate shared configuration from request state",
         "Bean scopes",
-        "A shared counter helps operations track the service, but each draft booking needs fresh state. Accidentally sharing the draft lets one customer's changes affect another customer.",
+        "The booking service needs one shared counter, starting at zero, and a separate empty draft for each new booking. If one worker increases the counter, other workers must see the new count. If one customer edits their draft, another customer's draft must remain empty. Configure the service to provide both kinds of object with these different sharing rules.",
         "Annotate ScopeConfig as configuration. Register counter() as a singleton AtomicInteger starting at zero, and draft() as a prototype StringBuilder starting empty. Use bean names counter and draft; repeated counter lookups share changes while draft lookups are independent.",
         "Increment one counter → next lookup sees 1; append to one draft → another draft remains empty.",
         {
@@ -89,7 +89,7 @@ export const springCourses = [
       spring(
         "Move deployment settings out of code",
         "Spring Boot configuration properties",
-        "The same booking service runs in a demo shop and a live shop. Operations needs to change the shop name and booking limit without editing Java or recompiling the application.",
+        "The same booking service runs at several shops. Give it a shop name and a daily booking limit supplied through its settings, so staff can change them without editing or rebuilding the program. For example, one shop may use North and 12 bookings, while another uses South and 3. Read whichever settings were supplied rather than fixing these example values in the code.",
         "Turn ShopSettings into a @ConfigurationProperties record with prefix shop, fields name and dailyLimit. Implement SettingsConfig to enable that record. Spring must bind shop.name and shop.daily-limit from the environment; do not hard-code their values.",
         "shop.name=North and shop.daily-limit=12 → ShopSettings(name=North, dailyLimit=12); another context can bind South and 3.",
         {
@@ -107,7 +107,7 @@ export const springCourses = [
       spring(
         "Choose the right notification adapter",
         "Profiles and bean selection",
-        "Demo bookings must never send a live notification. Production needs a different adapter, selected by deployment configuration rather than an if statement scattered through the business code.",
+        "The service has a demo environment and a production environment. Configure demo to choose console delivery and production to choose email delivery. The active environment must decide which one is available, without changing the booking code. If neither environment is selected, provide no delivery choice. This exercise selects the delivery method; it does not send a real email.",
         "Implement ProfileConfig with one String bean named delivery under profile demo returning console, and one under profile production returning email. With either profile active, Spring must expose exactly one String bean; with neither active, none.",
         "demo → console; production → email; no profile → no delivery bean.",
         {
@@ -138,7 +138,7 @@ export const springCourses = [
       spring(
         "Expose a booking status API",
         "Spring MVC and MockMvc testing",
-        "The customer app wants a small status endpoint before the booking service is fully built. The URL's booking ID must appear in the JSON response, so support can trace the right request.",
+        "A customer app needs to ask for a booking's status. When it requests a positive booking ID, return that same ID with the status booked. For example, requesting booking 7 returns ID 7 and booked. Reject zero or negative IDs instead of reporting a successful booking. Build the small web endpoint that provides this response.",
         "Implement a @RestController BookingController with GET /bookings/{id}. For positive long IDs return JSON with id equal to the path ID and status booked. For zero or negative IDs return HTTP 400. Implement Status as a nested public record with fields long id and String status.",
         'GET /bookings/7 → 200 with {"id":7,"status":"booked"}; /bookings/0 → 400; unknown routes → 404.',
         {
@@ -152,7 +152,7 @@ export const springCourses = [
       spring(
         "Reject bad requests consistently",
         "Bean Validation and exception advice",
-        "An API client occasionally sends empty customer names or zero quantities. The booking API should reject these with a predictable response instead of creating bad records or exposing a stack trace.",
+        "The booking app sends a customer's name and a requested quantity. Accept a request only when the name contains some text and the quantity is at least one, then return those details as a newly created booking. Reject missing or blank names and quantities below one with the agreed invalid-request response, rather than creating a bad record or showing internal error details.",
         "Implement POST /bookings in CreateController. Accept JSON CreateRequest(name, quantity): name must be nonblank and quantity at least 1 using Jakarta Bean Validation with @Valid. Valid requests return HTTP 201 and JSON name and quantity. Implement ApiErrors as @RestControllerAdvice handling MethodArgumentNotValidException with HTTP 400 and JSON error=invalid_request.",
         '{"name":"Aina","quantity":2} → 201; blank name or quantity 0 → 400 {"error":"invalid_request"}.',
         {
@@ -170,7 +170,7 @@ export const springCourses = [
       spring(
         "Persist bookings through a repository",
         "Spring Data JPA and Boot auto-configuration",
-        "The shop loses its booking list whenever the service restarts. Introduce a persistence boundary and let Spring Data provide the repository implementation. The lab uses an isolated H2 database; production would configure its own database.",
+        "The shop wants a database-backed ticket register instead of keeping tickets only in a Java list. Each saved ticket needs its own automatically assigned ID and the customer's name. Let staff save tickets and retrieve only one customer's tickets in ascending ID order. The lab supplies a temporary database for this exercise; you do not need to connect a production database.",
         "Implement lab.Ticket as a JPA entity with generated Long id, non-null String customer, a protected no-arg constructor, public Ticket(String customer), getId() and getCustomer(). Implement TicketRepository extending JpaRepository<Ticket,Long> with List<Ticket> findByCustomerOrderByIdAsc(String customer). Keep the supplied LabApplication fixture unchanged.",
         "Save Aina, Ben, Aina → three generated IDs; findByCustomerOrderByIdAsc(Aina) returns only Aina's two tickets in ID order.",
         {
@@ -194,7 +194,7 @@ export const springCourses = [
       spring(
         "Roll back an incomplete transfer",
         "Declarative transactions and proxies",
-        "A wallet transfer updates two balances. An error after the debit must never leave money missing. Let Spring's transaction boundary coordinate both database writes.",
+        "A customer transfers money between two accounts. Subtract the amount from the sender and add it to the recipient as one complete transfer. If either account is missing, the sender lacks funds, or an error occurs after subtraction, leave both balances unchanged. For example, transferring 30 from balances 100 and 20 produces 70 and 50; a failed attempt must preserve the starting balances.",
         "Implement TransferService as a Spring @Service with constructor JdbcTemplate. Its public @Transactional transfer(long from,long to,int amount,boolean failAfterDebit) rejects nonpositive amounts; subtracts amount from accounts.balance only if sufficient funds; adds it to the existing destination; throws IllegalArgumentException for missing/insufficient accounts or when failAfterDebit is true. Any failure must roll back both writes. The fixture provides accounts(id,balance) and transaction infrastructure.",
         "Balances 100 and 20: transfer 30 → 70 and 50; forced failure, missing recipient or insufficient funds leave both balances unchanged.",
         {
@@ -209,7 +209,7 @@ export const springCourses = [
       spring(
         "Protect an administrative operation",
         "Spring Security method authorization",
-        "Customer support may read operational summaries, but only an administrator may purge old reports. Protect the service itself so an alternate controller cannot accidentally bypass the rule.",
+        "Only an administrator may clear old reports. Allow an administrator to run that operation and receive the confirmation purged, but deny ordinary users and people who are not signed in. Keep the operation protected even when another part of the application calls it directly, rather than relying only on a check in a web page.",
         "Implement SecurityConfig with @Configuration and @EnableMethodSecurity. Implement AdminReports as a Spring-managed bean with public String purge() protected by @PreAuthorize(\"hasRole('ADMIN')\") and returning purged. Anonymous callers and USER role must be denied; ADMIN must succeed. The fixture registers AdminReports using @Import.",
         "ROLE_USER → denied; ROLE_ADMIN → purged; no authentication → denied. The same bean remains protected after the security context changes.",
         {

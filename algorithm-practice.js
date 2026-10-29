@@ -14,7 +14,7 @@ export const algorithmTopics = [
     "O(log n) search; input ordering is a stated precondition.",
     q(
       "Locate the full run of duplicate values",
-      "A sorted incident index can contain the same code many times. Find the matching half-open range without scanning every match.",
+      "An incident list is sorted and may repeat the requested code. Return where that code's run starts and where it stops, excluding the stopping position. Positions start at zero: code 2 in [1, 2, 2, 5] gives [1, 3]. If the code is missing, return its insertion position twice. Leave the list unchanged.",
       "Implement equalRange(int[] sorted, int target) using two binary searches. Return a fresh int[2] [first index >= target, first index > target]. If absent both indexes are its insertion point. Reject null; assume sorted nondecreasing input. Do not mutate or linearly scan it.",
       "public static int[] equalRange(int[] sorted, int target)",
       J`require(sorted!=null);int l=0,r=sorted.length;while(l<r){int m=l+(r-l)/2;if(sorted[m]<target)l=m+1;else r=m;}int first=l;r=sorted.length;while(l<r){int m=l+(r-l)/2;if(sorted[m]<=target)l=m+1;else r=m;}return new int[]{first,l};`,
@@ -24,7 +24,7 @@ export const algorithmTopics = [
     ),
     q(
       "Search a rotated version index",
-      "A deployment index was rotated at an unknown position but still contains distinct sorted values before rotation.",
+      "A deployment list was sorted before someone moved a section from the front to the back. For example, [1, 2, 3, 4, 5] may become [4, 5, 1, 2, 3]. Given such a list of different IDs and a requested ID, return its current position, counted from zero, or -1 if absent. Do not reorder the list.",
       "Implement rotatedIndex(int[] values, int target). Return the matching index or -1 using O(log n) modified binary search. Input is a rotation of a strictly increasing array; empty input is valid. Reject null, preserve input and do not sort it.",
       "public static int rotatedIndex(int[] values, int target)",
       J`require(values!=null);int l=0,r=values.length-1;while(l<=r){int m=l+(r-l)/2;if(values[m]==target)return m;if(values[l]<=values[m]){if(values[l]<=target&&target<values[m])r=m-1;else l=m+1;}else{if(values[m]<target&&target<=values[r])l=m+1;else r=m-1;}}return -1;`,
@@ -41,7 +41,7 @@ export const algorithmTopics = [
     "Insertion O(n²), O(n) best case; merge O(n log n) time and O(n) auxiliary space.",
     q(
       "Sort a small nearly ordered import",
-      "A small price file is nearly sorted, so an insertion-style pass can shift only the entries that are out of place.",
+      "A small import contains signed prices, often already close to the right order. Return a separate copy sorted from smallest to largest, keeping repeated prices and leaving the original file unchanged. The acceptance criteria specify the sorting technique to practise.",
       "Implement insertionSort(int[] values). Return an independently sorted ascending copy using insertion sort, without Arrays.sort, Collections.sort or stream sorted. Accept duplicates, signed values and empty input; reject null and preserve input.",
       "public static int[] insertionSort(int[] values)",
       J`require(values!=null);int[] out=values.clone();for(int i=1;i<out.length;i++){int value=out[i],j=i-1;while(j>=0&&out[j]>value){out[j+1]=out[j];j--;}out[j+1]=value;}return out;`,
@@ -51,7 +51,7 @@ export const algorithmTopics = [
     ),
     q(
       "Keep arrival order among equal-priority jobs",
-      "An export sorts jobs by priority, but ties must retain their original arrival order for fairness.",
+      "A job export supplies rows containing a priority and a job ID. Return a separate copy sorted by priority from smallest to largest. When priorities tie, keep those jobs in their original arrival order. Do not change the original rows.",
       "Implement stableJobs(int[][] jobs) with merge sort. Each row is [priority,id]; reject null, null rows or rows not of length 2. Return a deep independent array sorted by priority ascending, preserving row encounter order on equal priorities. Do not use built-in sorting; empty input is valid.",
       "public static int[][] stableJobs(int[][] jobs)",
       J`require(jobs!=null);int[][] out=new int[jobs.length][];for(int i=0;i<jobs.length;i++){require(jobs[i]!=null&&jobs[i].length==2);out[i]=jobs[i].clone();}merge(out,0,out.length,new int[out.length][]);return out;`,
@@ -81,7 +81,7 @@ export const algorithmTopics = [
     ),
     q(
       "Select a percentile rank without sorting everything",
-      "A dashboard needs one ranked latency value rather than the complete ordered sample.",
+      "A dashboard needs one value by rank rather than a fully sorted report. Given the measurements and a rank counted from zero, return the value that would occupy that position in ascending order. Repeated measurements each occupy a position: rank 1 in [9, 2, 2] returns 2. Leave the original measurements unchanged.",
       "Implement select(int[] values, int rank). Return the zero-based rank value using quickselect and a pivot partition, without sorting the full input. Reject null/empty input or invalid rank, preserve input and include duplicates in ranking. Use randomized or midpoint pivots rather than relying on an already-sorted input.",
       "public static int select(int[] values, int rank)",
       J`require(values!=null&&rank>=0&&rank<values.length);int[] a=values.clone();int l=0,r=a.length-1;Random random=new Random(71);while(l<=r){int p=a[l+random.nextInt(r-l+1)],low=l,i=l,high=r;while(i<=high){if(a[i]<p){int t=a[low];a[low++]=a[i];a[i++]=t;}else if(a[i]>p){int t=a[high];a[high--]=a[i];a[i]=t;}else i++;}if(rank<low)r=low-1;else if(rank>high)l=high+1;else return a[rank];}throw new AssertionError();`,
@@ -98,7 +98,7 @@ export const algorithmTopics = [
     "Counting O(n+range); radix O(d·(n+base)); auxiliary storage is explicit.",
     q(
       "Sort bounded score values",
-      "An interview scoring system stores only integers in a small declared range. Count frequencies rather than comparing every pair.",
+      "A scoring system receives integer scores and the smallest and largest permitted scores. Return a separate list sorted from smallest to largest, keeping repeated scores. Reject scores outside the permitted range; the range may contain at most 10000 different values. Do not change the input scores.",
       "Implement counting(int[] values, int minimum, int maximum). Reject null, minimum>maximum, a range larger than 10000 distinct integers, or any value outside the range. Return a fresh ascending array using counting sort; preserve duplicates and input. Compute range width in long arithmetic to avoid overflow.",
       "public static int[] counting(int[] values, int minimum, int maximum)",
       J`require(values!=null&&minimum<=maximum);long width=(long)maximum-minimum+1;require(width<=10000);int[] counts=new int[(int)width];for(int n:values){require(n>=minimum&&n<=maximum);counts[n-minimum]++;}int[] out=new int[values.length];int at=0;for(int i=0;i<counts.length;i++)for(int j=0;j<counts[i];j++)out[at++]=minimum+i;return out;`,
@@ -108,7 +108,7 @@ export const algorithmTopics = [
     ),
     q(
       "Sort nonnegative identifiers by digit passes",
-      "A large import contains nonnegative integer identifiers. A stable digit-based pipeline must handle both zero and Integer.MAX_VALUE.",
+      "An equipment import contains nonnegative integer IDs, including zero and possibly very large values. Return a separate ascending copy, keeping repeated IDs and leaving the source unchanged. Reject negative IDs. The acceptance criteria describe the digit-by-digit sorting method to practise.",
       "Implement radix(int[] values) using stable least-significant-digit base-10 passes. Reject null or negative values. Return an independent ascending copy without built-in sorting. Preserve duplicates and empty input; use a long exponent so the final digit pass cannot overflow.",
       "public static int[] radix(int[] values)",
       J`require(values!=null);int[] a=values.clone(),out=new int[a.length];int max=0;for(int n:a){require(n>=0);max=Math.max(max,n);}for(long exp=1;max/exp>0;exp*=10){int[] count=new int[10];for(int n:a)count[(int)(n/exp%10)]++;for(int i=1;i<10;i++)count[i]+=count[i-1];for(int i=a.length-1;i>=0;i--)out[--count[(int)(a[i]/exp%10)]]=a[i];int[] t=a;a=out;out=t;}return a;`,
@@ -135,7 +135,7 @@ export const algorithmTopics = [
     ),
     q(
       "Compact sorted duplicates in place",
-      "An imported sorted ID array should keep only one copy of each ID in its leading region. Allocating another array is unnecessary.",
+      "A sorted ID list contains repeated IDs. Move one copy of each different ID to the front of that same list, still in ascending order, and return how many different IDs remain. Only that leading part of the list matters afterward. For [1, 1, 2], the leading result is [1, 2] and the count is 2.",
       "Implement compact(int[] sorted). Reject null; assume nondecreasing input. Using read/write pointers, mutate only as needed to place unique values in sorted order at the front and return their count. Ignore contents after that count. Empty input returns 0; use O(1) extra space.",
       "public static int compact(int[] sorted)",
       J`require(sorted!=null);int write=0;for(int n:sorted)if(write==0||sorted[write-1]!=n)sorted[write++]=n;return write;`,
@@ -152,7 +152,7 @@ export const algorithmTopics = [
     "O(n) scans; each endpoint moves forward at most n times.",
     q(
       "Find the longest run of distinct symbols",
-      "A short ASCII event stream needs the longest contiguous run without repeated symbols.",
+      "A short event message contains ordinary ASCII characters. Return the length of the longest uninterrupted section with no repeated character. For abca, the answer is 3 from abc or bca; the empty message gives zero. Do not change the message.",
       "Implement distinctRun(String text). Reject null or any non-ASCII UTF-16 char above 127. Return the length of the longest substring with no repeated char using a sliding window and last-seen positions. Empty text returns 0; do not enumerate all substrings.",
       "public static int distinctRun(String text)",
       J`require(text!=null);for(int i=0;i<text.length();i++)require(text.charAt(i)<128);int[] seen=new int[128];Arrays.fill(seen,-1);int left=0,best=0;for(int right=0;right<text.length();right++){char c=text.charAt(right);left=Math.max(left,seen[c]+1);seen[c]=right;best=Math.max(best,right-left+1);}return best;`,
@@ -162,7 +162,7 @@ export const algorithmTopics = [
     ),
     q(
       "Find the shortest qualifying sales burst",
-      "All daily sales values are positive. Find the shortest contiguous period reaching a positive target without checking every possible interval.",
+      "Daily sales are all positive. Given their history and a positive target amount, return the fewest consecutive days whose combined sales reach or exceed the target. Return zero if no period qualifies. For [2, 3, 1] and target 5, the answer is 2 days. Leave the sales history unchanged.",
       "Implement minimumWindow(int[] positive, long target). Reject null, nonpositive items or target<=0. Return the minimum window length whose sum is at least target, or 0 if none. Empty input is valid; use long sums and a growing/shrinking window; preserve input.",
       "public static int minimumWindow(int[] positive, long target)",
       J`require(positive!=null&&target>0);for(int n:positive)require(n>0);long sum=0;int left=0,best=Integer.MAX_VALUE;for(int right=0;right<positive.length;right++){sum+=positive[right];while(sum>=target){best=Math.min(best,right-left+1);sum-=positive[left++];}}return best==Integer.MAX_VALUE?0:best;`,
@@ -179,7 +179,7 @@ export const algorithmTopics = [
     "O(n+q) total time, O(n) auxiliary space.",
     q(
       "Answer many interval totals",
-      "A dashboard requests many half-open ranges from the same signed transaction array. Build one prefix table rather than rescanning every range.",
+      "A dashboard receives transaction amounts and several requested ranges. For each range, add amounts from its starting position up to, but not including, its stopping position; positions start at zero. Return totals in the same order as the ranges. An empty range totals zero, and the original transactions must stay unchanged.",
       "Implement rangeTotals(int[] values, int[][] ranges). Reject null arrays, null ranges, rows not of length 2 or invalid [from,to) bounds. Return a fresh long[] of totals in query order, using long prefix sums. Empty ranges total zero; preserve all inputs.",
       "public static long[] rangeTotals(int[] values, int[][] ranges)",
       J`require(values!=null&&ranges!=null);for(int[] r:ranges)require(r!=null&&r.length==2&&r[0]>=0&&r[1]>=r[0]&&r[1]<=values.length);long[] prefix=new long[values.length+1],out=new long[ranges.length];for(int i=0;i<values.length;i++)prefix[i+1]=prefix[i]+values[i];for(int i=0;i<ranges.length;i++)out[i]=prefix[ranges[i][1]]-prefix[ranges[i][0]];return out;`,
@@ -189,7 +189,7 @@ export const algorithmTopics = [
     ),
     q(
       "Apply many inclusive booking adjustments",
-      "A planner applies many signed adjustments to contiguous day ranges. Updating each affected day for every request would be too expensive.",
+      "A planner starts with zero adjustment on every day. Each supplied change gives a first day, last day and signed amount to add to every day between them, including both ends. Days are numbered from zero. Return the final adjustment for each day after all changes; overlapping changes add together.",
       "Implement adjustments(int days, int[][] updates). Accept days 0..100000. Each update is [from,to,delta] with inclusive valid day indexes; reject null updates/rows, wrong row lengths or invalid ranges. Return long[days] after applying all updates with a difference array and prefix scan. Preserve input; no updates is valid.",
       "public static long[] adjustments(int days, int[][] updates)",
       J`require(days>=0&&days<=100000&&updates!=null);for(int[] u:updates)require(u!=null&&u.length==3&&u[0]>=0&&u[1]>=u[0]&&u[1]<days);long[] diff=new long[days+1],out=new long[days];for(int[] u:updates){diff[u[0]]+=u[2];diff[u[1]+1]-=u[2];}long sum=0;for(int i=0;i<days;i++){sum+=diff[i];out[i]=sum;}return out;`,
@@ -211,7 +211,7 @@ export const algorithmTopics = [
     "Expected O(n) prefix counting; O(total characters) fixed-alphabet grouping.",
     q(
       "Group anagrams in stable first-seen order",
-      "A word-game service groups lowercase ASCII words that use the same letters. Both group order and word order must be predictable.",
+      "A word game receives lowercase words. Group words made from the same letters in the same quantities, so eat, tea and ate belong together. Keep groups in the order their first word appeared and keep words in their original order within each group, including duplicates. Leave the source unchanged.",
       "Implement anagrams(List<String> words). Reject null/items or characters outside a..z; an empty word is valid. Use a 26-count canonical key and a LinkedHashMap. Return unmodifiable groups in first-seen group order, retaining duplicates and original word order. Preserve source.",
       "public static List<List<String>> anagrams(List<String> words)",
       J`valid(words);Map<String,List<String>> groups=new LinkedHashMap<>();for(String word:words){int[] counts=new int[26];for(int i=0;i<word.length();i++){char c=word.charAt(i);require(c>='a'&&c<='z');counts[c-'a']++;}groups.computeIfAbsent(Arrays.toString(counts),k->new ArrayList<>()).add(word);}return groups.values().stream().map(List::copyOf).toList();`,
@@ -221,7 +221,7 @@ export const algorithmTopics = [
     ),
     q(
       "Count signed subarrays reaching a target",
-      "A transaction stream includes refunds, so a positive-only sliding window is invalid. Count all contiguous ranges with a target total instead.",
+      "A transaction history includes payments, refunds and zero amounts. Given a target total, count every nonempty consecutive section whose amounts add up to that target. Different starting or stopping positions count separately, even if their values match. Return the count and leave the transactions unchanged.",
       "Implement subarrayCount(int[] values, long target). Reject null. Use long prefix sums and a frequency map to return the number of nonempty contiguous subarrays totaling target. Empty input returns zero. Negative values and zero are valid; return long and preserve input. Aim for expected O(n).",
       "public static long subarrayCount(int[] values, long target)",
       J`require(values!=null);Map<Long,Long> frequency=new HashMap<>();frequency.put(0L,1L);long sum=0,count=0;for(int n:values){sum+=n;count+=frequency.getOrDefault(sum-target,0L);frequency.merge(sum,1L,Long::sum);}return count;`,
@@ -238,7 +238,7 @@ export const algorithmTopics = [
     "Output-sensitive exponential/factorial work; small input bounds are deliberate.",
     q(
       "Enumerate unique ingredient subsets",
-      "A menu planner explores every distinct subset of a small ingredient multiset. Repeated ingredients must not produce repeated subsets.",
+      "A menu planner receives up to 12 ingredient numbers and wants every different combination, including choosing nothing. Repeated ingredients must not create duplicate combinations. Return combinations in the exact ordering described by the sample and acceptance criteria, with the numbers inside each combination ascending. Leave the original ingredients unchanged.",
       "Implement subsets(int[] values). Reject null or length>12. Sort a copy, backtrack over subsets and skip equal values at the same recursion depth. Return unmodifiable lists in DFS order: emit the current subset before expanding candidates in ascending order. Include the empty subset; preserve input.",
       "public static List<List<Integer>> subsets(int[] values)",
       J`require(values!=null&&values.length<=12);int[] a=values.clone();Arrays.sort(a);List<List<Integer>> out=new ArrayList<>();subset(a,0,new ArrayList<>(),out);return List.copyOf(out);`,
@@ -251,7 +251,7 @@ export const algorithmTopics = [
     ),
     q(
       "Enumerate unique seating permutations",
-      "A seating planner orders a small list of group sizes. Equal sizes are indistinguishable and must not create duplicate permutations.",
+      "A seating planner receives up to eight group sizes. Return every different arrangement of all the groups, in dictionary order, comparing numbers from left to right. Repeated sizes must not create repeated arrangements. An empty input has one empty arrangement; leave the supplied sizes unchanged.",
       "Implement permutations(int[] values). Reject null or length>8. Return every unique permutation in lexical order using sorted candidates, a used-position array and backtracking. Include one empty permutation for empty input; return unmodifiable outer/inner lists and preserve input.",
       "public static List<List<Integer>> permutations(int[] values)",
       J`require(values!=null&&values.length<=8);int[] a=values.clone();Arrays.sort(a);List<List<Integer>> out=new ArrayList<>();permute(a,new boolean[a.length],new ArrayList<>(),out);return List.copyOf(out);`,
@@ -271,7 +271,7 @@ export const algorithmTopics = [
     "O(n) time and O(1) extra workspace.",
     q(
       "Reverse an owned node chain",
-      "A service owns a singly linked chain and must reverse its traversal direction without allocating replacement nodes.",
+      "A work chain links each item to the next, ending at the last item. Reverse those links so walking from the new first item visits the original items backward. Return that new first item and reuse the original items rather than replacing them. An empty chain stays empty.",
       "Implement reverse(Node head). Node is provided with public value and next fields. Assume an acyclic chain. Reverse links in place and return the new head; null input returns null. Reuse the original node objects and use O(1) extra space, not a collection buffer.",
       "public static Node reverse(Node head)",
       J`Node previous=null,current=head;while(current!=null){Node next=current.next;current.next=previous;previous=current;current=next;}return previous;`,
@@ -285,7 +285,7 @@ export const algorithmTopics = [
     ),
     q(
       "Detect a cycle without storing visited nodes",
-      "A damaged work chain may loop back to an earlier node. Repeated values alone must not count as a cycle.",
+      "A damaged work chain may point back to an earlier item and loop forever. Follow its links and report whether such a loop exists. Two different items carrying the same value do not make a loop; the links must return to the same item. Do not change any links.",
       "Implement hasCycle(Node head) using slow/fast pointers. Node is provided. Return true only when following next revisits an object identity; do not mutate links or allocate a visited-node set. Null and finite chains return false. Use O(1) additional space.",
       "public static boolean hasCycle(Node head)",
       J`Node slow=head,fast=head;while(fast!=null&&fast.next!=null){slow=slow.next;fast=fast.next.next;if(slow==fast)return true;}return false;`,
@@ -306,7 +306,7 @@ export const algorithmTopics = [
     "O(n) time; O(width) BFS space or O(height) DFS stack.",
     q(
       "Read a tree level by level",
-      "A reporting hierarchy must be exported level by level, with each level ordered left to right.",
+      "A reporting hierarchy has a top item and up to two children under each item. Return its values one level at a time, starting at the top and reading each level left to right. Keep the hierarchy unchanged. An empty hierarchy gives an empty result.",
       "Implement levels(TreeNode root) using BFS. TreeNode is provided and input is assumed to be a finite tree with no shared nodes/cycles. Return unmodifiable outer and inner lists, one per level; null root returns an empty list. Do not mutate the tree.",
       "public static List<List<Integer>> levels(TreeNode root)",
       J`if(root==null)return List.of();Queue<TreeNode> queue=new ArrayDeque<>();queue.offer(root);List<List<Integer>> out=new ArrayList<>();while(!queue.isEmpty()){int count=queue.size();List<Integer> level=new ArrayList<>();for(int i=0;i<count;i++){TreeNode n=queue.poll();level.add(n.value);if(n.left!=null)queue.offer(n.left);if(n.right!=null)queue.offer(n.right);}out.add(List.copyOf(level));}return List.copyOf(out);`,
@@ -320,7 +320,7 @@ export const algorithmTopics = [
     ),
     q(
       "Reject a deeply invalid search tree",
-      "A node can satisfy its immediate parent and still violate an ancestor's ordering bound. Validate the complete search-tree rule.",
+      "A search tree must keep every value on a node's left side smaller than that node and every value on its right side larger, including distant descendants. Report whether the whole tree follows this rule; equal values are not allowed. An empty tree is valid. Do not change the tree.",
       "Implement isBst(TreeNode root). Assume a finite tree. Every left descendant must be strictly smaller and every right descendant strictly larger than the node; duplicate values are invalid. Use inherited long bounds so Integer.MIN_VALUE/MAX_VALUE remain valid values. Null is a valid empty BST; do not mutate the tree.",
       "public static boolean isBst(TreeNode root)",
       J`return bst(root,Long.MIN_VALUE,Long.MAX_VALUE);`,
@@ -347,7 +347,7 @@ export const algorithmTopics = [
     "O(V+E) time and space for adjacency lists and traversal state.",
     q(
       "Find a minimum-hop service route",
-      "An unweighted undirected service network needs the smallest number of links from one service to another.",
+      "Services are connected by two-way links, and every link counts as one step. Given a starting and destination service, return the fewest links needed to reach the destination. Starting at the destination takes zero steps; a destination that cannot be reached gives -1. Leave the network unchanged.",
       "Implement hops(int vertices, int[][] edges, int source, int target). Accept vertices 1..10000; validate every [u,v] edge and endpoint within 0..vertices-1 before traversal. Return minimum hops by BFS, 0 for source==target, or -1 when unreachable. Duplicate/self edges are allowed; reject malformed/null input.",
       "public static int hops(int vertices, int[][] edges, int source, int target)",
       J`require(vertices>=1&&vertices<=10000&&edges!=null&&source>=0&&source<vertices&&target>=0&&target<vertices);List<List<Integer>> graph=new ArrayList<>();for(int i=0;i<vertices;i++)graph.add(new ArrayList<>());for(int[] e:edges){require(e!=null&&e.length==2&&e[0]>=0&&e[0]<vertices&&e[1]>=0&&e[1]<vertices);graph.get(e[0]).add(e[1]);graph.get(e[1]).add(e[0]);}int[] distance=new int[vertices];Arrays.fill(distance,-1);distance[source]=0;Queue<Integer> q=new ArrayDeque<>();q.offer(source);while(!q.isEmpty()){int u=q.poll();if(u==target)return distance[u];for(int v:graph.get(u))if(distance[v]<0){distance[v]=distance[u]+1;q.offer(v);}}return -1;`,
@@ -357,7 +357,7 @@ export const algorithmTopics = [
     ),
     q(
       "Count isolated service clusters",
-      "An inventory includes disconnected and completely isolated services. Every vertex must belong to exactly one connected component.",
+      "An inventory lists services and their two-way links, including services with no links at all. Count how many separate connected groups there are. Each isolated service counts as its own group; an empty inventory gives zero. Leave the network unchanged.",
       "Implement components(int vertices, int[][] edges) for an undirected graph using DFS or BFS. Accept vertices 0..10000 and validate all two-endpoint edges. Return the number of connected components, counting isolated vertices. Empty graph returns 0; reject null/malformed edges and do not alter input.",
       "public static int components(int vertices, int[][] edges)",
       J`require(vertices>=0&&vertices<=10000&&edges!=null);List<List<Integer>> g=new ArrayList<>();for(int i=0;i<vertices;i++)g.add(new ArrayList<>());for(int[] e:edges){require(e!=null&&e.length==2&&e[0]>=0&&e[0]<vertices&&e[1]>=0&&e[1]<vertices);g.get(e[0]).add(e[1]);g.get(e[1]).add(e[0]);}boolean[] seen=new boolean[vertices];int count=0;Deque<Integer> stack=new ArrayDeque<>();for(int s=0;s<vertices;s++)if(!seen[s]){count++;seen[s]=true;stack.push(s);while(!stack.isEmpty()){int u=stack.pop();for(int v:g.get(u))if(!seen[v]){seen[v]=true;stack.push(v);}}}return count;`,
@@ -379,7 +379,7 @@ export const algorithmTopics = [
     "Topological sort O(V+E), or O((V+E) log V) with lexical ties; Dijkstra O((V+E) log V).",
     q(
       "Schedule prerequisites deterministically",
-      "A build system must schedule dependencies before their dependents. When several jobs are ready, the smallest ID should run first.",
+      "A build supplies jobs and rules saying which job must run before another. Return an order that respects all those rules. Whenever several jobs are ready, choose the smallest job ID first. If the rules form a loop so no complete order is possible, return an empty result.",
       "Implement buildOrder(int vertices, int[][] edges). Edge [u,v] means u must precede v. Accept vertices 0..10000 and validate endpoints; duplicate edges and self edges are allowed. Use indegrees and a min-heap for lexical tie-breaking. Return an unmodifiable order, or an empty list on a cycle. Empty graph also returns empty; reject malformed input.",
       "public static List<Integer> buildOrder(int vertices, int[][] edges)",
       J`require(vertices>=0&&vertices<=10000&&edges!=null);List<List<Integer>> g=new ArrayList<>();for(int i=0;i<vertices;i++)g.add(new ArrayList<>());int[] degree=new int[vertices];for(int[] e:edges){require(e!=null&&e.length==2&&e[0]>=0&&e[0]<vertices&&e[1]>=0&&e[1]<vertices);g.get(e[0]).add(e[1]);degree[e[1]]++;}PriorityQueue<Integer> ready=new PriorityQueue<>();for(int i=0;i<vertices;i++)if(degree[i]==0)ready.offer(i);List<Integer> out=new ArrayList<>();while(!ready.isEmpty()){int u=ready.poll();out.add(u);for(int v:g.get(u))if(--degree[v]==0)ready.offer(v);}return out.size()==vertices?List.copyOf(out):List.of();`,
@@ -389,7 +389,7 @@ export const algorithmTopics = [
     ),
     q(
       "Find weighted routes without int overflow",
-      "A routing service chooses minimum total cost through directed links. Some links cost more than an int-safe total can hold.",
+      "A routing map supplies one-way links with nonnegative travel costs and a starting service. Return the cheapest total cost from that start to every service in service-ID order. The start costs zero, and an unreachable service gets -1. Costs add across links and may exceed one individual link's number range.",
       "Implement distances(int vertices, int[][] edges, int source). Edges are [from,to,nonnegativeCost]. Accept 1..10000 vertices, validate rows/endpoints/costs, and run Dijkstra with long distances and a priority queue. Return long[vertices], using -1 for unreachable vertices; source distance is zero. Reject null/malformed input and negative edges; preserve input.",
       "public static long[] distances(int vertices, int[][] edges, int source)",
       J`require(vertices>=1&&vertices<=10000&&edges!=null&&source>=0&&source<vertices);List<List<int[]>> g=new ArrayList<>();for(int i=0;i<vertices;i++)g.add(new ArrayList<>());for(int[] e:edges){require(e!=null&&e.length==3&&e[0]>=0&&e[0]<vertices&&e[1]>=0&&e[1]<vertices&&e[2]>=0);g.get(e[0]).add(new int[]{e[1],e[2]});}long[] d=new long[vertices];Arrays.fill(d,Long.MAX_VALUE);d[source]=0;PriorityQueue<long[]> heap=new PriorityQueue<>(Comparator.comparingLong(a->a[1]));heap.offer(new long[]{source,0});while(!heap.isEmpty()){long[] item=heap.poll();int u=(int)item[0];if(item[1]!=d[u])continue;for(int[] e:g.get(u)){long next=d[u]+e[1];if(next<d[e[0]]){d[e[0]]=next;heap.offer(new long[]{e[0],next});}}}for(int i=0;i<d.length;i++)if(d[i]==Long.MAX_VALUE)d[i]=-1;return d;`,
@@ -406,7 +406,7 @@ export const algorithmTopics = [
     "Amortized near-constant O(α(n)) per operation with path compression and size/rank.",
     q(
       "Track cluster count after each connection",
-      "Services are linked incrementally. Every successful union of separate clusters reduces the component count by one.",
+      "Services begin as separate groups. Add the supplied two-way links one at a time and report how many connected groups remain after each link. Linking services already in the same group does not reduce the count, and a link from a service to itself changes nothing.",
       "Implement clusterCounts(int vertices, int[][] edges). Accept vertices 0..10000; validate every [u,v] endpoint. Use union-find with path compression and union by size. Return component counts after each edge, including duplicates/self edges that do not change the count. Reject null/malformed input and preserve it.",
       "public static int[] clusterCounts(int vertices, int[][] edges)",
       J`require(vertices>=0&&vertices<=10000&&edges!=null);for(int[] e:edges)require(e!=null&&e.length==2&&e[0]>=0&&e[0]<vertices&&e[1]>=0&&e[1]<vertices);int[] p=new int[vertices],size=new int[vertices],out=new int[edges.length];for(int i=0;i<vertices;i++){p[i]=i;size[i]=1;}int count=vertices;for(int i=0;i<edges.length;i++){int a=find(p,edges[i][0]),b=find(p,edges[i][1]);if(a!=b){if(size[a]<size[b]){int t=a;a=b;b=t;}p[b]=a;size[a]+=size[b];count--;}out[i]=count;}return out;`,
@@ -419,7 +419,7 @@ export const algorithmTopics = [
     ),
     q(
       "Find the first redundant link",
-      "A network audit reviews undirected links in order and needs the first link whose endpoints were already connected.",
+      "A network audit adds two-way links in the supplied order. Find the first link that connects services already connected through earlier links, making that link redundant. Return its position counted from zero, or -1 if no link is redundant. A link to the same service is immediately redundant.",
       "Implement firstRedundant(int vertices, int[][] edges). Accept vertices 0..10000 and validate all rows/endpoints first. Use union-find and return the zero-based first edge index that closes a cycle, or -1. A self edge is immediately redundant; a repeated edge can be redundant. Preserve inputs.",
       "public static int firstRedundant(int vertices, int[][] edges)",
       J`require(vertices>=0&&vertices<=10000&&edges!=null);for(int[] e:edges)require(e!=null&&e.length==2&&e[0]>=0&&e[0]<vertices&&e[1]>=0&&e[1]<vertices);int[] p=new int[vertices],size=new int[vertices];for(int i=0;i<vertices;i++){p[i]=i;size[i]=1;}for(int i=0;i<edges.length;i++){int a=find(p,edges[i][0]),b=find(p,edges[i][1]);if(a==b)return i;if(size[a]<size[b]){int t=a;a=b;b=t;}p[b]=a;size[a]+=size[b];}return -1;`,
@@ -443,7 +443,7 @@ export const algorithmTopics = [
     "Coin change O(amount·coins); LIS O(n log n).",
     q(
       "Choose the fewest coins",
-      "A kiosk must make an exact amount using unlimited coins of the supplied positive denominations. Greedy choice is not always optimal.",
+      "A kiosk receives an amount and the positive coin denominations it can use, with an unlimited supply of each. Return the fewest coins that make the exact amount, or -1 if it cannot be made. Amount zero needs zero coins. Picking the largest coin first is not guaranteed to work; for [1, 3, 4] and amount 6, two 3s are best.",
       "Implement minimumCoins(int[] coins, int amount) using bottom-up DP. Reject null, nonpositive coins, or amount outside 0..10000. Duplicates are allowed; return the fewest coins or -1 if impossible. Amount zero returns 0 even with no denominations. Preserve input.",
       "public static int minimumCoins(int[] coins, int amount)",
       J`require(coins!=null&&amount>=0&&amount<=10000);for(int coin:coins)require(coin>0);int[] dp=new int[amount+1];Arrays.fill(dp,amount+1);dp[0]=0;for(int sum=1;sum<=amount;sum++)for(int coin:coins)if(coin<=sum)dp[sum]=Math.min(dp[sum],dp[sum-coin]+1);return dp[amount]>amount?-1:dp[amount];`,
@@ -453,7 +453,7 @@ export const algorithmTopics = [
     ),
     q(
       "Find the longest strictly increasing subsequence",
-      "A trend report needs a longest upward sequence that may skip intervening observations. Equal values must not extend the trend.",
+      "A trend report receives measurements in time order. Return the greatest number of measurements you can choose that keep getting strictly larger, while preserving their original order. You may skip measurements between chosen ones; equal values do not extend the trend. An empty history gives zero.",
       "Implement lis(int[] values). Reject null; return the length of the longest strictly increasing subsequence using a tails array and lower-bound binary search in O(n log n). Empty input returns 0. Preserve input and distinguish subsequences from contiguous subarrays.",
       "public static int lis(int[] values)",
       J`require(values!=null);int[] tails=new int[values.length];int size=0;for(int n:values){int l=0,r=size;while(l<r){int m=l+(r-l)/2;if(tails[m]<n)l=m+1;else r=m;}tails[l]=n;if(l==size)size++;}return size;`,
@@ -470,7 +470,7 @@ export const algorithmTopics = [
     "O(n log n) sorting plus O(n) scan.",
     q(
       "Merge overlapping time ranges",
-      "A maintenance calendar combines overlapping or touching closed intervals into a canonical list.",
+      "A maintenance calendar supplies start and end times for work periods. Combine periods that overlap or touch at an endpoint, and return the resulting periods in starting-time order. For [1, 3] and [3, 5], return [1, 5]. Keep the original calendar unchanged.",
       "Implement mergeIntervals(int[][] ranges). Validate nonnull rows of exactly two ints with start<=end. Sort a deep copy by start then end, merge whenever next.start<=current.end, and return independent ascending ranges. Empty input returns an empty array; do not mutate input or use subtraction comparators.",
       "public static int[][] mergeIntervals(int[][] ranges)",
       J`require(ranges!=null);int[][] a=new int[ranges.length][];for(int i=0;i<ranges.length;i++){require(ranges[i]!=null&&ranges[i].length==2&&ranges[i][0]<=ranges[i][1]);a[i]=ranges[i].clone();}Arrays.sort(a,Comparator.<int[]>comparingInt(r->r[0]).thenComparingInt(r->r[1]));List<int[]> out=new ArrayList<>();for(int[] r:a){if(out.isEmpty()||r[0]>out.get(out.size()-1)[1])out.add(r.clone());else out.get(out.size()-1)[1]=Math.max(out.get(out.size()-1)[1],r[1]);}return out.toArray(int[][]::new);`,
@@ -528,7 +528,7 @@ export const algorithmTopics = [
     "O(rows·columns) time; output uses O(rows·columns) space.",
     q(
       "Read a grid in spiral order",
-      "A display visits the outer edge of a rectangular grid, then continues inward without repeating any cell.",
+      "A display receives a rectangular grid. Read its values clockwise around the outside, starting at the top-left, then continue around the next inner layer until every cell has been read once. Return that reading order without changing the grid. Handle a single row or column as well as a larger rectangle.",
       "Implement spiral(int[][] grid). Reject null, null rows or ragged rows. Return an unmodifiable clockwise spiral traversal starting at the top-left. Empty outer input or zero columns returns an empty list. Do not mutate the grid; carefully handle a single remaining row or column.",
       "public static List<Integer> spiral(int[][] grid)",
       J`require(grid!=null);int columns=grid.length==0?0:(grid[0]==null?-1:grid[0].length);for(int[] row:grid)require(row!=null&&row.length==columns);List<Integer> out=new ArrayList<>();int top=0,bottom=grid.length-1,left=0,right=columns-1;while(top<=bottom&&left<=right){for(int c=left;c<=right;c++)out.add(grid[top][c]);top++;for(int r=top;r<=bottom;r++)out.add(grid[r][right]);right--;if(top<=bottom){for(int c=right;c>=left;c--)out.add(grid[bottom][c]);bottom--;}if(left<=right){for(int r=bottom;r>=top;r--)out.add(grid[r][left]);left++;}}return List.copyOf(out);`,
@@ -538,7 +538,7 @@ export const algorithmTopics = [
     ),
     q(
       "Rotate a rectangular export clockwise",
-      "A reporting image rotates by 90 degrees. The input may be rectangular, so the result's dimensions must swap.",
+      "A report receives a rectangular grid and needs a new grid rotated 90 degrees clockwise. A two-row, three-column grid becomes three rows and two columns. Keep every value and leave the original grid unchanged. An empty grid gives an empty result.",
       "Implement rotate(int[][] grid). Reject null, null rows or ragged rows. Return an independent clockwise 90-degree rotation with columns rows and rows columns. Empty outer input or zero columns returns new int[0][0]. Preserve original rows and values; do not assume a square matrix.",
       "public static int[][] rotate(int[][] grid)",
       J`require(grid!=null);int rows=grid.length,columns=rows==0?0:(grid[0]==null?-1:grid[0].length);for(int[] row:grid)require(row!=null&&row.length==columns);if(rows==0||columns==0)return new int[0][0];int[][] out=new int[columns][rows];for(int r=0;r<rows;r++)for(int c=0;c<columns;c++)out[c][rows-1-r]=grid[r][c];return out;`,
@@ -563,7 +563,7 @@ algorithmTopics.push(
     "Heap sort O(n log n), O(1) auxiliary after copying; quicksort average O(n log n), worst O(n²), O(log n) stack when recursing only on the smaller partition.",
     q(
       "Sort with a heap and no library sort",
-      "An offline export needs a comparison sort whose worst-case work is predictable without allocating merge buffers.",
+      "An offline export receives signed values and needs them from smallest to largest, including duplicates. Return a separate sorted copy and leave the original values unchanged. Practise the heap-based sorting method described in the acceptance criteria rather than calling a ready-made sort.",
       "Implement heapSort(int[] values). Reject null. Return an independent ascending copy using a max heap and sift-down; no library sort or PriorityQueue. Support duplicates, empty input and signed extremes. Heap construction should be O(n); total sorting O(n log n). Preserve input.",
       "public static int[] heapSort(int[] values)",
       J`require(values!=null);int[] a=values.clone();for(int i=a.length/2-1;i>=0;i--)sift(a,i,a.length);for(int end=a.length-1;end>0;end--){int t=a[0];a[0]=a[end];a[end]=t;sift(a,0,end);}return a;`,
@@ -576,7 +576,7 @@ algorithmTopics.push(
     ),
     q(
       "Partition a comparison sort safely",
-      "A large import may be already sorted or full of repeated keys. Sort it through partitions without allowing recursion depth to grow with every element.",
+      "An import receives signed values that may be already sorted or heavily repeated. Return a separate ascending copy, keeping duplicates and leaving the original unchanged. Practise the partition-based sorting method in the acceptance criteria, ensuring large inputs do not cause an unnecessarily deep chain of method calls.",
       "Implement quickSort(int[] values). Reject null. Return an independent ascending copy using quicksort, without library sorts. Use a middle-value pivot and recurse only on the smaller resulting partition, iterating over the larger partition to bound stack depth. Support duplicates and signed extremes; preserve input.",
       "public static int[] quickSort(int[] values)",
       J`require(values!=null);int[] a=values.clone();quick(a,0,a.length-1);return a;`,

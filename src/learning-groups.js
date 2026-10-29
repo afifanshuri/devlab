@@ -1,4 +1,4 @@
-import { courses, allLessons } from "../curriculum.js?v=focused-missions-1";
+import { courses, allLessons } from "../curriculum.js?v=mission-roles-1";
 
 const definitions = [
   [

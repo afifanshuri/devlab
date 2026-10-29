@@ -88,14 +88,14 @@ const stories = {
   ],
   "hands-java-architecture": [
     [
-      "The counter, workshop and delivery desk all need the shop’s configuration registry. Give every part of the application the same registry, even when several parts request it at the same moment.",
+      "The counter, workshop and delivery desk all need the shop's environment settings. Give every caller the same shared settings object, including callers arriving at the same time, and create it only when it is first requested. Its environment is production. Let the client read that value through the shared object.",
     ],
     [
-      "A customer chooses either standard or express delivery for their order. Calculate the appropriate shipping charge and add it to the item total, while allowing checkout to accept another delivery option later.",
+      "An order supplies its item price in cents, parcel weight in grams and selected delivery option. Standard delivery costs 500 cents plus 100 cents for each started 1000 grams; a zero-weight parcel costs the base 500 cents. Express costs twice the standard charge. Return the item price plus the chosen delivery charge, and allow another delivery option to be supplied later without rewriting checkout.",
       "1001 grams → 700 cents standard, 1400 cents express",
     ],
     [
-      "A customer selects a delivery option by name. Match that choice to the correct shipping service, accepting harmless differences in spaces or capitalization but refusing an unknown option.",
+      "A customer chooses standard or express delivery by name. Return the matching shipping service, accepting surrounding spaces and differences in capitalization: EXPRESS and express mean the same choice. Reject an unknown or empty choice rather than silently choosing a different service.",
     ],
     [
       "A repair payment should update the dashboard, email service and collection desk. Notify each registered recipient once, and keep one failed or departing recipient from preventing the others from receiving the news.",
@@ -111,7 +111,7 @@ const stories = {
       "A staff member reserves three parts for the wrong repair and needs to undo that reservation. Deduct the parts once, allow one matching undo, and reject repeated actions that would create or lose stock.",
     ],
     [
-      "The operations lead chooses a service, reporting period and tags for a report. Let them assemble a valid request, then keep that completed request unchanged while they prepare another report.",
+      "The operations lead is preparing a report request with a service name, a reporting period and optional tags. Use 7 days when no period is chosen; otherwise accept 1 to 30 days. Clean outside spaces and keep each tag once in first-seen order. Save the completed choices so preparing or editing another report cannot change an earlier request.",
     ],
     [
       "A customer selects shipping, pays for an order and then retries after losing the response. Charge and notify only once for the same successful order, reject a changed order using the same request identity, and allow a failed payment to be tried again.",

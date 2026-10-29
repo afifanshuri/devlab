@@ -14,7 +14,7 @@ export const collectionTopics = [
     "O(n) copying/initialization; O(1) indexed access.",
     q(
       "Copy a bounded delivery window",
-      "A kitchen exports a selected window of order quantities. Editing that export must not change the original day's orders.",
+      "A kitchen needs a separate copy of part of the day's order quantities. You receive the quantities, a starting position and a stopping position. Copy from the start up to, but not including, the stop; positions start at zero. Editing the returned quantities must not change the original orders, and a start equal to the stop produces an empty result.",
       "Implement window(int[] values, int from, int to). Return an independent copy of [from,to). Reject null or bounds outside 0..length, or from>to, with IllegalArgumentException. Allow an empty range; do not pad out-of-range input.",
       "public static int[] window(int[] values, int from, int to)",
       J`require(values!=null && from>=0 && to>=from && to<=values.length); return Arrays.copyOfRange(values,from,to);`,
@@ -24,7 +24,7 @@ export const collectionTopics = [
     ),
     q(
       "Prepare numbered slots with a reserved band",
-      "A café numbers its pickup slots, but reserved positions must carry a special marker instead of a number.",
+      "A café needs the requested number of pickup slots, numbered 1 through that number. You also receive a reserved range of positions: replace those slot values with -1, including the starting position but excluding the stopping position. Positions start at zero; for five slots and positions 1 to 3, return [1, -1, -1, 4, 5].",
       "Implement slots(int size, int from, int to). Create [1..size] using Arrays.setAll, then fill [from,to) with -1 using Arrays.fill. Accept size 0..10000 and valid half-open bounds; reject invalid arguments with IllegalArgumentException.",
       "public static int[] slots(int size, int from, int to)",
       J`require(size>=0 && size<=10000 && from>=0 && to>=from && to<=size);int[] out=new int[size];Arrays.setAll(out,i->i+1);Arrays.fill(out,from,to,-1);return out;`,
@@ -75,7 +75,7 @@ export const collectionTopics = [
     "O(1) get/set; amortized O(1) append; O(n) middle insert.",
     q(
       "Insert a rush order without losing the queue",
-      "A café keeps orders in arrival sequence but has approved a rush order at one specific position. The original booking list is still needed for auditing.",
+      "A café supplies its order list, a rush order and the position where that rush order belongs. Return a new editable list with the rush order inserted there and all other orders still in sequence. Position zero means the front, and the position after the last order means append it. Leave the original list unchanged.",
       "Implement insert(List<String> orders, int position, String rush). Return a fresh mutable ArrayList with rush inserted at position, preserving all other order. Accept 0..size including an empty list. Reject null list/items/rush and invalid positions with IllegalArgumentException; preserve input.",
       "public static List<String> insert(List<String> orders, int position, String rush)",
       J`valid(orders);require(rush!=null && position>=0 && position<=orders.size());ArrayList<String> out=new ArrayList<>(orders);out.add(position,rush);return out;`,
@@ -85,7 +85,7 @@ export const collectionTopics = [
     ),
     q(
       "Correct a slot, then append walk-ins",
-      "The host corrects one reservation and appends a group of walk-ins. Changing the input lists later must not alter the published plan.",
+      "A host supplies a booking list, a position to correct, the replacement booking and a list of walk-ins. Make a new plan with that booking replaced and all walk-ins added at the end. Keep the original lists unchanged and protect the completed plan from later edits to those lists.",
       "Implement revise(List<String> plan, int index, String corrected, List<String> walkIns). On an independent ArrayList, replace the indexed item with set and append all walkIns using addAll. Return an unmodifiable snapshot. Reject null lists/items/corrected or an index outside the existing plan.",
       "public static List<String> revise(List<String> plan, int index, String corrected, List<String> walkIns)",
       J`valid(plan);valid(walkIns);require(corrected!=null && index>=0 && index<plan.size());ArrayList<String> out=new ArrayList<>(plan);out.set(index,corrected);out.addAll(walkIns);return List.copyOf(out);`,
@@ -108,7 +108,7 @@ export const collectionTopics = [
     "O(n) removals/filtering; avoid repeated middle removal for large lists.",
     q(
       "Remove the order number, not the position",
-      "Order numbers are integers. Cancelling order 2 must not accidentally remove whichever order sits at index 2.",
+      "A café supplies order numbers, a number to cancel and a position to remove afterward. In a new list, first remove the first occurrence of the cancelled number, if present; then remove the entry at the supplied position in the remaining list. Positions start at zero. Keep the original list unchanged; cancelling order number 2 is different from removing position 2.",
       "Implement cancel(List<Integer> orders, int orderNumber, int position). In a fresh mutable ArrayList remove the first matching value using remove(Object), then remove the supplied index from the remaining list. Reject null list/items or an index invalid after the value removal. Preserve input; a missing value is allowed.",
       "public static List<Integer> cancel(List<Integer> orders, int orderNumber, int position)",
       J`valid(orders);ArrayList<Integer> out=new ArrayList<>(orders);out.remove(Integer.valueOf(orderNumber));require(position>=0 && position<out.size());out.remove(position);return out;`,
@@ -140,7 +140,7 @@ export const collectionTopics = [
     "O(n) transformation; O(n log n) sort.",
     q(
       "Normalize and sort menu names",
-      "Menu names arrive padded and mixed-case. Sort short names first, then alphabetically for a consistent compact display.",
+      "Menu names arrive with extra outside spaces and mixed capitalization. Make a cleaned copy using lowercase names, then put shorter names first and alphabetical order second when lengths tie. Keep repeated names and leave the original list unchanged. For example, Pie, EGG and a become a, egg, pie.",
       "Implement menu(List<String> names). Validate all names are nonnull and nonblank, copy them, replaceAll with strip/lowercase Locale.ROOT, then sort by length ascending and natural text ascending. Preserve duplicates and the source; return an unmodifiable list.",
       "public static List<String> menu(List<String> names)",
       J`valid(names);require(names.stream().noneMatch(String::isBlank));List<String> out=new ArrayList<>(names);out.replaceAll(s->s.strip().toLowerCase(Locale.ROOT));out.sort(Comparator.comparingInt(String::length).thenComparing(Comparator.naturalOrder()));return List.copyOf(out);`,
@@ -173,7 +173,7 @@ export const collectionTopics = [
     "O(k) page copy; O(n) middle-range removal; capacity changes do not add elements.",
     q(
       "Remove one range and detach the page",
-      "The host archives a range of bookings. The removed page must remain readable after the remaining plan changes.",
+      "A host needs to archive a section of the booking list. You receive a start and stop position, counted from zero. Remove that section from the live list, including the start but excluding the stop, and return a separate saved copy of the removed bookings. Later changes to the remaining bookings must not change the archived copy.",
       "Implement archive(List<String> plan, int from, int to). Mutate the supplied mutable list by clearing its subList(from,to), but first return a detached unmodifiable snapshot of that range. Reject null/items and invalid half-open bounds before mutation. Empty ranges are valid.",
       "public static List<String> archive(List<String> plan, int from, int to)",
       J`valid(plan);require(from>=0 && to>=from && to<=plan.size());List<String> page=List.copyOf(plan.subList(from,to));plan.subList(from,to).clear();return page;`,
@@ -183,7 +183,7 @@ export const collectionTopics = [
     ),
     q(
       "Reserve capacity without inventing bookings",
-      "A bulk import knows its expected capacity, but only real arrivals should appear in the final export.",
+      "An import supplies actual arrivals and an expected capacity, meaning how much space to reserve in advance. Export only the actual arrivals in their original order; reserved space must not appear as extra bookings. For example, two arrivals with expected capacity 100 still produce an export containing exactly those two arrivals. Leave the input list unchanged.",
       "Implement export(List<String> arrivals, int expected). Reject null/items and expected outside 0..100000. Create an empty ArrayList, call ensureCapacity(expected), append arrivals, call trimToSize, and return a detached String[] using toArray(String[]::new). Expected capacity must not change the logical element count.",
       "public static String[] export(List<String> arrivals, int expected)",
       J`valid(arrivals);require(expected>=0 && expected<=100000);ArrayList<String> out=new ArrayList<>();out.ensureCapacity(expected);out.addAll(arrivals);out.trimToSize();return out.toArray(String[]::new);`,
@@ -206,7 +206,7 @@ export const collectionTopics = [
     "O(n) traversal; O(1) edits at an existing iterator position.",
     q(
       "Edit tickets during a forward walk",
-      "A support queue marks cancelled tickets with X and urgent tickets with !. Insert a priority marker immediately after each urgent ticket without invalidating the walk.",
+      "A support list marks cancelled tickets with X and urgent tickets with ! before their name. Return a new list that removes every X, changes !name to name, and puts PRIORITY immediately after that urgent ticket. Keep other entries in their original order and leave the original list unchanged. Do not treat the markers you add as new input tickets.",
       "Implement annotate(List<String> tickets). Validate nulls first. Using a ListIterator over a copied LinkedList, remove X, replace !name with name, and insert PRIORITY immediately after it. Other strings stay unchanged, including empty strings. Return a mutable independent list; do not process inserted markers again.",
       "public static List<String> annotate(List<String> tickets)",
       J`valid(tickets);LinkedList<String> out=new LinkedList<>(tickets);ListIterator<String> it=out.listIterator();while(it.hasNext()){String s=it.next();if(s.equals("X"))it.remove();else if(s.startsWith("!")){it.set(s.substring(1));it.add("PRIORITY");}}return out;`,
@@ -250,7 +250,7 @@ export const collectionTopics = [
     ),
     q(
       "Find shared and exclusive access",
-      "An access review needs people present in both groups or in exactly one group, without relying on iteration order.",
+      "An access review supplies two groups and a choice of report. When the choice requests shared members, return people in both groups. Otherwise return people in exactly one group, excluding everyone who belongs to both. Do not change either group; result order does not matter.",
       "Implement membership(Set<String> a, Set<String> b, boolean shared). Return an independent unmodifiable intersection when shared=true, otherwise the symmetric difference. Use set bulk operations; reject null collections/items and leave sources unchanged.",
       "public static Set<String> membership(Set<String> a, Set<String> b, boolean shared)",
       J`valid(a);valid(b);Set<String> both=new HashSet<>(a);both.retainAll(b);if(shared)return Set.copyOf(both);Set<String> out=new HashSet<>(a);out.addAll(b);out.removeAll(both);return Set.copyOf(out);`,
@@ -277,7 +277,7 @@ export const collectionTopics = [
     ),
     q(
       "Dispatch from the oldest unique arrival",
-      "A dispatcher serves the oldest unique customer and then needs a snapshot of the remaining order.",
+      "A dispatcher receives customer IDs that may repeat. Keep each customer once in first-arrival order, serve the first unique customer, and return the remaining unique customers in order. For [A, B, A, C], return [B, C]. An empty arrival list gives an empty result; leave the original list unchanged.",
       "Implement dispatchUnique(List<String> ids). Validate nulls, build a LinkedHashSet and removeFirst once if nonempty. Return the remaining IDs as an unmodifiable list in encounter order. Empty input returns empty; preserve the input list.",
       "public static List<String> dispatchUnique(List<String> ids)",
       J`valid(ids);LinkedHashSet<String> set=new LinkedHashSet<>(ids);if(!set.isEmpty())set.removeFirst();return List.copyOf(set);`,
@@ -301,7 +301,7 @@ export const collectionTopics = [
     "O(log n) navigation; O(k+log n) range traversal.",
     q(
       "Find the neighboring pickup slots",
-      "A scheduler must show the nearest slots around a requested time, distinguishing inclusive from strictly earlier/later matches.",
+      "A scheduler receives available pickup times and a requested time. Return four nearest times: strictly earlier, earlier-or-equal, later-or-equal, and strictly later, in that order. Treat repeated slots as one time, and use a missing value wherever no suitable time exists. Leave the supplied slots unchanged.",
       "Implement neighbors(int[] slots, int target). Reject null. Build a TreeSet and return a fresh Integer[4] containing [lower, floor, ceiling, higher]. Use null for a missing neighbor; preserve input and remove duplicate slot values naturally.",
       "public static Integer[] neighbors(int[] slots, int target)",
       J`require(slots!=null);TreeSet<Integer> set=new TreeSet<>();for(int n:slots)set.add(n);return new Integer[]{set.lower(target),set.floor(target),set.ceiling(target),set.higher(target)};`,
@@ -311,7 +311,7 @@ export const collectionTopics = [
     ),
     q(
       "Read a descending time range",
-      "A manager reviews unique pickup times within a closed interval, latest first, without changing the live schedule.",
+      "A manager supplies a pickup schedule and the earliest and latest times to review. Return the unique times inside that range, including both ends, with the latest first. Return an empty list if nothing matches and leave the live schedule unchanged.",
       "Implement slotRange(NavigableSet<Integer> slots, int from, int to). Reject null/items and from>to. Use an inclusive subSet and descendingSet, returning an unmodifiable detached list. Empty matches are valid; do not mutate slots.",
       "public static List<Integer> slotRange(NavigableSet<Integer> slots, int from, int to)",
       J`valid(slots);require(from<=to);return List.copyOf(slots.subSet(from,true,to,true).descendingSet());`,
@@ -372,7 +372,7 @@ export const collectionTopics = [
     ),
     q(
       "Accumulate signed stock movements",
-      "A warehouse receives signed stock movements by SKU. The aggregate must keep exact long totals rather than silently overflowing.",
+      "A warehouse supplies item codes and matching stock changes, where negative numbers mean stock leaving. Add the changes for each item code and return one total per code, including zero totals. An item may appear several times. Keep very large totals accurate and report a failure instead of silently wrapping a number that is too large.",
       "Implement movements(List<String> skus, long[] deltas). Reject nulls, unequal lengths or null SKU items. Use Map.merge and Math.addExact to total each SKU; negative/zero deltas are valid. Return an unmodifiable map. Arithmetic overflow must throw ArithmeticException.",
       "public static Map<String,Long> movements(List<String> skus, long[] deltas)",
       J`valid(skus);require(deltas!=null && skus.size()==deltas.length);Map<String,Long> out=new HashMap<>();for(int i=0;i<deltas.length;i++)out.merge(skus.get(i),deltas[i],Math::addExact);return Map.copyOf(out);`,
@@ -389,7 +389,7 @@ export const collectionTopics = [
     "Expected O(1) per HashMap lookup/update.",
     q(
       "Apply a compare-and-replace status update",
-      "A workflow should update a job only when its current status still matches what the caller observed.",
+      "A worker wants to change a job's status but may be using an outdated view. You receive the statuses, job ID, the status the worker expects and the proposed new status. Apply the change only if the job still has the expected status, and report whether it changed. Missing jobs and mismatched statuses must stay unchanged.",
       "Implement compareReplace(Map<String,String> statuses, String id, String expected, String next). Validate map keys/values and all arguments are nonnull. Mutate only when replace(id,expected,next) succeeds; return that boolean. Missing IDs and stale expected values leave the map unchanged.",
       "public static boolean compareReplace(Map<String,String> statuses, String id, String expected, String next)",
       J`require(statuses!=null && id!=null && expected!=null && next!=null);valid(statuses.keySet());valid(statuses.values());return statuses.replace(id,expected,next);`,
@@ -399,7 +399,7 @@ export const collectionTopics = [
     ),
     q(
       "Expire a counter when it reaches zero",
-      "A reservation counter is adjusted atomically with respect to one map operation. Zero means the key should disappear, not remain as a stale entry.",
+      "You receive reservation counts, a booking key and a signed adjustment. Add the adjustment to that booking's count, treating a missing booking as zero, and return the resulting count. Remove the booking's entry when its count becomes zero. Reject a change that would make the count negative or exceed the supported number range; leave its old count unchanged on failure.",
       "Implement adjust(Map<String,Integer> counts, String key, int delta). Validate nonnull map/keys/values/key and nonnegative existing counts before mutation. Use compute with a missing value treated as zero. Reject a negative result; checked int overflow throws ArithmeticException. Remove a zero result by returning null from compute. Return the new numeric value, including zero.",
       "public static int adjust(Map<String,Integer> counts, String key, int delta)",
       J`require(counts!=null && key!=null);valid(counts.keySet());valid(counts.values());require(counts.values().stream().allMatch(n->n>=0));Integer value=counts.compute(key,(k,old)->{int n=Math.addExact(old==null?0:old,delta);require(n>=0);return n==0?null:n;});return value==null?0:value;`,
@@ -422,7 +422,7 @@ export const collectionTopics = [
     "O(n) traversal; mutation applies to the original map.",
     q(
       "Prune zero balances through a values view",
-      "A maintenance job removes inactive balances. Removing values through the view must also remove their map entries.",
+      "A maintenance job receives account balances. Remove entries whose balance is zero from that same set of records and return how many you removed. Keep positive balances unchanged. Check for missing or negative balances before removing anything, so invalid input cannot leave half the records cleaned.",
       "Implement prune(Map<String,Integer> balances). Validate nonnull map/keys/values and nonnegative balances before changes. Use values().removeIf to remove zero-valued entries. Return the number removed, and mutate the supplied map only as specified.",
       "public static int prune(Map<String,Integer> balances)",
       J`require(balances!=null);valid(balances.keySet());valid(balances.values());require(balances.values().stream().allMatch(n->n>=0));int before=balances.size();balances.values().removeIf(n->n==0);return before-balances.size();`,
@@ -432,7 +432,7 @@ export const collectionTopics = [
     ),
     q(
       "Rename every value without replacing the map",
-      "Support needs to normalize all stored labels while preserving the original map object and its keys.",
+      "Support receives labels stored against record IDs. Remove spaces around each label and convert it to lowercase, updating those labels in the existing records without changing any IDs. Return a separate saved copy of the cleaned result. Check all labels before changing any; a blank or missing label must not leave a partial update.",
       "Implement normalizeValues(Map<String,String> labels). Validate all keys/values are nonnull and all values nonblank before mutation. Walk entrySet and use setValue to strip/lowercase Locale.ROOT. Return a detached unmodifiable snapshot of the normalized map. Do not add or remove keys.",
       "public static Map<String,String> normalizeValues(Map<String,String> labels)",
       J`require(labels!=null);valid(labels.keySet());valid(labels.values());require(labels.values().stream().noneMatch(String::isBlank));for(Map.Entry<String,String> e:labels.entrySet())e.setValue(e.getValue().strip().toLowerCase(Locale.ROOT));return Map.copyOf(labels);`,
@@ -453,7 +453,7 @@ export const collectionTopics = [
     "Expected O(1) get/put and eldest eviction.",
     q(
       "Simulate a bounded LRU cache",
-      "A small menu cache records reads. A cache miss loads an ID, while a hit makes that ID most recently used.",
+      "A menu cache can hold only the supplied number of different IDs. Process the supplied sequence of lookups in order: a new ID is added, and looking up an existing ID makes it the most recently used. If adding an ID exceeds capacity, remove the ID that has gone longest without a lookup. Return the remaining IDs from least to most recently used. Capacity is an input, not a fixed number.",
       "Implement cacheOrder(List<String> accesses, int capacity). Reject null/items or capacity below 1. Use an access-order LinkedHashMap with eldest eviction. Each access gets or inserts its ID. Return final keys from least to most recently used as an unmodifiable list; empty access input gives empty output.",
       "public static List<String> cacheOrder(List<String> accesses, int capacity)",
       J`valid(accesses);require(capacity>=1);LinkedHashMap<String,Boolean> cache=new LinkedHashMap<>(16,0.75f,true){protected boolean removeEldestEntry(Map.Entry<String,Boolean> e){return size()>capacity;}};for(String id:accesses){if(cache.get(id)==null)cache.put(id,true);}return List.copyOf(cache.keySet());`,
@@ -484,7 +484,7 @@ export const collectionTopics = [
     "O(log n) floor/ceiling/update; O(k+log n) range read.",
     q(
       "Resolve an effective price version",
-      "Price changes take effect at integer timestamps. A purchase must use the latest version whose timestamp is not later than the purchase.",
+      "A price history supplies a price label for each change time. Given a purchase time, return the label from the latest change at or before that time. A later price change must not affect an earlier purchase. Return an empty text result if the purchase happened before every known price change.",
       "Implement effective(NavigableMap<Integer,String> versions, int time). Reject null map/keys/values. Use floorEntry; return its value, or an empty string if no version is old enough. Do not mutate versions.",
       "public static String effective(NavigableMap<Integer,String> versions, int time)",
       J`require(versions!=null);valid(versions.keySet());valid(versions.values());Map.Entry<Integer,String> e=versions.floorEntry(time);return e==null?"":e.getValue();`,
@@ -494,7 +494,7 @@ export const collectionTopics = [
     ),
     q(
       "Drain an inclusive schedule range",
-      "A worker claims all scheduled tasks in one inclusive time interval, earliest first, while leaving tasks outside it untouched.",
+      "A worker receives a schedule and a start and end time. Claim and remove all tasks inside that range, including tasks exactly at either end, and return their values earliest first. Leave tasks outside the range in the schedule. No matching tasks means an empty result.",
       "Implement drainRange(NavigableMap<Integer,String> schedule, int from, int to). Validate null map/keys/values and from<=to before mutation. Use a backed inclusive subMap and pollFirstEntry repeatedly. Return removed values in ascending timestamp order as an unmodifiable list. Empty matches are valid.",
       "public static List<String> drainRange(NavigableMap<Integer,String> schedule, int from, int to)",
       J`require(schedule!=null && from<=to);valid(schedule.keySet());valid(schedule.values());NavigableMap<Integer,String> view=schedule.subMap(from,true,to,true);List<String> out=new ArrayList<>();while(!view.isEmpty())out.add(view.pollFirstEntry().getValue());return List.copyOf(out);`,
@@ -511,7 +511,7 @@ export const collectionTopics = [
     "Amortized O(1) ArrayDeque offer/poll/peek.",
     q(
       "Process only available capacity",
-      "A kitchen accepts an arrival-order queue and serves up to its current worker capacity. Fewer arrivals than capacity are normal.",
+      "A kitchen receives orders in arrival order and a capacity saying how many it can serve now. Return up to that many orders, oldest first, without changing the supplied arrival list. Fewer orders than capacity is normal; capacity zero means serve none.",
       "Implement serve(List<String> arrivals, int capacity). Reject null/items and negative capacity. Use an ArrayDeque through Queue.offer/poll, returning up to capacity served IDs in FIFO order as an unmodifiable list. Empty queues stop normally; preserve arrivals.",
       "public static List<String> serve(List<String> arrivals, int capacity)",
       J`valid(arrivals);require(capacity>=0);Queue<String> queue=new ArrayDeque<>();arrivals.forEach(queue::offer);List<String> out=new ArrayList<>();while(out.size()<capacity && !queue.isEmpty())out.add(queue.poll());return List.copyOf(out);`,
@@ -521,7 +521,7 @@ export const collectionTopics = [
     ),
     q(
       "Inspect the next order without consuming it",
-      "A display reads the next order before a worker claims it. Inspection must not change queue size or order.",
+      "A display first reads which order is next without removing it. A worker then claims that same order. Return both readings in order and remove exactly that one order from the queue. If the queue is empty, both readings are missing and the queue stays empty.",
       "Implement inspect(Queue<String> queue). Reject null or null items. Return a fresh String[2] with [peek result, subsequent poll result]. For an empty queue both entries are null. The queue loses exactly one item when nonempty. Use peek/poll rather than exception-throwing empty operations.",
       "public static String[] inspect(Queue<String> queue)",
       J`valid(queue);String head=queue.peek();String removed=queue.poll();return new String[]{head,removed};`,
@@ -557,7 +557,7 @@ export const collectionTopics = [
     ),
     q(
       "Give an urgent order a new front position",
-      "A dispatcher promotes an existing order without duplicating it, then claims the newest deferred item from the back.",
+      "A dispatcher supplies a live work queue and an urgent order ID. Remove only the first existing occurrence of that ID, if present, then place the urgent ID at the front. Next, claim and return one item from the back of the updated queue. Keep these changes in the supplied queue; an initially empty queue returns the urgent ID and ends empty.",
       "Implement promote(Deque<String> work, String urgent). Reject null/items/urgent. Remove only the first occurrence of urgent if present, offerFirst urgent, then pollLast once. Return the claimed item. Mutate the supplied deque; an initially empty deque returns urgent and ends empty.",
       "public static String promote(Deque<String> work, String urgent)",
       J`valid(work);require(urgent!=null);work.removeFirstOccurrence(urgent);work.offerFirst(urgent);return work.pollLast();`,
@@ -579,7 +579,7 @@ export const collectionTopics = [
     "O(n log k) top-k; O(n log k) merging k sorted lanes.",
     q(
       "Keep the largest k sales",
-      "A sales import may be large, but the dashboard only needs its k largest values, including ties.",
+      "A sales dashboard receives many values and the number of leading values it needs. Return that many largest values from highest to lowest, counting repeated values separately. Asking for zero gives an empty result, and the requested number cannot exceed the number of supplied values. Leave the source unchanged.",
       "Implement largest(int[] values, int k). Reject null or k outside 0..length. Keep a min-heap of at most k entries; return the selected values descending as an unmodifiable list. Preserve input and duplicates; k=0 returns empty. Do not sort the full input.",
       "public static List<Integer> largest(int[] values, int k)",
       J`require(values!=null && k>=0 && k<=values.length);PriorityQueue<Integer> heap=new PriorityQueue<>();for(int n:values){heap.offer(n);if(heap.size()>k)heap.poll();}List<Integer> out=new ArrayList<>();while(!heap.isEmpty())out.add(heap.poll());Collections.reverse(out);return List.copyOf(out);`,
@@ -644,7 +644,7 @@ export const collectionTopics = [
     "O(n) rearrangement and frequency/overlap scans with hash-set membership.",
     q(
       "Rotate and reverse a duty roster",
-      "A duty roster rotates by a signed offset and is then displayed backward for a reverse shift handover.",
+      "A shift manager supplies a duty roster and a rotation distance. First rotate the roster: a positive distance moves names toward the right, wrapping around; a negative distance moves them left. Then reverse the rotated order and return a new editable list. Keep the original roster unchanged.",
       "Implement roster(List<String> names, int distance). Reject null/items. On a fresh mutable list use Collections.rotate followed by Collections.reverse. Positive rotation moves elements right; negative moves left. Empty input is valid; preserve the source.",
       "public static List<String> roster(List<String> names, int distance)",
       J`valid(names);List<String> out=new ArrayList<>(names);Collections.rotate(out,distance);Collections.reverse(out);return out;`,
@@ -654,7 +654,7 @@ export const collectionTopics = [
     ),
     q(
       "Audit repeated and excluded attendees",
-      "An event audit needs a duplicate count and a check for overlap with a blocked audience, using the original data unchanged.",
+      "An event audit supplies attendee names, one name to count and a blocked group. Return two numbers: how often that name appears, followed by 1 if no attendee is blocked or 0 if any attendee is blocked. Do not change the attendance list or the blocked group.",
       "Implement attendance(List<String> attendees, String target, Set<String> blocked). Reject nulls/items. Return a fresh int[2]: frequency of target and 1 if attendees/blocked are disjoint, otherwise 0. Use Collections.frequency and disjoint; empty collections are valid.",
       "public static int[] attendance(List<String> attendees, String target, Set<String> blocked)",
       J`valid(attendees);valid(blocked);require(target!=null);return new int[]{Collections.frequency(attendees,target),Collections.disjoint(attendees,blocked)?1:0};`,
@@ -698,7 +698,7 @@ export const collectionTopics = [
     "O(n) transfer/selection.",
     q(
       "Copy specialized work into a general tray",
-      "A reusable helper moves values from a producer of a subtype to a destination capable of accepting that type.",
+      "A reusable import helper receives a source list and an editable destination list. Add all source values to the destination in order and return how many were added, without removing anything from the source. If both inputs are the same list, append exactly one copy of its original contents rather than copying endlessly.",
       "Implement generic copy(List<? extends T> source, List<? super T> destination). Reject null lists or null source items before changes. Append a snapshot of source to destination so source==destination works. Return the number appended. Do not remove source entries; destination is supplied mutable.",
       "public static <T> int copy(List<? extends T> source, List<? super T> destination)",
       J`valid(source);require(destination!=null);List<T> snapshot=new ArrayList<>(source);destination.addAll(snapshot);return snapshot.size();`,
@@ -708,7 +708,7 @@ export const collectionTopics = [
     ),
     q(
       "Select using a supertype comparator",
-      "A generic selection function must work with a comparator defined on a supertype, without forcing caller casts.",
+      "A customer supplies a nonempty list of items and a rule describing which item ranks ahead of another. Return the item that ranks first under that rule. If several items tie, keep the first one from the original list. Do not sort or otherwise change the caller's list.",
       "Implement best(List<? extends T> values, Comparator<? super T> comparator). Reject null/empty values, null items or comparator. Return the minimum according to comparator, keeping the first item on ties. Do not reorder input.",
       "public static <T> T best(List<? extends T> values, Comparator<? super T> comparator)",
       J`valid(values);require(!values.isEmpty() && comparator!=null);T best=values.get(0);for(T value:values)if(comparator.compare(value,best)<0)best=value;return best;`,
@@ -725,7 +725,7 @@ export const collectionTopics = [
     "O(n) grouping/flattening, excluding any explicit sorting.",
     q(
       "Flatten independent order lanes",
-      "A reporting export needs one list from several order lanes. Lane order and each lane's order are both significant.",
+      "A reporting export receives several order lanes. Return one combined list by taking every order from the first lane, then every order from the second lane, and so on. Keep the order inside each lane and skip empty lanes. For lanes [A, B] and [C], return [A, B, C]; leave the original lanes unchanged.",
       "Implement flatten(List<List<String>> lanes) using flatMap. Validate all outer/inner lists and items before producing the result. Return an unmodifiable flattened list in encounter order. Allow empty lanes and leave input unchanged.",
       "public static List<String> flatten(List<List<String>> lanes)",
       J`valid(lanes);lanes.forEach(Main::valid);return lanes.stream().flatMap(Collection::stream).toList();`,
@@ -735,7 +735,7 @@ export const collectionTopics = [
     ),
     q(
       "Partition pancake orders by a threshold",
-      "A café keeps orders in arrival order and separates large pancake orders from ordinary ones for kitchen planning.",
+      "A café supplies the pancake quantity for each order and a threshold for large orders. Separate quantities strictly above the threshold from all remaining quantities, keeping the original order within each group. A quantity equal to the threshold belongs in the ordinary group. Always include both groups, even if one is empty; the threshold is supplied for each call.",
       "Implement pancakes(List<Integer> quantities, int threshold). Reject null/items, negative quantities or negative threshold. Use partitioningBy to split quantities strictly greater than threshold under true and the rest under false. Include both keys with unmodifiable lists, keep within-group order and return an unmodifiable map.",
       "public static Map<Boolean,List<Integer>> pancakes(List<Integer> quantities, int threshold)",
       J`valid(quantities);require(threshold>=0 && quantities.stream().allMatch(n->n>=0));Map<Boolean,List<Integer>> out=new HashMap<>(quantities.stream().collect(Collectors.partitioningBy(n->n>threshold)));out.replaceAll((k,v)->List.copyOf(v));return Map.copyOf(out);`,
@@ -757,7 +757,7 @@ export const collectionTopics = [
     "O(n) scan/reduction; fallback executes only when absent.",
     q(
       "Load a default only when no order qualifies",
-      "A café searches for the first large order. Looking up a default is expensive and must happen only if none qualifies.",
+      "A café supplies order quantities, a minimum size and a way to obtain a default quantity. Return the first quantity at least as large as the minimum. Only if none qualifies should you obtain the default, exactly once. Do not obtain a default when a qualifying order already exists, and leave the orders unchanged.",
       "Implement firstLarge(List<Integer> quantities, int minimum, IntSupplier fallback). Reject null/items/fallback and negative quantities/minimum before callbacks. Return the first quantity >= minimum, otherwise invoke fallback exactly once. Use filter/findFirst and orElseGet; leave inputs unchanged.",
       "public static int firstLarge(List<Integer> quantities, int minimum, IntSupplier fallback)",
       J`valid(quantities);require(fallback!=null && minimum>=0 && quantities.stream().allMatch(n->n>=0));return quantities.stream().filter(n->n>=minimum).findFirst().orElseGet(fallback::getAsInt);`,
@@ -767,7 +767,7 @@ export const collectionTopics = [
     ),
     q(
       "Summarize signed amounts without int overflow",
-      "A reconciliation report totals signed amounts that may exceed int range even when every individual amount fits in an int.",
+      "A reconciliation report receives signed amounts. Return four numbers in this order: how many amounts there are, their total, the smallest amount and the largest amount. An empty report returns four zeros. Totals may be larger than one individual amount can hold, so do not let large totals wrap into an incorrect value.",
       "Implement summary(int[] amounts). Reject null. Use an IntStream summaryStatistics or an equivalent long reduction, returning a fresh long[4] [count,sum,min,max]. For empty input return [0,0,0,0]. Preserve input and do not perform the sum in int arithmetic.",
       "public static long[] summary(int[] amounts)",
       J`require(amounts!=null);IntSummaryStatistics s=Arrays.stream(amounts).summaryStatistics();return new long[]{s.getCount(),s.getSum(),s.getCount()==0?0:s.getMin(),s.getCount()==0?0:s.getMax()};`,
@@ -784,7 +784,7 @@ export const collectionTopics = [
     "Expected O(n) counting work; copy-on-write mutation costs O(size).",
     q(
       "Count competing requests exactly",
-      "Several worker tasks update counts for the same IDs. No increment may be lost when updates overlap.",
+      "Several workers count incoming request IDs at the same time. Return the exact number of occurrences of each ID after all counting finishes, without losing increments when workers overlap. Each call must start its own separate counts, and the supplied ID list must stay unchanged.",
       "Implement parallelCounts(List<String> ids). Reject null/items before starting work. Use a local ConcurrentHashMap with merge from a parallel stream, and return an unmodifiable detached map after all work completes. Calls must not share state.",
       "public static Map<String,Integer> parallelCounts(List<String> ids)",
       J`valid(ids);ConcurrentHashMap<String,Integer> counts=new ConcurrentHashMap<>();ids.parallelStream().forEach(id->counts.merge(id,1,Integer::sum));return Map.copyOf(counts);`,
@@ -794,7 +794,7 @@ export const collectionTopics = [
     ),
     q(
       "Read a copy-on-write snapshot",
-      "A listener registry captures an iterator, then registers one more listener. The existing iterator should see the earlier snapshot only.",
+      "A notification service takes a view of its current recipient list, then adds one new recipient. Return the recipients visible to the earlier view, excluding the newly added recipient. For an initial list [A, B], adding C after taking that view must still return [A, B]. Leave the supplied initial list unchanged.",
       "Implement listenerSnapshot(List<String> initial, String added). Reject null/items/added. Create a CopyOnWriteArrayList, capture its iterator, append added, and consume the old iterator into a result. Return that old snapshot as an unmodifiable list; preserve initial.",
       "public static List<String> listenerSnapshot(List<String> initial, String added)",
       J`valid(initial);require(added!=null);CopyOnWriteArrayList<String> registry=new CopyOnWriteArrayList<>(initial);Iterator<String> before=registry.iterator();registry.add(added);List<String> out=new ArrayList<>();before.forEachRemaining(out::add);return List.copyOf(out);`,
@@ -815,7 +815,7 @@ export const collectionTopics = [
     "O(1) offer/poll; O(k) bounded drain.",
     q(
       "Report admission when the queue is full",
-      "A worker queue has fixed capacity. An import should report which jobs were accepted without blocking or silently dropping their status.",
+      "A work queue starts empty and can hold only the supplied number of jobs. Offer the incoming jobs in order without serving any. Return accepted or rejected for each incoming job; once the queue is full, later jobs are rejected immediately rather than left waiting. For three jobs and capacity 2, report accepted, accepted, rejected.",
       "Implement admit(List<String> jobs, int capacity). Reject null/items or capacity outside 1..10000. Offer jobs to a fresh ArrayBlockingQueue without consuming any. Return an unmodifiable Boolean list, one offer result per job. Do not use put or waiting/sleeping.",
       "public static List<Boolean> admit(List<String> jobs, int capacity)",
       J`valid(jobs);require(capacity>=1 && capacity<=10000);ArrayBlockingQueue<String> queue=new ArrayBlockingQueue<>(capacity);List<Boolean> out=new ArrayList<>();for(String job:jobs)out.add(queue.offer(job));return List.copyOf(out);`,
@@ -825,7 +825,7 @@ export const collectionTopics = [
     ),
     q(
       "Drain a bounded batch from a live queue",
-      "A worker claims at most its batch limit from a bounded FIFO queue, leaving the remaining work for another worker.",
+      "A worker receives a live queue and the maximum number of jobs it can claim now. Remove up to that many jobs from the front and return them in arrival order. Leave the remaining jobs waiting; a limit of zero claims nothing, and fewer jobs than the limit is normal. Do not wait for new arrivals.",
       "Implement claim(BlockingQueue<String> queue, int maximum). Reject null queue, null entries or a negative maximum. Use drainTo into a fresh list with the given maximum; return an unmodifiable list in queue removal order. Do not block. The supplied queue is mutated only by removing claimed items.",
       "public static List<String> claim(BlockingQueue<String> queue, int maximum)",
       J`valid(queue);require(maximum>=0);List<String> out=new ArrayList<>();queue.drainTo(out,maximum);return List.copyOf(out);`,
@@ -850,7 +850,7 @@ collectionTopics.push(
     "O(n) positional lookup; containsAll can cost O(n*m) on lists.",
     q(
       "Locate repeated orders",
-      "A customer asks where their repeated order appears in the café queue. Staff need both ends of its occurrence range, without changing queue order.",
+      "A customer asks where a repeated order ID appears in the café queue. Return its first and last positions, counting the first position as zero. For [A, B, A], the positions for A are [0, 2]. If the ID is absent, return [-1, -1]. Keep the queue unchanged.",
       "Implement occurrences(List<String> orders, String id). Reject null list/items/id. Return int[2] containing indexOf and lastIndexOf of id; both are -1 when absent. Preserve the input, including duplicates.",
       "public static int[] occurrences(List<String> orders, String id)",
       J`valid(orders);require(id!=null);return new int[]{orders.indexOf(id),orders.lastIndexOf(id)};`,
@@ -860,7 +860,7 @@ collectionTopics.push(
     ),
     q(
       "Check ingredient coverage without counting stock",
-      "A kitchen wants to know whether every requested ingredient name is available. This check concerns availability of names, not quantities: asking twice for egg still needs only membership of egg.",
+      "A kitchen supplies available ingredient names, a requested ingredient list and one special ingredient to check separately. Report whether the special ingredient is available, then whether every requested ingredient name is available. This checks names, not stock quantities: requesting egg twice still needs only egg to be present once. Leave all inputs unchanged.",
       "Implement coverage(List<String> available, List<String> requested, String special). Reject null collections/items/special. Return boolean[2]: available.contains(special), then available.containsAll(requested). Empty requested is covered; do not mutate either list or treat duplicates as stock counts.",
       "public static boolean[] coverage(List<String> available, List<String> requested, String special)",
       J`valid(available);valid(requested);require(special!=null);return new boolean[]{available.contains(special),available.containsAll(requested)};`,
@@ -877,7 +877,7 @@ collectionTopics.push(
     "Expected O(1) per hash operation plus O(n) input validation.",
     q(
       "Renew only registered reservations",
-      "A reservation renewal must extend an existing booking, while an unknown booking must remain absent.",
+      "A booking service receives existing reservation durations, a booking ID and extra minutes. Extend only an existing reservation and return its new duration. An unknown ID must remain absent and return -1. Refuse negative extra minutes or a duration too large to store without changing the existing reservation.",
       "Implement renew(Map<String,Integer> minutes, String id, int extra). Reject null map/keys/values/id, negative values or negative extra before mutation. Use computeIfPresent to add extra with Math.addExact. Return the new value or -1 if absent; overflow throws ArithmeticException without updating the mapping.",
       "public static int renew(Map<String,Integer> minutes, String id, int extra)",
       J`require(minutes!=null&&id!=null&&extra>=0);valid(minutes.keySet());valid(minutes.values());require(minutes.values().stream().allMatch(n->n>=0));Integer n=minutes.computeIfPresent(id,(k,v)->Math.addExact(v,extra));return n==null?-1:n;`,
@@ -909,7 +909,7 @@ collectionTopics.push(
     "O(n) extrema scans; O(log n) binary search on random-access lists; O(1) indexed swap on ArrayList.",
     q(
       "Summarize and search a sorted price list",
-      "A sorted price list needs its smallest price, largest price and the exact binary-search result for an absent or unique target.",
+      "A till receives a nonempty price list already in ascending order and a target price. Return the smallest price, largest price and the search result for the target, in that order. A match reports its position; a missing target reports its insertion position using the negative-number format explained in the acceptance criteria. Leave the prices unchanged.",
       "Implement priceSearch(List<Integer> sorted, int target). Reject null/items or empty input. Assume sorted nondecreasing input and that target, when present, appears once. Return int[3] containing Collections.min, max and binarySearch's raw result, including its negative insertion-point encoding. Preserve input.",
       "public static int[] priceSearch(List<Integer> sorted, int target)",
       J`valid(sorted);require(!sorted.isEmpty());return new int[]{Collections.min(sorted),Collections.max(sorted),Collections.binarySearch(sorted,target)};`,
@@ -936,7 +936,7 @@ collectionTopics.push(
     "O(1) head operations on ArrayDeque, plus O(n) validation.",
     q(
       "Inspect required work",
-      "A scheduled worker must have a next job. An empty queue is a failed precondition that should remain distinguishable from optional work.",
+      "A scheduled worker must inspect its next job without claiming it. Return the front job and leave the queue unchanged. If no job is waiting, report an empty-queue error rather than returning a missing value, because this worker requires a job to be present.",
       "Implement requiredHead(Queue<String> queue). Reject null or null entries with IllegalArgumentException. Return element() without removal. Preserve NoSuchElementException on an empty queue; preserve all queue contents.",
       "public static String requiredHead(Queue<String> queue)",
       J`valid(queue);return queue.element();`,
@@ -946,7 +946,7 @@ collectionTopics.push(
     ),
     q(
       "Claim required work",
-      "A worker must claim exactly one queued job. If another worker already emptied the queue, the caller needs an explicit empty-queue failure.",
+      "A worker must claim one job from the front of its live queue. Remove and return that job, leaving the remaining jobs in order. If the queue is empty, report an empty-queue error rather than a missing result; the caller requires exactly one job to be claimed.",
       "Implement requiredClaim(Queue<String> queue). Reject null or null entries with IllegalArgumentException. Return remove() and consume exactly one head item. Preserve NoSuchElementException when empty; do not translate it to null.",
       "public static String requiredClaim(Queue<String> queue)",
       J`valid(queue);return queue.remove();`,

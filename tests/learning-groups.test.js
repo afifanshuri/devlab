@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { allLessons } from "../curriculum.js?v=focused-missions-1";
+import { allLessons } from "../curriculum.js?v=mission-roles-1";
 import {
   learningGroups,
   groupForLesson,

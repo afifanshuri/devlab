@@ -1,8 +1,9 @@
 import { esc } from "../ui.js";
+import { exerciseRoles } from "../exercise-roles.js";
 import {
   advancedSamples,
   missionOverrides,
-} from "../exercise-samples.js?v=focused-missions-1";
+} from "../exercise-samples.js?v=mission-roles-1";
 
 export function exerciseBrief(task, key) {
   const story = missionOverrides[key] || task.mission || "";
@@ -57,6 +58,7 @@ export function exerciseBrief(task, key) {
   }
   return {
     mission: [mission, task.workspaceGuide].filter(Boolean).join("\n\n"),
+    roles: exerciseRoles(task),
     sample,
     learn: task.learn || [],
     requirements: task.requirements || [goal],
@@ -66,6 +68,7 @@ export function exerciseBrief(task, key) {
 export function renderExerciseBrief(task, key) {
   const brief = exerciseBrief(task, key);
   return `<h2>Mission</h2><p class="mission-story">${brief.mission.split("\n\n").map(esc).join('</p><p class="mission-story">')}</p>
+    ${brief.roles.length ? `<p class="muted">Who does what in this exercise:</p><ul>${brief.roles.map(({ name, file, purpose, provided }) => `<li><strong>${esc(name)}</strong> (${esc(file)}): ${esc(purpose)}.${provided ? ' <span class="muted">Already provided.</span>' : ""}</li>`).join("")}</ul>` : ""}
     <h2>Sample input and output</h2>
     ${task.outputSource ? `<p class="muted">${esc(task.outputSource)}</p>` : ""}
     <div class="mission-example"><strong>Input</strong><pre ${task.healthCheck ? 'class="diagnostic-output" aria-label="Sample health-check output"' : ""}>${esc(brief.sample.input)}</pre>

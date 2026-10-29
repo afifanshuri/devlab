@@ -1,4 +1,4 @@
-import { renderExerciseBrief } from "./exercise-brief.js";
+import { renderExerciseBrief } from "./exercise-brief.js?v=mission-roles-1";
 import {
   groupPicker,
   groupNavigation,

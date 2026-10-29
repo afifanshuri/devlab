@@ -1,10 +1,10 @@
-import { renderExerciseBrief } from "./exercise-brief.js";
+import { renderExerciseBrief } from "./exercise-brief.js?v=mission-roles-1";
 import {
   groupPicker,
   groupNavigation,
   bindGroupPicker,
 } from "./group-navigation.js";
-import { courses } from "../../curriculum.js?v=focused-missions-1";
+import { courses } from "../../curriculum.js?v=mission-roles-1";
 import * as store from "../../database.js";
 import { state } from "../state.js";
 import { $, esc, shell, toast } from "../ui.js";
@@ -12,8 +12,8 @@ import { callRunner, localRunner } from "../services/runner.js";
 import { openCodeEditor } from "../services/code-editor.js";
 import { editKey } from "../editor-input.js";
 import { createTerminalDisplay } from "../services/terminal-display.js";
-import { linuxPane, mountLinux } from "./linux-workspace.js?v=focused-missions-1";
-import { mountWritten } from "./written-workspace.js";
+import { linuxPane, mountLinux } from "./linux-workspace.js?v=mission-roles-1";
+import { mountWritten } from "./written-workspace.js?v=mission-roles-1";
 import {
   starterFiles,
   readDraft,

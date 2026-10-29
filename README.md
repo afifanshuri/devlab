@@ -262,3 +262,9 @@ See [the method and algorithm coverage checklist](COLLECTIONS_ALGORITHMS.md) for
 Missions describe the situation, supplied inputs and expected result in plain language. Implementation rules remain in Acceptance criteria. Java missions and procedural SQL scenarios describe the result in everyday language rather than copying method signatures into the story. Advanced Java questions explicitly identify Challenge.java as the answer file. Relevant supporting classes and any reused earlier method are supplied complete; independent questions do not carry unrelated files such as DayPlan into batching.
 
 Existing exercise IDs and saved answer records are retained. Legacy multi-file drafts show only files belonging to the current question. After updating, restart the local lab server and refresh the page. Reset lab loads the revised starter if you want to replace an older draft; your saved code is not automatically rewritten. Reused Java containers refresh their internal checks without deleting answer files or restarting the container.
+
+### Mission review and class responsibilities
+
+A further 95 mission descriptions clarify supplied capacities, range endpoints, return values and the expected business behavior, including all nine introductory Spring exercises. Missions distinguish a worked example from values supplied on each call. The Java mission panel also explains every custom class, interface, record and enum in the exercise files, including nested types. Roles reflect the current exercise: shipping Checkout and payment Checkout have different explanations. Relevant advanced supporting files remain ready to use, and unrelated files are not reintroduced.
+
+This is a content and mission-display update; answer contracts, test cases and saved exercise IDs are unchanged.

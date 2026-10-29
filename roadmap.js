@@ -1,5 +1,8 @@
-import { make, javaProject } from "./exercise-factories.js?v=interactive-linux-1";
-const todo = '/* TODO */';
+import {
+  make,
+  javaProject,
+} from "./exercise-factories.js?v=interactive-linux-1";
+const todo = "/* TODO */";
 const same = (source) => [source, source];
 function lab(title, topics, mission, requirements, sources, tests, concept) {
   return {
@@ -63,7 +66,7 @@ const basics = [
   lab(
     "Number the repair tickets",
     ["Static Keyword", "Final Keyword"],
-    "Two counters issue repair tickets at the same shop. Give every new ticket the next number in one shared sequence, and make sure a ticket keeps that number for its entire life.",
+    "Two counters issue repair tickets at the same shop. Number the first ticket 1, the next 2, and continue one shared sequence across both counters. Each ticket keeps its own number for its entire life. Let staff read a ticket's number and the total number issued; use JOB as the shared ticket prefix.",
     'JobTicket(): each new ticket gets the next ID, starting at 1. id() returns its permanent int ID; issued() returns the total across all tickets. Provide public static final String PREFIX="JOB". Use an instance final field for the ID and a static counter. Calls in this exercise are single-threaded.',
     {
       "JobTicket.java": [
@@ -107,7 +110,7 @@ const basics = [
   lab(
     "Separate the counter from the workshop",
     ["Packages", "Access Specifiers"],
-    "The counter needs to print a repair ticket’s label, while the workshop maintains the naming rules. Let the counter request a finished label without exposing the workshop’s internal formatting rules.",
+    "The counter needs a finished repair-ticket label, while the workshop owns the naming rule. Given a positive ticket number, produce JOB- followed by that number: ticket 12 becomes JOB-12. Keep the prefix rule inside the workshop so outside callers can request labels without using that internal rule directly. Reject zero or negative ticket numbers.",
     "Both source files declare package workshop. TicketLabel.format(int id) is public static: positive IDs become JOB-<id>; nonpositive IDs throw IllegalArgumentException. It delegates to package-private LabelRules.prefix(), which returns JOB. LabelRules itself must be package-private. The runner uses javac -d to create the package output folders; edit the supplied files directly.",
     {
       "TicketLabel.java": [
@@ -137,7 +140,7 @@ const more = [
       "Method Overloading / Overriding",
       "Static vs Dynamic Binding",
     ],
-    "The shop repairs both phones and laptops, each with a different fixed price. Let the till ask for a repair’s price in the same way regardless of the device, and receive the price for that particular repair.",
+    "The shop charges 3000 cents for a phone repair and 7000 cents for a laptop repair. Build the repair types and let the till ask either repair for its price through the same shared repair contract. The till must return the price of the repair it receives, rather than always choosing one device's price.",
     "Abstract Repair has public abstract long price(). PhoneRepair and LaptopRepair extend Repair and return 3000 and 7000 cents. PriceDesk.quote(Repair) delegates to price(), rejecting null with IllegalArgumentException. Objects must dispatch correctly when held in a Repair reference.",
     {
       "PriceDesk.java": [
@@ -183,7 +186,7 @@ const more = [
   lab(
     "Predict which receipt method Java chooses",
     ["Method Overloading / Overriding", "Static vs Dynamic Binding"],
-    "A receipt displays different wording depending on how a value is presented to the formatter. Reproduce the expected object, text and fancy results so the team can distinguish choosing a format from changing an existing formatter’s behaviour.",
+    "The receipt formatter has two choices: general values normally produce object, while text produces text. A special formatter changes only the general-value result to fancy. Demonstrate formatting the same receipt through both choices using that special formatter; the combined result must be fancy|text. Let the formatting methods produce those results rather than returning that whole phrase directly.",
     'Formatter.format(Object) returns object; format(String) returns text. FancyFormatter extends Formatter and overrides format(Object) to return fancy. BindingDemo.run() creates Formatter base=new FancyFormatter(), Object value="receipt", then returns base.format(value)+"|"+base.format("receipt"). Expected fancy|text. Implement both format overloads and the override; do not hardcode run’s result.',
     {
       "BindingDemo.java": [
@@ -316,7 +319,7 @@ const collections = [
   lab(
     "One reminder per customer",
     ["Set"],
-    "A customer may have several repairs ready for collection but should receive only one reminder. Prepare a reminder list with each customer appearing once, in the order they first appeared in the repair list.",
+    "A customer may have several repairs ready for collection but should receive only one reminder. Remove spaces around each customer ID and convert its letters to uppercase, so b and B identify the same customer. Return each cleaned ID once, in the order customers first appeared. Reject missing or blank IDs.",
     "Reminders.unique(String[] customers) returns a LinkedHashSet<String>. Trim and uppercase IDs with Locale.ROOT, deduplicate, preserve first-seen order. Reject null array or null/blank entries with IllegalArgumentException. Empty input returns an empty set.",
     {
       "Reminders.java": [
@@ -372,7 +375,7 @@ const collections = [
   lab(
     "Clear cancelled jobs during a shelf walk",
     ["Iterator"],
-    "The workshop’s shelf list still includes cancelled repairs, sometimes next to one another. Remove every cancelled entry, keep the remaining labels in their original order, and report how many were removed.",
+    "The shelf list includes cancelled repairs marked with CANCELLED: at the start of their labels. Remove every entry with that prefix, including consecutive cancelled entries. Keep all other labels in their original order and report how many entries you removed.",
     "ShelfCleanup.removeCancelled(List<String> jobs) mutates the supplied list, removing entries starting CANCELLED:, and returns the removed count. Reject null list or null entries with IllegalArgumentException before any mutation. Use Iterator.remove rather than indexed removal or removeIf for this drill. Preserve other entries and their order. Input is a mutable ArrayList.",
     {
       "ShelfCleanup.java": [

@@ -1,7 +1,7 @@
-import { collectionMethods } from "./collection-methods.js";
+import { collectionMethods } from "./collection-methods.js?v=mission-roles-1";
 import { applyPlainSqlMissions } from "./plain-sql-missions.js";
-import { algorithmPractice } from "./algorithm-practice.js";
-import { advancedCourses as pairedAdvancedCourses } from "./advanced-practice.js?v=focused-missions-1";
+import { algorithmPractice } from "./algorithm-practice.js?v=mission-roles-1";
+import { advancedCourses as pairedAdvancedCourses } from "./advanced-practice.js?v=mission-roles-1";
 import { linuxInterview } from "./linux-interview.js";
 import { javaInterview } from "./java-interview.js";
 import { javaStrings } from "./java-strings.js";
@@ -15,11 +15,11 @@ import {
 } from "./exercise-factories.js?v=comment-starters-1";
 import { advancedCourses } from "./progression.js";
 import { patternCourses } from "./patterns.js";
-import { sqlRoadmapCourses } from "./sql-roadmap.js?v=comment-starters-1";
-import { linuxRoadmapCourses } from "./linux-roadmap.js?v=comment-starters-1";
-import { springCourses } from "./spring-practice.js?v=comment-starters-1";
-import { roadmapCourses } from "./roadmap.js?v=comment-starters-1";
-import { applyMissions } from "./missions.js?v=comment-starters-1";
+import { sqlRoadmapCourses } from "./sql-roadmap.js?v=mission-roles-1";
+import { linuxRoadmapCourses } from "./linux-roadmap.js?v=mission-roles-1";
+import { springCourses } from "./spring-practice.js?v=mission-roles-1";
+import { roadmapCourses } from "./roadmap.js?v=mission-roles-1";
+import { applyMissions } from "./missions.js?v=mission-roles-1";
 import {
   solidPractice,
   advancedPatterns,
