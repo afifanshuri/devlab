@@ -1,4 +1,4 @@
-import { courses, allLessons } from "../curriculum.js?v=mission-brief-1";
+import { courses, allLessons } from "../curriculum.js?v=collections-complete-1";
 
 const definitions = [
   [
@@ -11,7 +11,7 @@ const definitions = [
     "java-collections",
     "java",
     "Collections & algorithms",
-    "Lists, sets, maps, queues, generics, searching and incident-data algorithms.",
+    "Collection APIs, ownership, streams, concurrency, sorting, searching, graphs, trees, dynamic programming and practical algorithm choices.",
   ],
   [
     "java-solid",

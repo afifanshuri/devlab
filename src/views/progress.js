@@ -1,9 +1,9 @@
-import { allLessons } from "../../curriculum.js?v=mission-brief-1";
+import { allLessons } from "../../curriculum.js?v=collections-complete-1";
 import { learningGroups, lessonRoute } from "../learning-groups.js";
 import { state } from "../state.js";
 import { esc, shell } from "../ui.js";
-import { completed, count } from "../catalog-data.js?v=mission-brief-1";
-import { groupSections } from "./learning-group.js?v=mission-brief-1";
+import { completed, count } from "../catalog-data.js?v=collections-complete-1";
+import { groupSections } from "./learning-group.js?v=collections-complete-1";
 
 export function progressPage() {
   shell(`<div class="eyebrow">MAKE YOUR PRACTICE COUNT</div><h1>Your progress<span>.</span></h1>

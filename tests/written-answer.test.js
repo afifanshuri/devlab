@@ -21,6 +21,7 @@ test("Linux interview keeps 13 terminal tasks and gives 19 questions definite an
     allLessons.filter(
       (l) =>
         l.type === "workspace" &&
+        !l.collectionPractice &&
         l.course !== "hands-linux-interview" &&
         l.course !== "hands-java-strings",
     ).length,

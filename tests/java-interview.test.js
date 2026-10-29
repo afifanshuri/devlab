@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { javaInterview } from "../java-interview.js";
-import { allLessons } from "../curriculum.js?v=mission-brief-1";
+import { allLessons } from "../curriculum.js?v=collections-complete-1";
 import { groupForLesson } from "../src/learning-groups.js";
 import { checkWrittenAnswer } from "../src/written-answer.js";
 
@@ -12,7 +12,8 @@ test("80 Java theory questions form 40 checked pairs and preserve earlier exerci
       (lesson) =>
         lesson.course !== "hands-java-interview" &&
         lesson.course !== "hands-java-strings" &&
-        !lesson.healthCheck,
+        !lesson.healthCheck &&
+        !lesson.collectionPractice,
     ).length,
     370,
   );

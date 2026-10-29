@@ -25,6 +25,7 @@ test("advanced concepts have exactly two executable challenges and keep legacy I
     allLessons.filter(
       (l) =>
         l.type === "workspace" &&
+        !l.collectionPractice &&
         !l.advancedTopic &&
         l.course !== "hands-linux-interview" &&
         l.course !== "hands-java-strings",

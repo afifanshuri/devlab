@@ -146,7 +146,7 @@ The original 142 exercises keep their IDs, answers and completion records. Three
 
 Java pairs cover object ownership and encapsulation, static/final/nested/package boundaries, inheritance, interfaces and binding, fluent APIs, enums/records/lifecycle/references, all five SOLID principles, fifteen individual design-pattern groups, collections/generics, binary-search/frequency/window algorithms, parsing, normalization, retry/idempotency/atomic claims, diagnostic redaction, and all nine existing Spring topics. SQL pairs cover joins through recursive/window analytics, safe dynamic SQL, procedural branching/cursors, atomic mutations, metadata, constraints, grants, indexes and retention. Linux pairs cover reliable shell/text/file tools and administrative diagnosis using the existing Docker configuration labs. The final SQL pair uses the optional Oracle image for stored PL/SQL functions, application exceptions and cursor aggregation; it is separate from the 40 PostgreSQL challenges.
 
-Run `node scripts/test-curriculum.mjs java-a`, `java-b`, or `ops` for the new Docker exercise suites; `legacy` runs the original cases. CI uses these four independent suites to keep the expanded curriculum within bounded job times. Every executable exercise is checked by rejecting its starter and accepting its reference solution. Behavioral tests do not prove all implementation techniques or asymptotic complexity; these remain explicit acceptance/interview requirements.
+Run `node scripts/test-curriculum.mjs java-a`, `java-b`, `ops`, or `collections` for the new Docker exercise suites; `legacy` runs the original cases. CI uses these independent suites to keep the expanded curriculum within bounded job times. Every executable exercise is checked by rejecting its starter and accepting its reference solution. Behavioral tests do not prove all implementation techniques or asymptotic complexity; these remain explicit acceptance/interview requirements.
 
 ## Linux interview practice
 
@@ -180,7 +180,7 @@ and [OpenSSH server configuration](https://www.openssh.com/manual.html).
 
 ## Topic groups
 
-The library organizes all 516 exercises into 17 groups: six Java, six Linux
+The library organizes all 616 exercises into 17 groups: six Java, six Linux
 and five SQL. Each group combines related initial practice, advanced challenge
 pairs and relevant Linux short-answer questions. SOLID has one section per
 principle; patterns have sections such as Singleton, Strategy and Observer.
@@ -250,3 +250,9 @@ test assertions. The original runner contracts and progress IDs are unchanged.
 Hints, reference solutions, completion and runtime information live beside the
 workspace controls. Short-answer questions show the sample input and required
 output format without revealing the correct answer before checking/reveal.
+
+### Collections and algorithms method progression
+
+An additional **100 Java coding exercises in 50 topic pairs** cover practical collection APIs and core/intermediate algorithms. These include ArrayList editing, value versus index removal, bulk filters, transformations, backed ranges, snapshots and capacity; sorted and concurrent collections; streams; sorting, searching, windows, backtracking, linked structures, trees, graphs, union-find, dynamic programming, greedy intervals, bits and matrices.
+
+See [the method and algorithm coverage checklist](COLLECTIONS_ALGORITHMS.md) for every pair, when to use it and expected costs. The new exercises appear in Collections & algorithms and preserve all earlier exercise IDs. Run `node scripts/test-curriculum.mjs collections` to reject every new starter and accept every reference solution using the actual Docker runner. No additional runtime library is required. Restart a running local lab runner after updating so it loads the new exercise definitions.

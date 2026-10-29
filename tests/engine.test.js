@@ -14,6 +14,7 @@ test("existing coding tasks retain unique versioned IDs alongside written practi
     courses.filter(
       (c) =>
         c.lessons[0].type === "workspace" &&
+        !c.lessons[0].collectionPractice &&
         !c.lessons[0].advancedTopic &&
         c.id !== "hands-linux-interview" &&
         c.id !== "hands-java-strings",
@@ -24,6 +25,7 @@ test("existing coding tasks retain unique versioned IDs alongside written practi
     allLessons.filter(
       (l) =>
         l.type === "workspace" &&
+        !l.collectionPractice &&
         !l.advancedTopic &&
         l.course !== "hands-linux-interview" &&
         l.course !== "hands-java-strings",

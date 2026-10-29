@@ -1,3 +1,5 @@
+import { collectionMethods } from "./collection-methods.js";
+import { algorithmPractice } from "./algorithm-practice.js";
 import { advancedCourses as pairedAdvancedCourses } from "./advanced-practice.js";
 import { linuxInterview } from "./linux-interview.js";
 import { javaInterview } from "./java-interview.js";
@@ -268,6 +270,7 @@ courses.splice(
 courses.push(...pairedAdvancedCourses(courses));
 courses.push(linuxInterview, javaInterview, javaStrings);
 courses.push(...healthCourses);
+courses.push(collectionMethods, algorithmPractice);
 for (const track of ["java", "linux", "sql"])
   courses
     .filter((c) => c.track === track && c.lessons[0].engine !== "oracle")

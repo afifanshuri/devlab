@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { allLessons, courses } from "../curriculum.js?v=mission-brief-1";
+import { allLessons, courses } from "../curriculum.js?v=collections-complete-1";
 import { checkWrittenAnswer } from "../src/written-answer.js";
 import { groupForLesson } from "../src/learning-groups.js";
 
@@ -46,7 +46,12 @@ const expected = {
 };
 test("42 output questions add Linux, PostgreSQL and Oracle pairs without replacing existing work", () => {
   assert.equal(health.length, 42);
-  assert.equal(allLessons.filter((lesson) => !lesson.healthCheck).length, 474);
+  assert.equal(
+    allLessons.filter(
+      (lesson) => !lesson.healthCheck && !lesson.collectionPractice,
+    ).length,
+    474,
+  );
   const topics = new Map();
   for (const lesson of health) {
     assert.equal(lesson.type, "written");

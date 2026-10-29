@@ -10,6 +10,9 @@ const files = [
   "index.html",
   entry,
   "curriculum.js",
+  "collection-exercise-builder.js",
+  "collection-methods.js",
+  "algorithm-practice.js",
   "advanced-practice.js",
   "advanced-java.js",
   "advanced-linux.js",
@@ -68,6 +71,8 @@ for (const file of files) {
         "sql-roadmap.js",
         "linux-roadmap.js",
         "spring-practice.js",
+        "collection-methods.js",
+        "algorithm-practice.js",
       ])
         assert.ok(body.includes(module), "Missing curriculum module " + module);
     if (file === "src/views/workspace.js")
